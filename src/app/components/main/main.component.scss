@@ -1,6 +1,5 @@
 .margin-top {
   margin-top: 1rem;
-  //background-color: #090a0a;
 }
 
 .sub-headers .sub-header-item {
@@ -18,49 +17,46 @@
   width: 20px;
 }
 
-.row {
-  display: flex;
-  -ms-flex-wrap: wrap;
-  flex-wrap: wrap;
-  margin-right: -15px;
-  margin-left: -15px;
-}
-
-.dashboard .section {
-  display: flex;
-  flex-direction: column;
-  padding: 0 15px;
-}
-
-.col {
-  position: relative;
+.dashboard {
+  display: grid;
+  grid-template-columns: 1fr;
+  align-items: start;
+  gap: 15px;
   width: 100%;
-  min-height: 1px;
-  padding-right: 15px;
-  padding-left: 15px;
-  flex-basis: 0;
-  -webkit-box-flex: 1;
-  -ms-flex-positive: 1;
-  flex-grow: 1;
-  max-width: 100%;
+  padding: 10px;
+  box-sizing: border-box;
 }
 
-.game-poster {
-  display: flex;
-  align-items: center;
-  height: 100%;
-  justify-content: center;
+.dashboard > a {
+  display: block;
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.game-poster img {
-  max-height: 95%;
-  max-width: 95%;
+.dashboard > a img {
+  width: 100%;
+  height: auto;
+  display: block;
+  vertical-align: middle;
 }
 
-@media (max-width: 767px) {
-  .panel {
-      min-width: 400px;
-      margin-block: .5rem;
-      flex-grow: 1;
+.dashboard > a:hover {
+  transform: scale(1.04);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  z-index: 1;
+}
+
+@media (min-width: 600px) {
+  .dashboard {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .dashboard {
+    grid-template-columns: repeat(4, 1fr);
   }
 }
