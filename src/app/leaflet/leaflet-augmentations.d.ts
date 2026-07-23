@@ -27,20 +27,24 @@ declare module 'leaflet' {
 
     interface RulerControlOptions extends ControlOptions {
         position?: ControlPosition;
+        lengthFactor?: number;
+        speed?: number;
+        labels?: {
+            length?: string;
+            azimuth?: string;
+            area?: string;
+            perimeter?: string;
+            speed?: string;
+            time?: string;
+            meterShort?: string;
+            m2?: string;
+            km2?: string;
+            rulerRoute?: string;
+            rulerArea?: string;
+        };
         circleMarker?: CircleMarkerOptions;
         lineStyle?: PolylineOptions;
-        lengthUnit?: {
-            factor?: number | null;
-            display?: string;
-            decimal?: number;
-            label?: string;
-        };
-        angleUnit?: {
-            display?: string;
-            decimal?: number;
-            factor?: number | null;
-            label?: string;
-        };
+        fillStyle?: PolylineOptions;
         events?: {
             onToggle?: (isActive: boolean) => void;
         };
@@ -55,7 +59,9 @@ declare module 'leaflet' {
     }
 
     namespace Control {
-        class Ruler extends Control {}
+        class Ruler extends Control {
+            isActive(): boolean;
+        }
 
         // Runtime-defined via L.Control.*.extend(...)
         // eslint-disable-next-line @typescript-eslint/no-explicit-any

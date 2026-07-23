@@ -310,38 +310,31 @@ export class MapService {
         return html;
     }
 
-    public addRuler(map: StalkerMap, pixelsInGameUnit: number, lengthFactor: number): StalkerRulerControl {
-        let ruler: StalkerRulerControl;
-
-        var options = {
-            position: 'topright', // Leaflet control position option
-            circleMarker: {
-                // Leaflet circle marker options for points used in this plugin
-                color: 'red',
-                radius: 2,
-            },
-            lineStyle: {
-                // Leaflet polyline options for lines used in this plugin
-                color: 'red',
-                dashArray: '1,6',
-            },
-            lengthUnit: {
-                factor: 1, //  from km to nm
-                display: this.translate.instant('meterShort'),
-                decimal: 2,
-                label: this.translate.instant('length'),
-            },
-            angleUnit: {
-                display: '&deg;', // This is the display value will be shown on the screen. Example: 'Gradian'
-                decimal: 2, // Bearing result will be fixed to this value.
-                factor: null, // This option is required to customize angle unit. Specify solid angle value for angle unit. Example: 400 (for gradian).
-                label: this.translate.instant('azimuth'),
+    public addRuler(
+        map: StalkerMap,
+        lengthFactor: number = 1,
+        speed: number = 1.4
+    ): StalkerRulerControl {
+        const options: L.RulerControlOptions = {
+            position: 'topright',
+            lengthFactor,
+            speed,
+            labels: {
+                length: this.translate.instant('length'),
+                azimuth: this.translate.instant('azimuth'),
+                area: this.translate.instant('area'),
+                perimeter: this.translate.instant('perimeter'),
+                speed: this.translate.instant('speed'),
+                time: this.translate.instant('time'),
+                meterShort: this.translate.instant('meterShort'),
+                m2: this.translate.instant('m2'),
+                km2: this.translate.instant('km2'),
+                rulerRoute: this.translate.instant('rulerRoute'),
+                rulerArea: this.translate.instant('rulerArea'),
             },
         };
 
-        ruler = L.control.ruler(options as L.RulerControlOptions);
-
-        return ruler;
+        return L.control.ruler(options) as StalkerRulerControl;
     }
 
     public createAnomalyZoneTooltip(zone: any) {

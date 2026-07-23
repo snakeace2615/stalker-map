@@ -592,7 +592,8 @@ export class MapComponent {
         let ruler: any = null;
 
         if (gameConfig.rulerEnabled) {
-            ruler = this.addRuler();
+            ruler = this.mapService.addRuler(this.map, this.mapConfig.lengthFactor ?? 1);
+            ruler.addTo(this.map);
         }
 
         this.createSearchController();
@@ -615,7 +616,8 @@ export class MapComponent {
             this.layerContoller = layerController;
 
             if (addRuler) {
-                ruler = this.addRuler();
+                ruler = this.mapService.addRuler(this.map, this.mapConfig.lengthFactor ?? 1);
+                ruler.addTo(this.map);
             }
 
             this.createSearchController();
@@ -1122,41 +1124,6 @@ export class MapComponent {
                 // Nothing to do here
             }
         } as any);
-    }
-
-    private addRuler(): any {
-        let ruler;
-
-        var options = {
-            position: 'topright', // Leaflet control position option
-            circleMarker: {
-                // Leaflet circle marker options for points used in this plugin
-                color: 'red',
-                radius: 2,
-            },
-            lineStyle: {
-                // Leaflet polyline options for lines used in this plugin
-                color: 'red',
-                dashArray: '1,6',
-            },
-            lengthUnit: {
-                factor: this.mapConfig.lengthFactor, //  from km to nm
-                display: this.translate.instant('meterShort'),
-                decimal: 2,
-                label: this.translate.instant('length'),
-            },
-            angleUnit: {
-                display: '&deg;', // This is the display value will be shown on the screen. Example: 'Gradian'
-                decimal: 2, // Bearing result will be fixed to this value.
-                factor: null, // This option is required to customize angle unit. Specify solid angle value for angle unit. Example: 400 (for gradian).
-                label: this.translate.instant('azimuth'),
-            },
-        };
-
-        ruler = L.control.ruler(options as L.RulerControlOptions);
-        ruler.addTo(this.map);
-
-        return ruler;
     }
 
     private addLocations() {

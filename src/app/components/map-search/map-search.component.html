@@ -9,18 +9,45 @@
         spellcheck="false"
     />
 
-    @if (results.length > 0) {
-        <ul class="stalker-map-search__results">
-            @for (result of results; track result.marker) {
-                <li class="stalker-map-search__result">
-                    <a href="#" (click)="onResultClick(result, $event)">
-                        <span [class]="'stalker-search-item ' + result.typeClass">{{ result.title }}</span>
-                        @if (result.locationLabel) {
-                            <b>({{ result.locationLabel }})</b>
-                        }
-                    </a>
-                </li>
+    @if (hasResults) {
+        <div class="stalker-map-search__results">
+            @for (group of groups; track group.key) {
+                <div class="stalker-map-search__group">
+                    @if (showLocation || group.label) {
+                        <button
+                            type="button"
+                            class="stalker-map-search__group-header"
+                            [class.stalker-map-search__group-header--collapsed]="isGroupCollapsed(group)"
+                            (click)="toggleGroup(group, $event)"
+                        >
+                            <span class="stalker-map-search__group-label">{{ group.label }}</span>
+                            <span class="stalker-map-search__group-meta">
+                                <span class="stalker-map-search__group-count">{{ group.items.length }}</span>
+                                <span class="stalker-map-search__group-toggle" aria-hidden="true"></span>
+                            </span>
+                        </button>
+                    }
+
+                    @if (!isGroupCollapsed(group)) {
+                        <div class="stalker-map-search__group-items">
+                            @for (result of group.items; track result.marker) {
+                                <div
+                                    class="stalker-map-search__result"
+                                    [class.stalker-map-search__result--selected]="isLastSelected(result)"
+                                >
+                                    <a href="#" (click)="onResultClick(result, $event)">
+                                        <span
+                                            [class]="'stalker-map-search__icon stalker-search-item ' + result.typeClass"
+                                            aria-hidden="true"
+                                        ></span>
+                                        <span class="stalker-map-search__title">{{ result.title }}</span>
+                                    </a>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
             }
-        </ul>
+        </div>
     }
 </div>

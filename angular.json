@@ -31,7 +31,7 @@
             ],
             "styles": [
               "node_modules/leaflet/dist/leaflet.css",
-              "src/app/leaflet/plugins/leaflet-ruler.css",
+              "src/app/leaflet/plugins/stalker-ruler.css",
               "src/styles.scss"
             ],
             "scripts": [],

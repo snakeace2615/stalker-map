@@ -246,6 +246,7 @@
     "rich-stuff": "Valuable Loot",
     "grid": "Coordinate Grid",
     "dlcFilter": "DLC content",
+    "offMapContent": "Content outside the map",
     "dlc.None": "Base game",
     "dlc.Deluxe": "Deluxe Edition",
     "dlc.PreOrder": "Pre-order",

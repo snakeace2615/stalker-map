@@ -58,6 +58,7 @@ export class MapHocComponent {
     private dlcMarkers: any[] = [];
     private dlcTypes: string[] = [];
     private enabledDlcs: Set<string> = new Set();
+    private showOffMapContent = false;
 
     private richClasses: string[] = [
         'EItemType::Artifact',
@@ -344,7 +345,7 @@ export class MapHocComponent {
 
         let ruler: any = null;
         if (gameConfig.rulerEnabled) {
-            ruler = this.mapService.addRuler(this.map, 1, 8000);
+            ruler = this.mapService.addRuler(this.map, gameConfig.lengthFactor ?? 1);
         }
 
         let cellSizeInit = 130;
@@ -393,14 +394,14 @@ export class MapHocComponent {
 
         this.dlcTypes = this.collectDlcTypes();
         this.enabledDlcs = this.loadEnabledDlcs();
+        this.showOffMapContent = this.loadShowOffMapContent();
         this.applyDlcFilter();
 
         this.mapService.createCustomLayersControl();
         let cellSizeControl = this.createCellSizeChangerControl('Energetic_Limited', cellSize);
-        let dlcFilterControl = this.dlcTypes.some((t) => t !== 'None')
+        let dlcFilterControl = this.shouldShowDlcFilterControl()
             ? this.createDlcFilterControl()
             : null;
-
         let layersToLayerController: any = [];
 
         if (
@@ -432,7 +433,7 @@ export class MapHocComponent {
             this.layerContoller?.remove();
             cellSizeControl.remove();
             dlcFilterControl?.remove();
-            if (this.dlcTypes.some((t) => t !== 'None')) {
+            if (this.shouldShowDlcFilterControl()) {
                 dlcFilterControl = this.createDlcFilterControl();
             }
 
@@ -465,7 +466,8 @@ export class MapHocComponent {
             dlcFilterControl?.addTo(this.map);
 
             if (addRuler) {
-                ruler.addTo(this.map)
+                ruler = this.mapService.addRuler(this.map, gameConfig.lengthFactor ?? 1);
+                ruler.addTo(this.map);
             }
 
             this.createSearchController();
@@ -490,7 +492,7 @@ export class MapHocComponent {
         this.layerContoller = layerController;
         cellSizeControl.addTo(this.map);
         dlcFilterControl?.addTo(this.map);
-        ruler.addTo(this.map);
+        ruler?.addTo(this.map);
         this.createSearchController();
 
         this.mapService.createCarousel(this.overlaysListTop);
@@ -588,8 +590,9 @@ export class MapHocComponent {
         return dlc;
     }
 
-    private registerDlcMarker(marker: any, data: { dlc?: string | null }): void {
+    private registerDlcMarker(marker: any, data: { dlc?: string | null; locationId?: number }): void {
         marker.dlc = this.normalizeDlc(data.dlc);
+        marker.isOffMap = !((data.locationId ?? 0) > 0);
         this.dlcMarkers.push(marker);
     }
 
@@ -613,23 +616,46 @@ export class MapHocComponent {
         });
     }
 
-    private loadEnabledDlcs(): Set<string> {
+    private hasOffMapMarkers(): boolean {
+        return this.dlcMarkers.some((marker) => marker.isOffMap);
+    }
+
+    private shouldShowDlcFilterControl(): boolean {
+        return this.dlcTypes.some((t) => t !== 'None') || this.hasOffMapMarkers();
+    }
+
+    private readDlcFilterStorage(): Record<string, boolean> | null {
         const stored = localStorage.getItem(this.dlcFilterLocalStorageKey);
 
-        if (stored) {
-            try {
-                const parsed = JSON.parse(stored) as Record<string, boolean>;
-                const enabled = this.dlcTypes.filter((dlc) => parsed[dlc] !== false);
+        if (!stored) {
+            return null;
+        }
 
-                if (enabled.length > 0) {
-                    return new Set(enabled);
-                }
-            } catch {
-                // ignore invalid stored state
+        try {
+            return JSON.parse(stored) as Record<string, boolean>;
+        } catch {
+            return null;
+        }
+    }
+
+    private loadEnabledDlcs(): Set<string> {
+        const parsed = this.readDlcFilterStorage();
+
+        if (parsed) {
+            const enabled = this.dlcTypes.filter((dlc) => parsed[dlc] !== false);
+
+            if (enabled.length > 0) {
+                return new Set(enabled);
             }
         }
 
         return new Set(this.dlcTypes);
+    }
+
+    private loadShowOffMapContent(): boolean {
+        const parsed = this.readDlcFilterStorage();
+
+        return parsed?.['offMapContent'] === true;
     }
 
     private saveDlcFilterState(): void {
@@ -638,6 +664,8 @@ export class MapHocComponent {
         for (const dlc of this.dlcTypes) {
             state[dlc] = this.enabledDlcs.has(dlc);
         }
+
+        state['offMapContent'] = this.showOffMapContent;
 
         localStorage.setItem(this.dlcFilterLocalStorageKey, JSON.stringify(state));
     }
@@ -649,7 +677,9 @@ export class MapHocComponent {
                 continue;
             }
 
-            const shouldShow = this.enabledDlcs.has(marker.dlc);
+            const shouldShow =
+                this.enabledDlcs.has(marker.dlc) &&
+                (!marker.isOffMap || this.showOffMapContent);
             const isInLayer = layer.hasLayer(marker);
 
             if (shouldShow && !isInLayer) {
@@ -672,7 +702,6 @@ export class MapHocComponent {
     private createDlcFilterControl(): any {
         const translate = this.translate;
         const component = this;
-        const dlcTypes = this.dlcTypes;
 
         if (!L.Control.DlcFilter) {
             L.Control.DlcFilter = L.Control.extend({
@@ -687,25 +716,49 @@ export class MapHocComponent {
                     toggle.title = translate.instant('dlcFilter');
                     toggle.innerHTML = 'DLC';
                     const content = L.DomUtil.create('div', 'leaflet-control-dlc-filter-content', header);
+                    const showDlcTypes = component.dlcTypes.some((t) => t !== 'None');
 
-                    for (const dlc of dlcTypes) {
-                        const item = L.DomUtil.create('label', 'dlc-filter-item', content);
-                        const checkbox = L.DomUtil.create('input', '', item) as HTMLInputElement;
-                        checkbox.type = 'checkbox';
-                        checkbox.checked = component.enabledDlcs.has(dlc);
+                    if (showDlcTypes) {
+                        for (const dlc of component.dlcTypes) {
+                            const item = L.DomUtil.create('label', 'dlc-filter-item', content);
+                            const checkbox = L.DomUtil.create('input', '', item) as HTMLInputElement;
+                            checkbox.type = 'checkbox';
+                            checkbox.checked = component.enabledDlcs.has(dlc);
 
-                        const label = L.DomUtil.create('span', '', item);
-                        label.innerHTML = component.getDlcLabel(dlc);
+                            const label = L.DomUtil.create('span', '', item);
+                            label.innerHTML = component.getDlcLabel(dlc);
 
-                        L.DomEvent.on(checkbox, 'change', (e: Event) => {
+                            L.DomEvent.on(checkbox, 'change', (e: Event) => {
+                                const target = e.target as HTMLInputElement;
+
+                                if (target.checked) {
+                                    component.enabledDlcs.add(dlc);
+                                } else {
+                                    component.enabledDlcs.delete(dlc);
+                                }
+
+                                component.saveDlcFilterState();
+                                component.applyDlcFilter();
+                            });
+                        }
+                    }
+
+                    if (component.hasOffMapMarkers()) {
+                        const offMapItem = L.DomUtil.create(
+                            'label',
+                            showDlcTypes ? 'dlc-filter-item dlc-filter-item--off-map' : 'dlc-filter-item',
+                            content
+                        );
+                        const offMapCheckbox = L.DomUtil.create('input', '', offMapItem) as HTMLInputElement;
+                        offMapCheckbox.type = 'checkbox';
+                        offMapCheckbox.checked = component.showOffMapContent;
+
+                        const offMapLabel = L.DomUtil.create('span', '', offMapItem);
+                        offMapLabel.innerHTML = translate.instant('offMapContent');
+
+                        L.DomEvent.on(offMapCheckbox, 'change', (e: Event) => {
                             const target = e.target as HTMLInputElement;
-
-                            if (target.checked) {
-                                component.enabledDlcs.add(dlc);
-                            } else {
-                                component.enabledDlcs.delete(dlc);
-                            }
-
+                            component.showOffMapContent = target.checked;
                             component.saveDlcFilterState();
                             component.applyDlcFilter();
                         });

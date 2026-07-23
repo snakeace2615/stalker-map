@@ -36,30 +36,122 @@
     border: 2px solid #fff;
     border-top: none;
     background: rgba(9, 10, 10, 0.97);
+    display: flex;
+    flex-direction: column;
+    scrollbar-width: thin;
+    scrollbar-color: #fff rgba(9, 10, 10, 0.97);
+}
+
+.stalker-map-search__results::-webkit-scrollbar {
+    width: 8px;
+}
+
+.stalker-map-search__results::-webkit-scrollbar-track {
+    background: rgba(9, 10, 10, 0.97);
+}
+
+.stalker-map-search__results::-webkit-scrollbar-thumb {
+    background: #fff;
+    border-radius: 4px;
+}
+
+.stalker-map-search__group + .stalker-map-search__group {
+    border-top: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.stalker-map-search__group-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 7px 8px;
+    border: 0;
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.stalker-map-search__group-header:hover {
+    background: rgba(255, 255, 255, 0.14);
+}
+
+.stalker-map-search__group-label {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+}
+
+.stalker-map-search__group-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex: 0 0 auto;
+}
+
+.stalker-map-search__group-count {
+    color: #bdbdbd;
+    font-size: 12px;
+}
+
+.stalker-map-search__group-toggle {
+    width: 0;
+    height: 0;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 5px solid #fff;
+    transition: transform 0.15s ease;
+}
+
+.stalker-map-search__group-header--collapsed .stalker-map-search__group-toggle {
+    transform: rotate(-90deg);
 }
 
 .stalker-map-search__result a {
-    display: block;
-    padding: 6px 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 6px 8px 6px 12px;
     color: #fff;
     text-decoration: none;
-    white-space: nowrap;
     overflow: hidden;
-    text-overflow: ellipsis;
 }
 
 .stalker-map-search__result a:hover {
     background: rgba(255, 255, 255, 0.12);
 }
 
-.stalker-map-search__result b {
-    margin-left: 4px;
-    font-weight: 400;
-    color: #bdbdbd;
+.stalker-map-search__result--selected a {
+    background: rgba(255, 255, 255, 0.2);
 }
 
-.stalker-map-search .stalker-search-item {
-    padding-left: 18px;
+.stalker-map-search__icon {
+    flex: 0 0 16px;
+    width: 16px;
+    height: 16px;
+    padding-left: 0;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: contain;
+}
+
+.stalker-map-search__title {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .leaflet-control.stalker-map-search-control {

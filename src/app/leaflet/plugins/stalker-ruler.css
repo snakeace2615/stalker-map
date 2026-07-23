@@ -1,0 +1,131 @@
+.stalker-ruler-control {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  pointer-events: auto;
+}
+
+.stalker-ruler-buttons {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.stalker-ruler-btn {
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #333;
+  background: #fff;
+  line-height: 1;
+  text-decoration: none !important;
+}
+
+.stalker-ruler-btn svg {
+  width: 18px;
+  height: 18px;
+  display: block;
+}
+
+.stalker-ruler-btn:hover {
+  background: #f4f4f4;
+}
+
+.stalker-ruler-btn.is-active {
+  background: #ececec;
+  color: #b71c1c;
+  box-shadow: inset 0 0 0 2px #c62828;
+}
+
+.stalker-ruler-btn-area {
+  display: none;
+  border-top: 1px solid #ccc;
+}
+
+.stalker-ruler-control:hover .stalker-ruler-btn-area,
+.stalker-ruler-control.is-area .stalker-ruler-btn-area,
+.stalker-ruler-control.is-active .stalker-ruler-btn-area {
+  display: flex;
+}
+
+.stalker-ruler-panel {
+  min-width: 170px;
+  max-width: 220px;
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.94);
+  border: 2px solid rgba(0, 0, 0, 0.2);
+  border-radius: 2px;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.35);
+  font-size: 12px;
+  line-height: 1.35;
+  color: #222;
+}
+
+.stalker-ruler-stat {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.stalker-ruler-stat:first-child {
+  margin-top: 0;
+}
+
+.stalker-ruler-stat-label {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.stalker-ruler-stat-value {
+  text-align: right;
+}
+
+.stalker-ruler-speed-input {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.stalker-ruler-speed-input input {
+  width: 58px;
+  height: 22px;
+  padding: 0 4px;
+  border: 1px solid #bbb;
+  border-radius: 2px;
+  font: inherit;
+}
+
+.stalker-ruler-vertex {
+  width: 14px !important;
+  height: 14px !important;
+  margin-left: -7px !important;
+  margin-top: -7px !important;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: #c62828;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.35);
+  cursor: move;
+}
+
+.stalker-ruler-midpoint {
+  width: 10px !important;
+  height: 10px !important;
+  margin-left: -5px !important;
+  margin-top: -5px !important;
+  border: 1px solid #fff;
+  border-radius: 50%;
+  background: rgba(198, 40, 40, 0.55);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25);
+  cursor: move;
+  opacity: 0.85;
+}
+
+.stalker-ruler-midpoint:hover {
+  background: #c62828;
+  opacity: 1;
+}

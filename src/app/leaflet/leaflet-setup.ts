@@ -1,7 +1,7 @@
 import * as L from 'leaflet';
 import 'leaflet-geometryutil';
 import 'leaflet-arrowheads';
-import './plugins/leaflet-ruler';
+import './plugins/stalker-ruler';
 
 export { L };
 export type {

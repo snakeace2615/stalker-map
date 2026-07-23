@@ -461,6 +461,10 @@ app-item-tooltip, app-upgrade-tooltip {
 
 .leaflet-control-slider-inventory {
     display: none;
+
+    .inventory {
+        min-width: stretch;
+    }
 }
 
 .leaflet-control .leaflet-control-slider-container-toggle {
@@ -483,12 +487,13 @@ app-item-tooltip, app-upgrade-tooltip {
 
 .leaflet-control-slider-header {
     display: flex;
+    justify-content: flex-end;
 }
 
 .leaflet-control-dlc-filter-container {
-    border: 2px solid rgba(0, 0, 0, 0.2);
+    border: 2px solid #fff;
     background-clip: padding-box;
-    background: #fff;
+    background: rgba(9, 10, 10, 0.95);
     border-radius: 5px;
     display: flex;
     flex-direction: column;
@@ -514,7 +519,7 @@ app-item-tooltip, app-upgrade-tooltip {
     justify-content: center;
     font-size: 11px;
     font-weight: 700;
-    color: #333;
+    color: #fff;
     text-decoration: none;
 }
 
@@ -530,7 +535,13 @@ app-item-tooltip, app-upgrade-tooltip {
     gap: 0.4rem;
     cursor: pointer;
     font-size: 13px;
-    color: #333;
+    color: #fff;
+}
+
+.dlc-filter-item--off-map {
+    margin-top: 0.25rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .upgrade-property-icon {
