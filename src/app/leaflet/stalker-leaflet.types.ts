@@ -1,4 +1,4 @@
-import type { Control as LeafletControl, Evented, ImageOverlay, LayerGroup, Map, Marker } from 'leaflet';
+import type { Control as LeafletControl, ImageOverlay, LayerGroup, Map, Marker } from 'leaflet';
 
 import type { StalkerMarkerProperties } from './stalker-marker.types';
 
@@ -53,10 +53,6 @@ export interface StalkerLayerGroup extends LayerGroup {
 export interface StalkerLocationsLayer extends StalkerLayerGroup {
     locations: ImageOverlay[];
 }
-
-export type StalkerSearchControl = LeafletControl & Evented & {
-    _handleUndergroundMark?: (loc: StalkerSearchLocation, self: LeafletControl) => void;
-};
 
 export type StalkerCustomLayersControl = LeafletControl & {
     searchName?: string;

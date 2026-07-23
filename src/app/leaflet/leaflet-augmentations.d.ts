@@ -19,22 +19,6 @@ declare module 'leaflet' {
         overlaysListTop?: string | null;
     }
 
-    interface SearchControlOptions extends ControlOptions {
-        layer?: Layer | Layer[];
-        initial?: boolean;
-        propertyName?: string;
-        delayType?: number;
-        collapsed?: boolean;
-        autoCollapseTime?: number;
-        textPlaceholder?: string;
-        buildTip?: (text: string, val: SearchTipValue) => string | HTMLElement;
-        filterData?: (textSearch: string, allRecords: Record<string, unknown>) => Record<string, unknown>;
-    }
-
-    interface SearchTipValue {
-        layer: Marker & { properties?: Record<string, unknown>; name?: string };
-    }
-
     interface ImageOverlay {
         name?: string;
         uniqueName?: string;
@@ -100,7 +84,6 @@ declare module 'leaflet' {
     }
 
     namespace control {
-        function search(options?: SearchControlOptions): Control;
         function ruler(options?: RulerControlOptions): Control.Ruler;
         function customLayers(
             baseLayers?: LayersObject | null,

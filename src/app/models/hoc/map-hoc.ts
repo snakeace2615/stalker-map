@@ -19,6 +19,7 @@ export class MapHoc {
   public tradeItemGenerators: TradeItemGenerator[];
   public guides: Guide[];
   public zones: ShapeCollection[];
+  public locations: { [id: string]: string };
 
   public equipmentWidth: number;
   public equipmentHeight: number;
@@ -58,6 +59,7 @@ export class ObjectAtLocationHoc {
   public y: number;
   public z: number;
   public dlc: string;
+  public locationId: number;
 }
 
 export class Marker extends ObjectAtLocationHoc {

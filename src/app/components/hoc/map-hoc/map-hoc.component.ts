@@ -1,5 +1,6 @@
 import {
     Component,
+    ComponentRef,
     HostListener,
     isDevMode,
     ViewChild,
@@ -22,7 +23,8 @@ import { GuideComponent } from '../guide-component/guide-component';
 import { TraderComponent } from '../trader.component/trader.component';
 import { HocStuffComponent } from '../hoc-stuff/hoc-stuff.component';
 import { Game } from '../../../models/game.model';
-import { L, asStalkerMap, pixelCenter, StalkerCustomLayersControl, StalkerLayerGroup, StalkerMap, StalkerSearchControl } from '../../../leaflet/leaflet-setup';
+import { MapSearchComponent } from '../../map-search/map-search.component';
+import { L, asStalkerMap, pixelCenter, StalkerCustomLayersControl, StalkerLayerGroup, StalkerMap } from '../../../leaflet/leaflet-setup';
 
 @Component({
     selector: 'app-map-hoc',
@@ -46,7 +48,8 @@ export class MapHocComponent {
     private canvasRenderer: any;
     private svgIcon: any;
     private allLayers: StalkerLayerGroup[] = [];
-    private searchContoller?: StalkerSearchControl;
+    private searchControl?: L.Control;
+    private searchComponentRef?: ComponentRef<MapSearchComponent>;
     protected overlaysListTop: string = 'layers-control';
     private layerContoller?: StalkerCustomLayersControl;
 
@@ -502,54 +505,79 @@ export class MapHocComponent {
     }
 
     private createSearchController(): void {
-        if (this.searchContoller) {
-            this.searchContoller.remove();
+        if (this.searchControl) {
+            this.searchControl.remove();
+            this.searchControl = undefined;
         }
 
-        let searchLayers = this.reorderSearchingLayers(this.allLayers);
-        let translate = this.translate;
+        if (this.searchComponentRef) {
+            this.searchComponentRef.destroy();
+            this.searchComponentRef = undefined;
+        }
 
-        this.searchContoller = L.control.search({
-            layer: searchLayers,
-            initial: false,
-            propertyName: 'search',
-            delayType: 0,
-            collapsed: false,
-            autoCollapseTime: 10000,
-            textPlaceholder: this.translate.instant('search'),
-            buildTip: function (text: string, val: any) {
-                try {
-                    let translated = translate.instant(val.layer.name);
-                    let type = '';
-                    let location = '';
+        const mapComponent = this;
 
-                    return (
-                        '<a href="#"><span class="stalker-search-item ' +
-                        type +
-                        '">' +
-                        translated +
-                        '</span></a>'
-                    );
-                } catch (ex) {
-                    console.error(text, val, val.layer.properties);
-                    throw ex;
+        const SearchControl = L.Control.extend({
+            options: {
+                position: 'topleft',
+            },
+
+            onAdd: function () {
+                const container = L.DomUtil.create('div', 'leaflet-control stalker-map-search-control');
+                L.DomEvent.disableClickPropagation(container);
+                L.DomEvent.disableScrollPropagation(container);
+
+                const componentRef = mapComponent.container.createComponent(MapSearchComponent);
+                componentRef.instance.placeholder = mapComponent.translate.instant('search');
+                componentRef.instance.showLocation = true;
+                componentRef.instance.getMarkers = () => mapComponent.collectSearchableMarkers();
+                componentRef.instance.resultSelected.subscribe((marker: any) => {
+                    mapComponent.onSearchResultSelected(marker);
+                });
+
+                mapComponent.searchComponentRef = componentRef;
+                container.appendChild(componentRef.location.nativeElement);
+                return container;
+            },
+
+            onRemove: function () {
+                if (mapComponent.searchComponentRef) {
+                    mapComponent.searchComponentRef.destroy();
+                    mapComponent.searchComponentRef = undefined;
                 }
             },
-        }) as StalkerSearchControl;
+        });
 
-        this.searchContoller.on(
-            'search:locationfound',
-            function (e: {
-                layer: {
-                    openPopup: () => void;
-                };
-            }) {
-                e.layer.openPopup();
-            }
-        );
-
-        this.map.addControl(this.searchContoller);
+        this.searchControl = new SearchControl();
+        this.searchControl.addTo(this.map);
         this.configureSeo();
+    }
+
+    private collectSearchableMarkers(): any[] {
+        const markers: any[] = [];
+
+        for (const layer of this.allLayers) {
+            if (!this.map.hasLayer(layer) || !layer._layers) {
+                continue;
+            }
+
+            for (const marker of Object.values(layer._layers)) {
+                if ((marker as any)?.feature?.properties?.search) {
+                    markers.push(marker);
+                }
+            }
+        }
+
+        return markers;
+    }
+
+    private onSearchResultSelected(marker: any): void {
+        if (!marker?.getLatLng || !marker?.fire) {
+            return;
+        }
+
+        this.map.setView(marker.getLatLng(), this.map.getMaxZoom());
+        marker.fire('click');
     }
 
     private normalizeDlc(dlc: string | null | undefined): string {
@@ -616,12 +644,22 @@ export class MapHocComponent {
 
     private applyDlcFilter(): void {
         for (const marker of this.dlcMarkers) {
-            marker.doNotRender = !this.enabledDlcs.has(marker.dlc);
+            const layer = marker.dlcLayer;
+            if (!layer) {
+                continue;
+            }
 
-            if (typeof marker.redraw === 'function') {
-                marker.redraw();
+            const shouldShow = this.enabledDlcs.has(marker.dlc);
+            const isInLayer = layer.hasLayer(marker);
+
+            if (shouldShow && !isInLayer) {
+                layer.addLayer(marker);
+            } else if (!shouldShow && isInLayer) {
+                layer.removeLayer(marker);
             }
         }
+
+        this.searchComponentRef?.instance.refreshResults();
     }
 
     private getDlcLabel(dlc: string): string {
@@ -1602,6 +1640,8 @@ export class MapHocComponent {
             marker.data = data;
             marker.feature = {};
             marker.feature.properties = {};
+            marker.properties = {};
+            marker.properties.locationUniqueName = data.locationId > 0 ? this.gamedata.locations[data.locationId] : null;
 
             if (localesToFind.length > 0) {
                 this.createTranslatableProperty(
@@ -1811,6 +1851,8 @@ export class MapHocComponent {
             marker.data = data;
             marker.feature = {};
             marker.feature.properties = {};
+            marker.properties = {};
+            marker.properties.locationUniqueName = data.locationId > 0 ? this.gamedata.locations[data.locationId] : null;
 
             localesToFind.push(marker.name, markers.length.toString());
 
@@ -2250,34 +2292,6 @@ export class MapHocComponent {
         return `<p><span>${title}:</span>&#9;&#9;<span>${value}</span></p>`
     }
 
-    private reorderSearchingLayers(layers: any): any {
-        let newUndergroundLayer: any = {};
-        let undergroundMarkers: any[] = [];
-        let newLayers: any[] = [];
-
-        for (let layer of layers) {
-            if (this.map.hasLayer(layer)) {
-                let markers: any[] = Object.values(layer._layers);
-                newLayers.push(layer);
-                /*if (markers[0] && markers[0].properties && markers[0].properties.typeUniqueName) {
-                      undergroundMarkers.push(...this.undergroundMarkerToSearch.filter(x => x.properties.typeUniqueName == markers[0].properties.typeUniqueName));
-                    }*/
-            }
-        }
-
-        if (
-            Object.values(layers).some(
-                (x: any) => x.name == 'level-changers' && this.map.hasLayer(x)
-            )
-        ) {
-            newUndergroundLayer = L.layerGroup(undergroundMarkers);
-            newUndergroundLayer.ableToSearch = true;
-            newUndergroundLayer.name = 'underground';
-            newLayers.push(newUndergroundLayer);
-        }
-        return L.featureGroup(newLayers);
-    }
-
     private createTranslatableProperty(
         object: any,
         propertyName: string,
@@ -2325,6 +2339,14 @@ export class MapHocComponent {
     private addLayerToMap(layer: any, name: any, ableToSearch: boolean = false) {
         layer.ableToSearch = ableToSearch;
         layer.name = name;
+
+        if (typeof layer.eachLayer === 'function') {
+            layer.eachLayer((marker: any) => {
+                if (marker?.dlc != null) {
+                    marker.dlcLayer = layer;
+                }
+            });
+        }
 
         this.allLayers.push(layer);
     }

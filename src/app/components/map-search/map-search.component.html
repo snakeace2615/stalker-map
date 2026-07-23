@@ -1,0 +1,26 @@
+<div class="stalker-map-search">
+    <input
+        class="stalker-map-search__input"
+        type="text"
+        [placeholder]="placeholder"
+        [value]="query"
+        (input)="onQueryInput($event)"
+        autocomplete="off"
+        spellcheck="false"
+    />
+
+    @if (results.length > 0) {
+        <ul class="stalker-map-search__results">
+            @for (result of results; track result.marker) {
+                <li class="stalker-map-search__result">
+                    <a href="#" (click)="onResultClick(result, $event)">
+                        <span [class]="'stalker-search-item ' + result.typeClass">{{ result.title }}</span>
+                        @if (result.locationLabel) {
+                            <b>({{ result.locationLabel }})</b>
+                        }
+                    </a>
+                </li>
+            }
+        </ul>
+    }
+</div>

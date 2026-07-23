@@ -1,9 +1,11 @@
 import {
     Component,
+    ComponentRef,
     HostListener,
     ViewEncapsulation,
     ViewContainerRef,
-    ViewChild
+    ViewChild,
+    isDevMode,
 } from '@angular/core';
 import { HeaderComponent } from '../header/header.component';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -25,10 +27,10 @@ import { Meta, Title } from '@angular/platform-browser';
 import { MapService } from '../../services/map.service';
 import { HiddenMarker } from '../../models/hidden-marker.model';
 import { CompareComponent } from '../compare/compare.component';
-import { isDevMode } from '@angular/core';
 import { Game } from '../../models/game.model';
 import { BottomSheetWrapperComponent } from "../bottom-sheet-wrapper/bottom-sheet-wrapper.component";
-import { L, asLatLngBounds, asLatLngExpressions, asStalkerLayerGroup, asStalkerMap, findLayerMarker, hasLevelChangerProperties, pixelBounds, pixelCenter, StalkerCustomLayersControl, StalkerLayerGroup, StalkerLocationsLayer, StalkerMap, StalkerMarker, StalkerSearchControl } from '../../leaflet/leaflet-setup';
+import { MapSearchComponent } from '../map-search/map-search.component';
+import { L, asLatLngBounds, asLatLngExpressions, asStalkerLayerGroup, asStalkerMap, findLayerMarker, hasLevelChangerProperties, pixelBounds, pixelCenter, StalkerCustomLayersControl, StalkerLayerGroup, StalkerLocationsLayer, StalkerMap, StalkerMarker } from '../../leaflet/leaflet-setup';
 
 @Component({
     selector: 'app-map',
@@ -80,10 +82,10 @@ export class MapComponent {
     protected upgradeProperties: UpgradeProperty[];
     protected mapConfig: MapConfig;
     protected svgIcon: any;
-    protected searchContoller?: StalkerSearchControl;
+    protected searchControl?: L.Control;
+    protected searchComponentRef?: ComponentRef<MapSearchComponent>;
     protected layerContoller?: StalkerCustomLayersControl;
     protected mapInitialized: boolean = false;
-    protected markersToSearch: any[] = [];
     public undergroundMarkerToSearch: any[] = [];
 
     protected openedUndergroundPopup: { component: UndergroundComponent, levelChanger: any };
@@ -706,103 +708,155 @@ export class MapComponent {
     }
 
     private createSearchController(): void {
-        if (this.searchContoller) {
-            this.searchContoller.remove();
+        if (this.searchControl) {
+            this.searchControl.remove();
+            this.searchControl = undefined;
         }
 
-        let searchLayers = this.reorderSearchingLayers(this.layers);
-        let translate = this.translate;
+        if (this.searchComponentRef) {
+            this.searchComponentRef.destroy();
+            this.searchComponentRef = undefined;
+        }
 
-        this.searchContoller = L.control.search({
-            layer: searchLayers,
-            initial: false,
-            propertyName: 'search',
-            delayType: 0,
-            collapsed: false,
-            autoCollapseTime: 10000,
-            textPlaceholder: this.translate.instant('search'),
-            buildTip: function (text: string, val: any) {
-                try {
-                    let type = val.layer.properties.typeUniqueName;
-                    let translated = translate.instant(val.layer.properties.name);
-                    let location = translate.instant(
-                        val.layer.properties.locationUniqueName);
-                    return (
-                        '<a href="#"><span class="stalker-search-item ' +
-                        type +
-                        '">' +
-                        translated +
-                        '</span> <b>(' +
-                        location +
-                        ')</b></a>');
-                } catch (ex) {
-                    console.error(text, val, val.layer.properties);
-                    throw ex;
+        const mapComponent = this;
+
+        const SearchControl = L.Control.extend({
+            options: {
+                position: 'topleft',
+            },
+
+            onAdd: function () {
+                const container = L.DomUtil.create('div', 'leaflet-control stalker-map-search-control');
+                L.DomEvent.disableClickPropagation(container);
+                L.DomEvent.disableScrollPropagation(container);
+
+                const componentRef = mapComponent.container.createComponent(MapSearchComponent);
+                componentRef.instance.placeholder = mapComponent.translate.instant('search');
+                componentRef.instance.showLocation = true;
+                componentRef.instance.getMarkers = () => mapComponent.collectSearchableMarkers();
+                componentRef.instance.resultSelected.subscribe((marker: any) => {
+                    mapComponent.onSearchResultSelected(marker);
+                });
+
+                mapComponent.searchComponentRef = componentRef;
+                container.appendChild(componentRef.location.nativeElement);
+                return container;
+            },
+
+            onRemove: function () {
+                if (mapComponent.searchComponentRef) {
+                    mapComponent.searchComponentRef.destroy();
+                    mapComponent.searchComponentRef = undefined;
                 }
             },
-        }) as StalkerSearchControl;
+        });
 
-        this.searchContoller._handleUndergroundMark = (loc: any, self: any) => {
-            let location = loc.layer.undergroundLocation;
+        this.searchControl = new SearchControl();
+        this.searchControl.addTo(this.map);
+    }
 
-            const levelChangers = this.layers.find(x => x.name == 'level-changers');
-            if (!levelChangers?._layers) {
-                console.error(`cant find level changer for ${location.uniqueName}`);
-                return;
+    private collectSearchableMarkers(): any[] {
+        const markers: any[] = [];
+        const undergroundMarkers: any[] = [];
+
+        for (const layer of this.layers) {
+            if (!this.map.hasLayer(layer) || !layer._layers) {
+                continue;
             }
 
-            const levelChanger = findLayerMarker(
-                levelChangers,
-                (marker) => marker.properties.destination == location.uniqueName
-            );
-
-            if (levelChanger && hasLevelChangerProperties(levelChanger.properties)) {
-                const levelChangerProperties = levelChanger.properties;
-                self._moveToLocation(levelChanger.getLatLng(), '', self._map)
-                levelChangerProperties.markerToSearch = loc;
-                let destinationLocation = this.gamedata.locations.find(x => x.id == levelChangerProperties.levelChanger.destinationLocationId) as Location;
-
-                if (this.openedUndergroundPopup) {
-                    if (this.openedUndergroundPopup.component.location.id == destinationLocation.id) {
-                        const markerToSearch = levelChangerProperties.markerToSearch;
-                        if (markerToSearch?.layer) {
-                            this.openedUndergroundPopup.component.markerToSearch = new MarkerToSearch();
-                            this.openedUndergroundPopup.component.markerToSearch.lat = markerToSearch.lat;
-                            this.openedUndergroundPopup.component.markerToSearch.lng = markerToSearch.lng;
-                            this.openedUndergroundPopup.component.markerToSearch.type = markerToSearch.layer.properties.typeUniqueName ?? '';
-                            levelChangerProperties.markerToSearch = undefined;
-                            this.openedUndergroundPopup.component.goToMarker();
-                            return;
-                        }
-                    }
-                    else {
-                        this.openedUndergroundPopup.levelChanger.closePopup();
-
-                        levelChanger.openPopup();
-                    }
-                }
-                else {
-                    levelChanger.openPopup();
+            const layerMarkers = Object.values(layer._layers);
+            for (const marker of layerMarkers) {
+                if (marker?.feature?.properties?.search) {
+                    markers.push(marker);
                 }
             }
-            else {
-                console.error(`cant find level changer for ${location.uniqueName}`);
-            }
 
-            if (self.options.autoCollapse) { self.collapse() }
+            if (layerMarkers[0]?.properties?.typeUniqueName) {
+                const typeUniqueName = layerMarkers[0].properties.typeUniqueName;
+                undergroundMarkers.push(
+                    ...this.undergroundMarkerToSearch.filter(
+                        (x) =>
+                            x.properties?.typeUniqueName == typeUniqueName
+                            && x.feature?.properties?.search
+                    )
+                );
+            }
         }
 
-        this.searchContoller.on(
-            'search:locationfound',
-            function (e: {
-                layer: {
-                    openPopup: () => void
-                }
-            }) {
-                e.layer.openPopup();
-            });
+        if (this.layers.some((x) => x.name == 'level-changers' && this.map.hasLayer(x))) {
+            markers.push(...undergroundMarkers);
+        }
 
-        this.map.addControl(this.searchContoller);
+        return markers;
+    }
+
+    private onSearchResultSelected(marker: any): void {
+        if (marker?.undergroundLocation) {
+            this.handleUndergroundSearchMark(marker);
+            return;
+        }
+
+        if (!marker?.getLatLng || !marker?.fire) {
+            return;
+        }
+
+        this.map.setView(marker.getLatLng(), this.map.getMaxZoom());
+        marker.fire('click');
+    }
+
+    private handleUndergroundSearchMark(marker: any): void {
+        const location = marker.undergroundLocation;
+
+        const levelChangers = this.layers.find((x) => x.name == 'level-changers');
+        if (!levelChangers?._layers) {
+            console.error(`cant find level changer for ${location.uniqueName}`);
+            return;
+        }
+
+        const levelChanger = findLayerMarker(
+            levelChangers,
+            (m) => m.properties.destination == location.uniqueName
+        );
+
+        if (levelChanger && hasLevelChangerProperties(levelChanger.properties)) {
+            const levelChangerProperties = levelChanger.properties;
+            const latLng = marker.getLatLng();
+
+            this.map.setView(levelChanger.getLatLng(), this.map.getMaxZoom());
+            levelChangerProperties.markerToSearch = {
+                lat: latLng.lat,
+                lng: latLng.lng,
+                layer: marker,
+                type: marker.properties?.typeUniqueName,
+            };
+
+            const destinationLocation = this.gamedata.locations.find(
+                (x) => x.id == levelChangerProperties.levelChanger.destinationLocationId
+            ) as Location;
+
+            if (this.openedUndergroundPopup) {
+                if (this.openedUndergroundPopup.component.location.id == destinationLocation.id) {
+                    const markerToSearch = levelChangerProperties.markerToSearch;
+                    if (markerToSearch?.layer) {
+                        this.openedUndergroundPopup.component.markerToSearch = new MarkerToSearch();
+                        this.openedUndergroundPopup.component.markerToSearch.lat = markerToSearch.lat;
+                        this.openedUndergroundPopup.component.markerToSearch.lng = markerToSearch.lng;
+                        this.openedUndergroundPopup.component.markerToSearch.type =
+                            markerToSearch.layer.properties.typeUniqueName ?? '';
+                        levelChangerProperties.markerToSearch = undefined;
+                        this.openedUndergroundPopup.component.goToMarker();
+                        return;
+                    }
+                } else {
+                    this.openedUndergroundPopup.levelChanger.closePopup();
+                    levelChanger.openPopup();
+                }
+            } else {
+                levelChanger.openPopup();
+            }
+        } else {
+            console.error(`cant find level changer for ${location.uniqueName}`);
+        }
     }
 
     private createCompareControl(): void {
@@ -2581,31 +2635,6 @@ export class MapComponent {
         stalkerLayer.name = name;
 
         this.layers.push(stalkerLayer);
-    }
-
-    private reorderSearchingLayers(layers: any): any {
-        this.markersToSearch = [];
-        let newUndergroundLayer: any = {};
-        let undergroundMarkers: any[] = [];
-        let newLayers: any[] = [];
-
-        for (let layer of layers) {
-            if (this.map.hasLayer(layer)) {
-                let markers: any[] = Object.values(layer._layers);
-                newLayers.push(layer);
-                if (markers[0] && markers[0].properties && markers[0].properties.typeUniqueName) {
-                    undergroundMarkers.push(...this.undergroundMarkerToSearch.filter(x => x.properties.typeUniqueName == markers[0].properties.typeUniqueName));
-                }
-            }
-        }
-
-        if (Object.values(layers).some((x: any) => x.name == "level-changers" && this.map.hasLayer(x))) {
-            newUndergroundLayer = L.layerGroup(undergroundMarkers);
-            newUndergroundLayer.ableToSearch = true;
-            newUndergroundLayer.name = 'underground';
-            newLayers.push(newUndergroundLayer);
-        }
-        return L.featureGroup(newLayers);
     }
 
     private createUndergroundMapPopup(levelChanger: any) {

@@ -21,6 +21,7 @@ import { Game } from '../models/game.model';
 import { BottomSheetWrapperComponent } from '../components/bottom-sheet-wrapper/bottom-sheet-wrapper.component';
 import { PopupComponent } from '../components/popup/popup.component';
 import { L } from '../leaflet/leaflet-setup';
+import { createCanvasIconClass, createCanvasMarkerClass, createCanvasRenderer } from '../leaflet/canvas-markers';
 import type { StalkerLayerGroup, StalkerMap, StalkerMarker, StalkerRulerControl } from '../leaflet/stalker-leaflet.types';
 
 @Injectable({
@@ -414,196 +415,15 @@ export class MapService {
     }
 
     public getCanvasIconConstructor(): any {
-        return L.Icon.extend({
-            setOptions(obj: any, options: any) {
-                if (!Object.hasOwn(obj, 'options')) {
-                    obj.options = obj.options ? Object.create(obj.options) : {};
-                }
-                for (const i in options) {
-                    if (Object.hasOwn(options, i)) {
-                        obj.options[i] = options[i];
-                    }
-                }
-                return obj.options;
-            },
-
-            initialize(options: any) {
-                this.setOptions(this, options);
-                this._image = new Image();
-
-                if (this.options.imageFactor == null) {
-                    this.options.imageFactor = 1;
-                }
-
-                if (options.color) {
-                    fetch(options.iconUrl).then((response) => {
-                        if (response.ok) {
-                            response.text().then((svg: string) => {
-                                svg = svg.replace(/#FFFFFF/gm, options.color)
-                                const svgBlob = new Blob([svg], { type: "image/svg+xml" });
-                                this._image.src = URL.createObjectURL(svgBlob);
-                            });
-                        }
-                    });
-                }
-                else {
-                    this._image.src = options.iconUrl;
-                }
-            },
-
-            // Метод для прив'язки до маркера та карти
-            bindToLayer(layer: any) {
-                if (layer.options.icon.keepMapSize) {
-                    this._setupZoomListener(layer);
-                    this._recalculateRadius(layer._map._zoom, layer.options.radius);
-                }
-                else {
-                    this._calculatedRadius = layer.options.radius
-                }
-
-                layer._radius = this._calculatedRadius * layer._map.scaleFactor;
-                layer._radius2 = layer._radius * 2;
-                layer._drawRadius = layer._radius2 * this.options.imageFactor;
-                layer._drawRadiusHalf = layer._radius * this.options.imageFactor;
-            },
-
-            // Встановлення слухача зуму
-            _setupZoomListener(layer: any) {
-                if (this._zoomHandler) {
-                    this.markers.push(layer);
-                    return; // Вже підписані
-                }
-
-                this.markers = [layer];
-
-                this._zoomHandler = () => {
-                    if (this.markers[0]._map) {
-                        this._recalculateRadius(this.markers[0]._map._zoom, this.markers[0].options.radius);
-                        let radius = this._calculatedRadius * this.markers[0]._map.scaleFactor;
-
-                        for (let i = 0; i < this.markers.length; i++) {
-                            this.markers[i]._radius = radius;
-                            this.markers[i]._radius2 = radius * 2;
-                            this.markers[i]._drawRadius = this.markers[i]._radius2 * this.options.imageFactor;
-                            this.markers[i]._drawRadiusHalf = this.markers[i]._radius * this.options.imageFactor;
-                        }
-                    }
-                };
-
-                this.markers[0]._map.on('zoomend', this._zoomHandler);
-            },
-
-            // Перерахунок радіусу
-            _recalculateRadius(zoom: number, radius: number) {
-                if (this._currentZoom === zoom) {
-                    return; // Нічого не змінилось
-                }
-
-                this._currentZoom = zoom;
-                this._calculatedRadius = radius * Math.pow(2, zoom);
-            },
-
-            // Отримання поточного радіусу (без перерахунку)
-            getRadius(): number {
-                return this._calculatedRadius ?? this.options.radius;
-            },
-
-            // Розрахунок параметрів для малювання
-            calculateDrawParameters(point: any, radius: number) {
-                const size = radius * 2;
-                return {
-                    x: point.x - radius,
-                    y: point.y - radius,
-                    width: size,
-                    height: size
-                };
-            },
-
-            // Очищення при видаленні
-            unbindFromLayer() {
-                if (this._zoomHandler && this._layer && this._layer._map) {
-                    this._layer._map.off('zoomend', this._zoomHandler);
-                    this._zoomHandler = null;
-                }
-                this._layer = null;
-            }
-        });
+        return createCanvasIconClass();
     }
 
     public getCanvasMarkerConstructor(): any {
-        return L.CircleMarker.extend({
-            _updatePath: function () {
-                this._renderer._updateSvgMarker(this);
-            },
-
-            setOpacity: function (opacity: number) {
-                this.setStyle({
-                    opacity: opacity,
-                    fillOpacity: opacity,
-                });
-            },
-
-            onAdd: function (map: any) {
-                L.CircleMarker.prototype.onAdd.call(this, map);
-
-                if (this.options.icon && this.options.icon.icon) {
-                    this.options.icon.icon.bindToLayer(this);
-                }
-
-                return this;
-            },
-
-            onRemove: function (map: any) {
-                if (this.options.icon && this.options.icon.icon) {
-                    this.options.icon.icon.unbindFromLayer();
-                }
-
-                return L.CircleMarker.prototype.onRemove.call(this, map);
-            }
-        });
+        return createCanvasMarkerClass();
     }
 
     public getCanvasRenderer(): any {
-        L.Canvas.include({
-            _updateSvgMarker: function (layer: any) {
-                if (!this._drawing || layer._empty() || layer.doNotRender) {
-                    return;
-                }
-
-                try {
-                    this._ctx.globalAlpha = layer.options.opacity;
-                    let x = 0,
-                        y = 0,
-                        width = 0,
-                        height = 0;
-
-                    /*if (layer.options.icon.keepMapSize) {
-                        if (layer.options.zoom != layer._map._zoom) {
-                            layer.options.zoom = layer._map._zoom;
-                            layer._radius =
-                                layer.options.icon.radius * Math.pow(2, layer.options.zoom);
-                        }
-                    }*/
-
-                    x = layer._point.x - layer._drawRadiusHalf;
-                    y = layer._point.y - layer._drawRadiusHalf;
-
-                    this._ctx.drawImage(
-                        layer.options.icon.icon._image,
-                        x,
-                        y,
-                        layer._drawRadius,
-                        layer._drawRadius
-                    );
-
-                } catch (ex) {
-                    console.log(layer);
-                    console.log(ex);
-                }
-            },
-        });
-
-        return L.canvas();
+        return createCanvasRenderer();
     }
 
     public createCustomLayersControl(): void {

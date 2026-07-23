@@ -1,0 +1,73 @@
+.stalker-map-search {
+    position: relative;
+    min-width: 220px;
+    max-width: min(320px, 80vw);
+    font-family: Letterica, sans-serif;
+}
+
+.stalker-map-search__input {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    height: 32px;
+    padding: 0 10px;
+    border: 2px solid #fff;
+    background: rgba(9, 10, 10, 0.95);
+    color: #fff;
+    font: inherit;
+    outline: none;
+}
+
+.stalker-map-search__input::placeholder {
+    color: #9a9a9a;
+}
+
+.stalker-map-search__results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    max-height: min(360px, 50vh);
+    overflow-y: auto;
+    border: 2px solid #fff;
+    border-top: none;
+    background: rgba(9, 10, 10, 0.97);
+}
+
+.stalker-map-search__result a {
+    display: block;
+    padding: 6px 10px;
+    color: #fff;
+    text-decoration: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.stalker-map-search__result a:hover {
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.stalker-map-search__result b {
+    margin-left: 4px;
+    font-weight: 400;
+    color: #bdbdbd;
+}
+
+.stalker-map-search .stalker-search-item {
+    padding-left: 18px;
+}
+
+.leaflet-control.stalker-map-search-control {
+    margin-top: 10px;
+    margin-left: 10px;
+    clear: none;
+    float: none;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+}

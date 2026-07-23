@@ -1,7 +1,6 @@
 import * as L from 'leaflet';
 import 'leaflet-geometryutil';
 import 'leaflet-arrowheads';
-import 'leaflet-search';
 import './plugins/leaflet-ruler';
 
 export { L };
@@ -16,7 +15,6 @@ export type {
     StalkerLevelChangerMarkerProperties,
     StalkerLootBoxMarkerProperties,
     StalkerRulerControl,
-    StalkerSearchControl,
     StalkerSearchLocation,
     StalkerStuffMarkerProperties,
     StalkerTraderMarkerProperties,
