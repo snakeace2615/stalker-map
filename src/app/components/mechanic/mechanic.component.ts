@@ -1,7 +1,7 @@
 import { MapService } from './../../services/map.service';
 import { Component, Input } from '@angular/core';
 import { Mechanic, MechanicDiscount, MechanicWeaponDamage } from '../../models/mechanic.model';
-import { Item } from '../../models/item.model';
+import { asUpgradable, asWeapon, isOutfit, isWeapon, Item, Outfit, UpgradableItem, Weapon } from '../../models/item.model';
 import { RankSetting } from '../../models/rank-settings.model';
 import { RelationType } from '../../models/gamedata/map-config';
 import { CharacterProfile } from '../../models/character-profile.model';
@@ -17,6 +17,7 @@ import { ItemPropertyNumberComponent } from './item-property-number/item-propert
 import { ItemUpgradesComponent } from './item-upgrades/item-upgrades.component';
 import { CompareService } from '../../services/compare.service';
 import { Game } from '../../models/game.model';
+import { ShareLinkService } from '../../services/share-link.service';
 
 @Component({
     selector: 'app-mechanic',
@@ -41,9 +42,30 @@ export class MechanicComponent {
     public relation: number = this.relations[1];
     public selectedDiscount: MechanicDiscount;
     public discounts: MechanicDiscount[];
-    public selectedItem: Item;
-    public selectedItemForUpgrades: Item;
+    public selectedItem: UpgradableItem;
+    public selectedItemForUpgrades: UpgradableItem;
     public selectedItemUpgrade: ItemUpgrade;
+
+    protected readonly asWeapon = asWeapon;
+    protected readonly asUpgradable = asUpgradable;
+
+    // the weapon/outfit sections of the template are guarded by $type checks,
+    // so these casts are safe where they are used
+    public get selectedWeapon(): Weapon {
+        return this.selectedItem as Weapon;
+    }
+
+    public get selectedWeaponForUpgrades(): Weapon {
+        return this.selectedItemForUpgrades as Weapon;
+    }
+
+    public get selectedOutfit(): Outfit {
+        return this.selectedItem as Outfit;
+    }
+
+    public get selectedOutfitForUpgrades(): Outfit {
+        return this.selectedItemForUpgrades as Outfit;
+    }
 
     public relationTypeEnum = RelationType;
     public itemsToRepait: Item[];
@@ -58,6 +80,7 @@ export class MechanicComponent {
 
     public itemDamage: MechanicWeaponDamage[];
     public upgradedItemDamage: MechanicWeaponDamage[];
+    public shareUrl: string = '';
 
     public readonly copMaxProperties = {
         radio_zone_max_power: 0.03,
@@ -89,9 +112,17 @@ export class MechanicComponent {
     constructor(
         private mapService: MapService,
         protected translate: TranslateService,
-        private compare: CompareService) { }
+        private compare: CompareService,
+        private shareLinks: ShareLinkService) { }
 
     private async ngOnInit(): Promise<void> {
+        this.shareUrl = this.shareLinks.forMarker(
+            this.game.uniqueName,
+            this.mechanic.z,
+            this.mechanic.x,
+            'mechanics'
+        );
+
         if (this.mechanic.itemsForUpgrader?.length > 0) {
             this.itemsToRepait = [];
 
@@ -134,18 +165,19 @@ export class MechanicComponent {
         }
     }
 
-    public addItemToCompare(item: Item) {
-        if (item.$type == 'weapon') {
-            new Promise(async (resolve, reject) => {
-                this.compare.addWeaponToCompare(item, this.game.gameStyle)
-            });
-        }
-        else if (item.$type == 'outfit') {
-            new Promise(async (resolve, reject) => {
-                this.compare.addOutfitToCompare(item, this.game.gameStyle)
-            });
-        }
+    public addItemToCompare(item: Item, event?: Event): void {
+        event?.stopPropagation();
 
+        if (isWeapon(item)) {
+            if (this.compare.addWeaponToCompare(item, this.game.gameStyle)) {
+                this.compare.open();
+            }
+        }
+        else if (isOutfit(item)) {
+            if (this.compare.addOutfitToCompare(item, this.game.gameStyle)) {
+                this.compare.open();
+            }
+        }
     }
 
     public selectDiscount(discount: MechanicDiscount): void {
@@ -266,8 +298,8 @@ export class MechanicComponent {
             this.selectedItemUpgrade = undefined as unknown as ItemUpgrade;
         }
 
-        if (item.$type == "weapon") {
-            const uniqueDamage: number[] = [...new Set(this.selectedItem.hitPower)];
+        if (isWeapon(item)) {
+            const uniqueDamage: number[] = [...new Set(this.selectedWeapon.hitPower)];
 
             if (uniqueDamage.length == 1) {
                 //itemDamage
@@ -307,19 +339,20 @@ export class MechanicComponent {
         this.compare.selectUpgrade(upgrade, upgradeSection, this.selectedItemForUpgrades, model.selectedItemUpgrade, this.game.gameStyle == 'cs');
 
         if (this.itemDamage) {
-            const uniqueDamage: number[] = [...new Set(this.selectedItemForUpgrades.hitPower)];
+            const upgradedWeapon = this.selectedWeaponForUpgrades;
+            const uniqueDamage: number[] = [...new Set(upgradedWeapon.hitPower)];
 
             let damage: MechanicWeaponDamage = new MechanicWeaponDamage();
             damage.value = uniqueDamage[0] * 100;
 
-            let shotsPerSec: number = this.selectedItemForUpgrades.rpm / 60;
+            let shotsPerSec: number = upgradedWeapon.rpm / 60;
 
-            if (shotsPerSec > this.selectedItemForUpgrades.ammoMagazineSize) {
-                shotsPerSec = this.selectedItemForUpgrades.ammoMagazineSize;
+            if (shotsPerSec > upgradedWeapon.ammoMagazineSize) {
+                shotsPerSec = upgradedWeapon.ammoMagazineSize;
             }
 
             damage.valuePerSecound = this.Math.floor(shotsPerSec * damage.value);
-            damage.valuePerMag = this.Math.floor(this.selectedItemForUpgrades.ammoMagazineSize * damage.value);
+            damage.valuePerMag = this.Math.floor(upgradedWeapon.ammoMagazineSize * damage.value);
 
             this.upgradedItemDamage = [damage];
         }
@@ -349,28 +382,31 @@ export class MechanicComponent {
     }
 
     private resetWeaponStats(): void {
-        let maxTime = (60 / this.selectedItem.rpm) * this.selectedItem.ammoMagazineSize;
+        const weapon = this.selectedWeapon;
+        const upgradedWeapon = this.selectedWeaponForUpgrades;
+
+        let maxTime = (60 / weapon.rpm) * weapon.ammoMagazineSize;
         let shots: BubbleDataPoint[] = [];
         let shotsZoom: BubbleDataPoint[] = [];
         let shotsUp: BubbleDataPoint[] = [];
         let shotsUpZoom: BubbleDataPoint[] = [];
 
-        shots = this.calculateWeaponShots(this.selectedItem, 'camDispersion', 'camDispersionInc', 'camDispertionFrac', 'camMaxAngle');
+        shots = this.calculateWeaponShots(weapon, 'camDispersion', 'camDispersionInc', 'camDispertionFrac', 'camMaxAngle');
 
-        if (this.selectedItem.zoomCamDispersion > 0) {
-            shotsZoom = this.calculateWeaponShots(this.selectedItem, 'zoomCamDispersion', 'zoomCamDispersionInc', 'zoomCamDispertionFrac', 'zoomCamMaxAngle');
+        if (weapon.zoomCamDispersion > 0) {
+            shotsZoom = this.calculateWeaponShots(weapon, 'zoomCamDispersion', 'zoomCamDispersionInc', 'zoomCamDispertionFrac', 'zoomCamMaxAngle');
         }
 
-        if (!this.hasSameUps(this.selectedItem, this.selectedItemForUpgrades)) {
-            shotsUp = this.calculateWeaponShots(this.selectedItemForUpgrades, 'camDispersion', 'camDispersionInc', 'camDispertionFrac', 'camMaxAngle');
-            if (this.selectedItemForUpgrades.zoomCamDispersion > 0) {
-                shotsUpZoom = this.calculateWeaponShots(this.selectedItemForUpgrades, 'zoomCamDispersion', 'zoomCamDispersionInc', 'zoomCamDispertionFrac', 'zoomCamMaxAngle');
+        if (!this.hasSameUps(weapon, upgradedWeapon)) {
+            shotsUp = this.calculateWeaponShots(upgradedWeapon, 'camDispersion', 'camDispersionInc', 'camDispertionFrac', 'camMaxAngle');
+            if (upgradedWeapon.zoomCamDispersion > 0) {
+                shotsUpZoom = this.calculateWeaponShots(upgradedWeapon, 'zoomCamDispersion', 'zoomCamDispersionInc', 'zoomCamDispertionFrac', 'zoomCamMaxAngle');
             }
         }
 
         let n = 20;
 
-        let maxDist = Math.max(this.selectedItemForUpgrades.fireDistance, this.selectedItem.fireDistance);
+        let maxDist = Math.max(upgradedWeapon.fireDistance, weapon.fireDistance);
 
         let dx = maxDist / n;
 
@@ -380,12 +416,12 @@ export class MechanicComponent {
         for (let i = 0; i < n + 1; i++) {
             let x = dx * i;
 
-            let time = x / this.selectedItem.bulletSpeed;
-            let d = this.bulletDinamic(this.selectedItem.bulletSpeed, 0, 0, time)
+            let time = x / weapon.bulletSpeed;
+            let d = this.bulletDinamic(weapon.bulletSpeed, 0, 0, time)
             dynamic.push({ x: d[0], y: d[1] });
 
-            let timeUp = x / this.selectedItemForUpgrades.bulletSpeed;
-            let dUp = this.bulletDinamic(this.selectedItemForUpgrades.bulletSpeed, 0, 0, timeUp)
+            let timeUp = x / upgradedWeapon.bulletSpeed;
+            let dUp = this.bulletDinamic(upgradedWeapon.bulletSpeed, 0, 0, timeUp)
             dynamicUp.push({ x: dUp[0], y: dUp[1] });
         }
 
@@ -527,7 +563,7 @@ export class MechanicComponent {
         });*/
     }
 
-    private calculateWeaponShots(item: Item, camDispersion: string, camDispersionInc: string, camDispertionFrac: string, camMaxAngle: string): any[] {
+    private calculateWeaponShots(item: Weapon, camDispersion: string, camDispersionInc: string, camDispertionFrac: string, camMaxAngle: string): any[] {
         let shots: any[] = [];
         let currentTime = 0;
         let currentAngle = 0;
@@ -568,30 +604,33 @@ export class MechanicComponent {
         public powerLoss : number;
         public artefactCount : number;*/
 
+        const outfit = this.selectedOutfit;
+        const upgradedOutfit = this.selectedOutfitForUpgrades;
+
         let itemStats = [
-            this.selectedItem.burnProtection,
-            this.selectedItem.shockProtection,
-            this.selectedItem.radiationProtection,
-            this.selectedItem.chemicalBurnProtection,
-            this.selectedItem.strikeProtection,
-            this.selectedItem.explosionProtection,
-            this.selectedItem.woundProtection,
-            /*this.selectedItem.hitFractionActor,
-            this.selectedItem.powerLoss,
-            this.selectedItem.artefactCount,*/
+            outfit.burnProtection,
+            outfit.shockProtection,
+            outfit.radiationProtection,
+            outfit.chemicalBurnProtection,
+            outfit.strikeProtection,
+            outfit.explosionProtection,
+            outfit.woundProtection,
+            /*outfit.hitFractionActor,
+            outfit.powerLoss,
+            outfit.artefactCount,*/
         ]
 
         let itemStatsUp = [
-            this.selectedItemForUpgrades.burnProtection,
-            this.selectedItemForUpgrades.shockProtection,
-            this.selectedItemForUpgrades.radiationProtection,
-            this.selectedItemForUpgrades.chemicalBurnProtection,
-            this.selectedItemForUpgrades.strikeProtection,
-            this.selectedItemForUpgrades.explosionProtection,
-            this.selectedItemForUpgrades.woundProtection,
-            /*this.selectedItemForUpgrades.hitFractionActor,
-            this.selectedItemForUpgrades.powerLoss,
-            this.selectedItemForUpgrades.artefactCount,*/
+            upgradedOutfit.burnProtection,
+            upgradedOutfit.shockProtection,
+            upgradedOutfit.radiationProtection,
+            upgradedOutfit.chemicalBurnProtection,
+            upgradedOutfit.strikeProtection,
+            upgradedOutfit.explosionProtection,
+            upgradedOutfit.woundProtection,
+            /*upgradedOutfit.hitFractionActor,
+            upgradedOutfit.powerLoss,
+            upgradedOutfit.artefactCount,*/
         ]
 
         /*this.outfitStatsChart = new Chart("outfit-stats-chart-canvas", {
@@ -651,7 +690,7 @@ export class MechanicComponent {
         ]
     }
 
-    private hasSameUps(item: Item, another: Item): boolean {
+    private hasSameUps(item: UpgradableItem, another: UpgradableItem): boolean {
         if (item.uniqueName != another.uniqueName) {
             return false;
         }

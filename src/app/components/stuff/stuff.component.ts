@@ -1,13 +1,14 @@
 import { Component, Input } from '@angular/core';
 import { StuffItem, StuffModel } from '../../models/stuff';
 import { TranslateModule } from '@ngx-translate/core';
-import { Item } from '../../models/item.model';
+import { asUpgradable, asWeapon, Item } from '../../models/item.model';
 import { MapService } from '../../services/map.service';
 import { ItemTooltipComponent } from '../tooltips/item-tooltip/item-tooltip.component';
 import { TooltipDirective } from '../tooltips/tooltip.directive';
 import { Game } from '../../models/game.model';
 import { NgClass } from '@angular/common';
 import { HiddenMarker } from '../../models/hidden-marker.model';
+import { ShareLinkService } from '../../services/share-link.service';
 
 @Component({
     selector: 'app-stuff',
@@ -24,7 +25,10 @@ export class StuffComponent {
     @Input() public isUnderground: boolean;
     @Input() public isPopup: boolean;
     public itemTooltipComponent: any = ItemTooltipComponent;
-    
+
+    protected readonly asWeapon = asWeapon;
+    protected readonly asUpgradable = asUpgradable;
+
     public hiddenMarker: HiddenMarker;
     public shareUrl: string = '';
 
@@ -37,7 +41,10 @@ export class StuffComponent {
     private actorOnLevel = /actor_on_level\(([^\)]+)\)/;
     private npcRank = /npc_rank\(([^\)]+)\)/;
 
-    constructor(private mapService: MapService) { }
+    constructor(
+        private mapService: MapService,
+        private shareLinks: ShareLinkService
+    ) { }
 
     private async ngOnInit(): Promise<void> {
         if (this.stuff.items) {
@@ -98,7 +105,13 @@ export class StuffComponent {
             }
         }
 
-        this.shareUrl = `${window.location.origin}/map/${this.game.uniqueName}?lat=${this.stuff.z}&lng=${this.stuff.x}&type=${this.stuffType}${this.isUnderground ? `&underground=${this.stuff.locationId}` : ''}`;
+        this.shareUrl = this.shareLinks.forMarker(
+            this.game.uniqueName,
+            this.stuff.z,
+            this.stuff.x,
+            this.stuffType,
+            { isUnderground: this.isUnderground, locationId: this.stuff.locationId }
+        );
         this.hiddenMarker = new HiddenMarker();
         this.hiddenMarker.game = this.game.uniqueName;
         this.hiddenMarker.isUnderground = this.isUnderground;

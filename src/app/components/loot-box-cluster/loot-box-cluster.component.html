@@ -8,21 +8,23 @@
                             <div class="inventory-item-count">x{{stuffItem.count}}</div>
                         }
 
-                        @if (stuffItem.item.installedUpgrades && stuffItem.item.installedUpgrades.length > 0) {
+                        @if (asUpgradable(stuffItem.item)?.installedUpgrades?.length) {
                             <div class="inventory-item-upgrade"></div>
                         }
                     </div>
                     <div class="inventory-item-image {{this.game.gameStyle}} inventory-item-x-{{stuffItem.item.gridX}} inventory-item-y-{{stuffItem.item.gridY}}">
-                        @if (stuffItem.item.hasScope && stuffItem.item.scopeX > -1000 && stuffItem.item.scopeY > -1000) {
-                            <div class="wpn_addon scope" [style.left.px]="stuffItem.item.scopeX" [style.top.px]="stuffItem.item.scopeY"></div>
-                        }
+                        @if (asWeapon(stuffItem.item); as weapon) {
+                            @if (weapon.hasScope && weapon.scopeX > -1000 && weapon.scopeY > -1000) {
+                                <div class="wpn_addon scope" [style.left.px]="weapon.scopeX" [style.top.px]="weapon.scopeY"></div>
+                            }
 
-                        @if (stuffItem.item.hasSilencer && stuffItem.item.silencerX > -1000 && stuffItem.item.silencerY > -1000) {
-                            <div class="wpn_addon silencer" [style.left.px]="stuffItem.item.silencerX" [style.top.px]="stuffItem.item.silencerY"></div>
-                        }
-                        
-                        @if (stuffItem.item.hasGrenadeLauncher && stuffItem.item.grenadeLauncherX > -1000 && stuffItem.item.grenadeLauncherY > -1000) {
-                            <div class="wpn_addon grenade-launcher" [style.left.px]="stuffItem.item.grenadeLauncherX" [style.top.px]="stuffItem.item.grenadeLauncherY"></div>
+                            @if (weapon.hasSilencer && weapon.silencerX > -1000 && weapon.silencerY > -1000) {
+                                <div class="wpn_addon silencer" [style.left.px]="weapon.silencerX" [style.top.px]="weapon.silencerY"></div>
+                            }
+
+                            @if (weapon.hasGrenadeLauncher && weapon.grenadeLauncherX > -1000 && weapon.grenadeLauncherY > -1000) {
+                                <div class="wpn_addon grenade-launcher" [style.left.px]="weapon.grenadeLauncherX" [style.top.px]="weapon.grenadeLauncherY"></div>
+                            }
                         }
                     </div>
                 </div>
@@ -45,21 +47,23 @@
                         <div tooltip [component]="itemTooltipComponent" [componentData]="{item: stuffItem.item}" class="inventory-item inventory-item-width-{{stuffItem.item.width}} inventory-item-height-{{stuffItem.item.height}}">
                             <div class="item-additional-info">
                                 <div class="inventory-item-count">{{stuffItem.probability}}%</div>
-                                @if (stuffItem.item.installedUpgrades && stuffItem.item.installedUpgrades.length > 0) {
+                                @if (asUpgradable(stuffItem.item)?.installedUpgrades?.length) {
                                     <div class="inventory-item-upgrade"></div>
                                 }
                             </div>
                             <div class="inventory-item-image {{this.game.gameStyle}} inventory-item-x-{{stuffItem.item.gridX}} inventory-item-y-{{stuffItem.item.gridY}}">
-                                @if (stuffItem.item.hasScope && stuffItem.item.scopeX > -1000 && stuffItem.item.scopeY > -1000) {
-                                    <div class="wpn_addon scope" [style.left.px]="stuffItem.item.scopeX" [style.top.px]="stuffItem.item.scopeY"></div>
-                                }
+                                @if (asWeapon(stuffItem.item); as weapon) {
+                                    @if (weapon.hasScope && weapon.scopeX > -1000 && weapon.scopeY > -1000) {
+                                        <div class="wpn_addon scope" [style.left.px]="weapon.scopeX" [style.top.px]="weapon.scopeY"></div>
+                                    }
 
-                                @if (stuffItem.item.hasSilencer && stuffItem.item.silencerX > -1000 && stuffItem.item.silencerY > -1000) {
-                                    <div class="wpn_addon silencer" [style.left.px]="stuffItem.item.silencerX" [style.top.px]="stuffItem.item.silencerY"></div>
-                                }
+                                    @if (weapon.hasSilencer && weapon.silencerX > -1000 && weapon.silencerY > -1000) {
+                                        <div class="wpn_addon silencer" [style.left.px]="weapon.silencerX" [style.top.px]="weapon.silencerY"></div>
+                                    }
 
-                                @if (stuffItem.item.hasGrenadeLauncher && stuffItem.item.grenadeLauncherX > -1000 && stuffItem.item.grenadeLauncherY > -1000) {
-                                    <div class="wpn_addon grenade-launcher" [style.left.px]="stuffItem.item.grenadeLauncherX" [style.top.px]="stuffItem.item.grenadeLauncherY"></div>
+                                    @if (weapon.hasGrenadeLauncher && weapon.grenadeLauncherX > -1000 && weapon.grenadeLauncherY > -1000) {
+                                        <div class="wpn_addon grenade-launcher" [style.left.px]="weapon.grenadeLauncherX" [style.top.px]="weapon.grenadeLauncherY"></div>
+                                    }
                                 }
                             </div>
                         </div>

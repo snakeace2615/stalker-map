@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { TradeGenerator, TradeItem, TradeItemGenerator, TraderHoc, TraderPossibleItem } from '../../../models/hoc/map-hoc';
-import { Item } from '../../../models/item.model';
+import { isHocWeapon, Item } from '../../../models/item.model';
 import { ItemTooltipComponent } from '../../tooltips/item-tooltip/item-tooltip.component';
 import { TooltipDirective } from '../../tooltips/tooltip.directive';
 import { TranslateModule } from '@ngx-translate/core';
@@ -16,6 +16,7 @@ export class TraderComponent {
     @Input() public trader: TraderHoc;
     @Input() public allItems: Item[];
     @Input() public tradeItemGenerators: TradeItemGenerator[];
+    @Input() public shareUrl: string = '';
 
     public itemTooltipComponent: any = ItemTooltipComponent;
 
@@ -66,7 +67,7 @@ export class TraderComponent {
 
             tradeItem.preinstalled = [];
 
-            if (item && item.preinstalledAttachments != null) {
+            if (item && isHocWeapon(item) && item.preinstalledAttachments != null) {
                 if (item.compatibleAttachments != null) {
                     for (let attName of item.preinstalledAttachments) {
                         let attachment = item.compatibleAttachments.find(x => x.uniqueName == attName);
@@ -124,7 +125,7 @@ export class TraderComponent {
                 item.price = Math.floor(item.item.price * sellModifier);
                 item.preinstalled = [];
                 
-                if (item.item.preinstalledAttachments != null) {
+                if (isHocWeapon(item.item) && item.item.preinstalledAttachments != null) {
                     if (item.item.compatibleAttachments != null) {
 
                         for (let attName of item.item.preinstalledAttachments) {

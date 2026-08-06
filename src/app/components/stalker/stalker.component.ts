@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { Stalker } from '../../models/stalker.model';
-import { Item } from '../../models/item.model';
+import { asUpgradable, asWeapon, Item } from '../../models/item.model';
 import { StuffItem } from '../../models/stuff';
 import { TranslateModule } from '@ngx-translate/core';
 import { StalkerProfileComponent } from "../stalker-profile/stalker-profile.component";
@@ -11,6 +11,7 @@ import { ItemTooltipComponent } from '../tooltips/item-tooltip/item-tooltip.comp
 import { Game } from '../../models/game.model';
 import { NgStyle, NgTemplateOutlet, NgClass } from '@angular/common';
 import { HiddenMarker } from '../../models/hidden-marker.model';
+import { ShareLinkService } from '../../services/share-link.service';
 
 @Component({
     selector: 'app-stalker',
@@ -28,12 +29,15 @@ export class StalkerComponent {
     @Input() public isBottomSheet: boolean;
     public itemTooltipComponent: any = ItemTooltipComponent;
 
+    protected readonly asWeapon = asWeapon;
+    protected readonly asUpgradable = asUpgradable;
+
     public hiddenMarker: HiddenMarker;
     public shareUrl: string = '';
 
     public inventory: StuffItem[];
 
-    constructor() { }
+    constructor(private shareLinks: ShareLinkService) { }
 
     private ngOnInit(): void {
         if (this.stalker.inventoryItems?.length > 0) {
@@ -57,7 +61,13 @@ export class StalkerComponent {
             })
         }
 
-        this.shareUrl = `${window.location.origin}/map/${this.game.uniqueName}?lat=${this.stalker.z}&lng=${this.stalker.x}&type=stalkers${this.isUnderground ? `&underground=${this.stalker.locationId}` : ''}`;
+        this.shareUrl = this.shareLinks.forMarker(
+            this.game.uniqueName,
+            this.stalker.z,
+            this.stalker.x,
+            'stalkers',
+            { isUnderground: this.isUnderground, locationId: this.stalker.locationId }
+        );
         
         this.hiddenMarker = new HiddenMarker();
         this.hiddenMarker.game = this.game.uniqueName;

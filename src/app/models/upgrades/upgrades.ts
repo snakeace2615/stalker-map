@@ -1,4 +1,4 @@
-import { Item } from "../item.model";
+import { UpgradableItem } from "../item.model";
 import { Point } from "../point.model";
 
 export class ItemUpgrade {
@@ -72,7 +72,7 @@ export class UpgradeProperty {
 export class UpgradeSelectedEventModel {
   public upgrade: Upgrade;
   public upgradeSection: UpgradeSection;
-  public item: Item;
+  public item: UpgradableItem;
   public selectedItemUpgrade: ItemUpgrade;
   public isCs: boolean;
 }

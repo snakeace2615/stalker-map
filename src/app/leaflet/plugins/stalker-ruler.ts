@@ -94,6 +94,30 @@ function formatDuration(seconds: number): string {
     return `${hours}h ${minutes}m`;
 }
 
+const SCALE_SAMPLE_PX = 100;
+
+function metersInPixels(map: L.Map, pixels: number, lengthFactor: number): number {
+    const a = map.containerPointToLatLng(L.point(0, 0));
+    const b = map.containerPointToLatLng(L.point(pixels, 0));
+    return distanceMeters(a, b, lengthFactor);
+}
+
+function formatMetersPer100px(meters: number): string {
+    if (!Number.isFinite(meters) || meters <= 0) {
+        return '—';
+    }
+
+    if (meters >= 100) {
+        return `${meters.toFixed(1)} m / ${SCALE_SAMPLE_PX}px`;
+    }
+
+    if (meters >= 10) {
+        return `${meters.toFixed(2)} m / ${SCALE_SAMPLE_PX}px`;
+    }
+
+    return `${meters.toFixed(3)} m / ${SCALE_SAMPLE_PX}px`;
+}
+
 const StalkerRuler = L.Control.extend({
     options: {
         position: 'topright',
@@ -158,11 +182,41 @@ const StalkerRuler = L.Control.extend({
         this._areaButton.setAttribute('role', 'button');
         this._areaButton.innerHTML = this._areaIconHtml();
 
+        this._scaleButton = L.DomUtil.create('a', 'stalker-ruler-btn stalker-ruler-btn-scale', this._buttons);
+        this._scaleButton.href = '#';
+        this._scaleButton.title = 'Scale (m / 100px)';
+        this._scaleButton.setAttribute('role', 'button');
+        this._scaleButton.innerHTML = this._scaleIconHtml();
+
         this._panel = L.DomUtil.create('div', 'stalker-ruler-panel', this._container);
         this._panel.hidden = true;
 
+        this._scalePanel = L.DomUtil.create('div', 'stalker-ruler-panel stalker-ruler-scale-panel', this._container);
+        this._scalePanel.hidden = true;
+        this._scalePanel.innerHTML = `
+            <div class="stalker-ruler-stat">
+                <span class="stalker-ruler-stat-label">Now</span>
+                <span class="stalker-ruler-stat-value stalker-ruler-scale-current">—</span>
+            </div>
+            <div class="stalker-ruler-stat stalker-ruler-stat-scale">
+                <span class="stalker-ruler-stat-label">Target</span>
+                <label class="stalker-ruler-scale-input">
+                    <input type="number" min="0.001" step="any" />
+                    <span>m / ${SCALE_SAMPLE_PX}px</span>
+                </label>
+            </div>
+            <button type="button" class="stalker-ruler-scale-apply">Set zoom</button>
+        `;
+        this._scaleCurrentEl = this._scalePanel.querySelector('.stalker-ruler-scale-current');
+        this._scaleInput = this._scalePanel.querySelector('input');
+        this._scaleApplyBtn = this._scalePanel.querySelector('.stalker-ruler-scale-apply');
+        this._scaleOpen = false;
+
         L.DomEvent.on(this._routeButton, 'click', this._onRouteButtonClick, this);
         L.DomEvent.on(this._areaButton, 'click', this._onAreaButtonClick, this);
+        L.DomEvent.on(this._scaleButton, 'click', this._onScaleButtonClick, this);
+        L.DomEvent.on(this._scaleApplyBtn, 'click', this._onScaleApplyClick, this);
+        L.DomEvent.on(this._scaleInput, 'keydown', this._onScaleInputKeydown, this);
 
         this._layer = L.layerGroup();
         this._shapeLayer = L.layerGroup().addTo(this._layer);
@@ -175,8 +229,12 @@ const StalkerRuler = L.Control.extend({
 
     onRemove(this: any) {
         this._setMode(null);
+        this._setScaleOpen(false);
         L.DomEvent.off(this._routeButton, 'click', this._onRouteButtonClick, this);
         L.DomEvent.off(this._areaButton, 'click', this._onAreaButtonClick, this);
+        L.DomEvent.off(this._scaleButton, 'click', this._onScaleButtonClick, this);
+        L.DomEvent.off(this._scaleApplyBtn, 'click', this._onScaleApplyClick, this);
+        L.DomEvent.off(this._scaleInput, 'keydown', this._onScaleInputKeydown, this);
     },
 
     isActive(this: any): boolean {
@@ -191,6 +249,10 @@ const StalkerRuler = L.Control.extend({
         return `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 7h9l3 5-4 6H8L5 12z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="6" cy="7" r="1.5" fill="currentColor"/><circle cx="15" cy="7" r="1.5" fill="currentColor"/><circle cx="18" cy="12" r="1.5" fill="currentColor"/><circle cx="14" cy="18" r="1.5" fill="currentColor"/><circle cx="8" cy="18" r="1.5" fill="currentColor"/><circle cx="5" cy="12" r="1.5" fill="currentColor"/></svg>`;
     },
 
+    _scaleIconHtml(): string {
+        return `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 14h18M3 14v5M7 14v3M11 14v5M15 14v3M21 14v5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M5 6h6v6H5z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 6V4m0 10v-2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`;
+    },
+
     _onRouteButtonClick(this: any, e: Event) {
         L.DomEvent.preventDefault(e);
         L.DomEvent.stopPropagation(e);
@@ -201,6 +263,74 @@ const StalkerRuler = L.Control.extend({
         L.DomEvent.preventDefault(e);
         L.DomEvent.stopPropagation(e);
         this._setMode(this._mode === 'area' ? null : 'area');
+    },
+
+    _onScaleButtonClick(this: any, e: Event) {
+        L.DomEvent.preventDefault(e);
+        L.DomEvent.stopPropagation(e);
+        this._setScaleOpen(!this._scaleOpen);
+    },
+
+    _onScaleApplyClick(this: any, e: Event) {
+        L.DomEvent.preventDefault(e);
+        L.DomEvent.stopPropagation(e);
+        this._applyTargetScale();
+    },
+
+    _onScaleInputKeydown(this: any, e: KeyboardEvent) {
+        if (e.key === 'Enter') {
+            L.DomEvent.preventDefault(e);
+            this._applyTargetScale();
+        }
+    },
+
+    _setScaleOpen(this: any, open: boolean) {
+        this._scaleOpen = open;
+        this._container.classList.toggle('is-scale', open);
+        this._scaleButton.classList.toggle('is-active', open);
+        this._scalePanel.hidden = !open;
+
+        if (open) {
+            this._updateScaleReadout(true);
+            this._map.on('zoom move zoomend moveend', this._onScaleMapChange, this);
+        } else {
+            this._map.off('zoom move zoomend moveend', this._onScaleMapChange, this);
+        }
+    },
+
+    _onScaleMapChange(this: any) {
+        this._updateScaleReadout(false);
+    },
+
+    _updateScaleReadout(this: any, syncInput: boolean) {
+        const meters = metersInPixels(this._map, SCALE_SAMPLE_PX, this.options.lengthFactor ?? 1);
+        if (this._scaleCurrentEl) {
+            this._scaleCurrentEl.textContent = formatMetersPer100px(meters);
+        }
+
+        if (syncInput && this._scaleInput && Number.isFinite(meters) && meters > 0) {
+            this._scaleInput.value = String(Number(meters.toPrecision(6)));
+        }
+    },
+
+    _applyTargetScale(this: any) {
+        const target = Number(this._scaleInput?.value);
+        if (!Number.isFinite(target) || target <= 0) {
+            return;
+        }
+
+        const current = metersInPixels(this._map, SCALE_SAMPLE_PX, this.options.lengthFactor ?? 1);
+        if (!Number.isFinite(current) || current <= 0) {
+            return;
+        }
+
+        // meters ∝ 2^(-zoom) → targetZoom = currentZoom - log2(target / current)
+        const nextZoom = this._map.getZoom() - Math.log2(target / current);
+        const prevSnap = this._map.options.zoomSnap;
+        this._map.options.zoomSnap = 0;
+        this._map.setZoom(nextZoom);
+        this._map.options.zoomSnap = prevSnap;
+        this._updateScaleReadout(false);
     },
 
     _setMode(this: any, mode: InternalMode) {
@@ -535,7 +665,7 @@ const StalkerRuler = L.Control.extend({
     },
 
     _formatArea(this: any, squareMeters: number): string {
-        if (squareMeters >= 1_000_000) {
+        if (squareMeters >= 100_000) {
             const unit = this.options.labels?.km2 ?? 'km²';
             return `${(squareMeters / 1_000_000).toFixed(2)} ${unit}`;
         }

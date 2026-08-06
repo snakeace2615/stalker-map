@@ -1,5 +1,5 @@
 import { NgClass } from "@angular/common";
-import { Component, Input, ViewChild, ViewContainerRef } from "@angular/core";
+import { Component, ElementRef, Input, ViewChild, ViewContainerRef } from "@angular/core";
 import { TranslateModule, TranslateService } from "@ngx-translate/core";
 import { Map } from '../../models/map.model';
 import { Location } from '../../models/location.model';
@@ -13,7 +13,7 @@ import { MarkerToSearch } from "../../models/marker-to-search.model";
 import { MapComponent } from "../map/map.component";
 import { HiddenMarker } from "../../models/hidden-marker.model";
 import { MapService } from "../../services/map.service";
-import { BottomSheetWrapperComponent } from "../bottom-sheet-wrapper/bottom-sheet-wrapper.component";
+import { ShareLinkService } from "../../services/share-link.service";
 import { L, asLatLngBounds, asStalkerLayerGroup, asStalkerMap, findLayerMarker, pixelBounds, pixelCenter, StalkerCustomLayersControl, StalkerLayerGroup, StalkerMap } from '../../leaflet/leaflet-setup';
 
 @Component({
@@ -27,6 +27,9 @@ import { L, asLatLngBounds, asStalkerLayerGroup, asStalkerMap, findLayerMarker, 
 export class UndergroundComponent {
     @ViewChild('dynamicComponents', { read: ViewContainerRef })
     container: ViewContainerRef;
+
+    @ViewChild('undergroundMap', { static: true })
+    private undergroundMapEl!: ElementRef<HTMLDivElement>;
 
     @Input() public location: Location;
     @Input() public gamedata: Map;
@@ -53,7 +56,8 @@ export class UndergroundComponent {
 
     constructor(
         private translate: TranslateService,
-        private mapService: MapService) { }
+        private mapService: MapService,
+        private shareLinks: ShareLinkService) { }
 
     public test(event: any): void {
         this.setLayer(event.target.value);
@@ -71,20 +75,18 @@ export class UndergroundComponent {
     }
 
     public goToMarker(): void {
-        let layer = this.layers.find(x => x.name == this.markerToSearch.type);
+        const marker = this.shareLinks.findUndergroundMarker(
+            this.layers,
+            {
+                lat: this.markerToSearch.lat,
+                lng: this.markerToSearch.lng,
+                type: this.markerToSearch.type,
+            },
+            { zShift: this.zShift, xShift: this.xShift }
+        );
 
-        if (layer) {
-            let sLat = this.markerToSearch.lat + this.zShift;
-            let sLng = this.markerToSearch.lng + this.xShift;
-
-            for (let marker of Object.values(layer._layers) as any[]) {
-                if (marker._latlng.lat == sLat && marker._latlng.lng == sLng) {
-
-                    this.fireSearchedMarker(marker);
-
-                    break;
-                }
-            }
+        if (marker) {
+            this.fireSearchedMarker(marker);
         }
     }
 
@@ -205,7 +207,7 @@ export class UndergroundComponent {
             }
         }
 
-        this.map = asStalkerMap(L.map('underground-map', {
+        this.map = asStalkerMap(L.map(this.undergroundMapEl.nativeElement, {
             center: pixelCenter(this.location.heightInMeters, this.location.widthInMeters),
             zoom: zoom,
             minZoom: minZoom,
@@ -217,6 +219,9 @@ export class UndergroundComponent {
         }));
 
         this.map.scaleFactor = scaleFactor;
+
+        L.DomEvent.disableClickPropagation(this.undergroundMapEl.nativeElement);
+        L.DomEvent.disableScrollPropagation(this.undergroundMapEl.nativeElement);
 
         const bounds = pixelBounds(this.location.heightInMeters, this.location.widthInMeters);
 
@@ -332,6 +337,11 @@ export class UndergroundComponent {
 
             //this.createSearchController();
         });
+
+        requestAnimationFrame(() => {
+            this.map.invalidateSize();
+            setTimeout(() => this.map?.invalidateSize(), 50);
+        });
     }
 
 
@@ -342,7 +352,7 @@ export class UndergroundComponent {
                 this.fireSearchedMarker(marker);
             }
             else {
-                marker.openPopup();
+                marker.fire('click');
             }
         }, 250);
     }
@@ -548,7 +558,21 @@ export class UndergroundComponent {
                         className: 'map-tooltip',
                         offset: new Point(0, 50),
                     });
-                    //stuff.bindPopup((p: any) => this.mapService.createStashPopup(p, this.container, this.game, this.items, true));
+
+                    stuff.on('click', (e: any) => this.mapService.onMarkerClick(
+                        e,
+                        this.map,
+                        this.container,
+                        this.mapComponent.bottomSheet,
+                        (container, isPopup) => this.mapService.createStashContent(
+                            e.target,
+                            container,
+                            this.game as any,
+                            this.items,
+                            true,
+                            isPopup
+                        )
+                    ));
 
                     if (hiddenMarkers.some(x => x.lat == stuffModel.z && x.lng == stuffModel.x)) {
                         markersToHide.push(stuff);
@@ -616,7 +640,16 @@ export class UndergroundComponent {
                 }
             );
 
-            canvasMarker.on('click', (e: any) => this.mapService.handleStalkerClick(e, this.map, this.container, new BottomSheetWrapperComponent(), this.game, this.items, this.mapConfig, false));
+            canvasMarker.on('click', (e: any) => this.mapService.handleStalkerClick(
+                e,
+                this.map,
+                this.container,
+                this.mapComponent.bottomSheet,
+                this.game as any,
+                this.items,
+                this.mapConfig,
+                true
+            ));
         }
 
         if (markers.length > 0) {
@@ -693,73 +726,29 @@ export class UndergroundComponent {
                     offset: [0, 50],
                 }
             );
-            /*lootBoxMarker.bindPopup((p: any) => this.mapService.createLootBoxPopup(p, this.container, this.game, this.items, this.gamedata.locations, this.lootBoxConfig, true), {
-                minWidth: 300,
-            }).openPopup(),*/
-                markers.push(lootBoxMarker);
+
+            lootBoxMarker.on('click', (e: any) => this.mapService.onMarkerClick(
+                e,
+                this.map,
+                this.container,
+                this.mapComponent.bottomSheet,
+                (container) => this.mapService.createLootBoxContent(
+                    e.target,
+                    container,
+                    this.game as any,
+                    this.items,
+                    this.gamedata.locations,
+                    this.lootBoxConfig,
+                    true
+                )
+            ));
+
+            markers.push(lootBoxMarker);
         }
 
         if (markers.length > 0) {
             this.addLayerToMap(L.layerGroup(markers), lootBoxType.uniqueName, lootBoxType.ableToSearch);
         }
-    }
-
-    private addLevelChangers() {
-        let levelChangerIcon, undergroundDoorIcon, rostokIcon, levelChangerDirection: any[];
-        [levelChangerIcon, undergroundDoorIcon, rostokIcon, levelChangerDirection] = this.mapComponent.getLevelChangerIcons();
-
-        let markers: any[] = [];
-
-        for (let levelChanger of this.gamedata.levelChangers.filter(x => x.locationId == this.location.id)) {
-            let destLocation: Location = this.gamedata.locations.find((x: { id: any; }) => x.id == levelChanger.destinationLocationId) as Location;
-
-            let markerIcon = null;
-
-            if (destLocation.isUnderground) {
-                markerIcon = undergroundDoorIcon;
-            }
-            else if (levelChanger.direction == "level_changer_rostok") {
-                markerIcon = rostokIcon;
-            }
-            else {
-                markerIcon = levelChangerDirection.find(x => x.name == levelChanger.direction);
-
-                if (!markerIcon) {
-                    markerIcon = levelChangerIcon;
-                }
-            }
-
-            let canvasMarker = new this.mapComponent.svgMarker([levelChanger.z + this.zShift, levelChanger.x + this.xShift], {
-                icon: markerIcon,
-                renderer: this.canvasRenderer,
-                radius: markerIcon.radius
-            });
-
-            canvasMarker.properties = {};
-            canvasMarker.properties.levelChanger = levelChanger;
-            canvasMarker.properties.name = levelChanger.locale ? levelChanger.locale : 'level-changer';
-            canvasMarker.properties.typeUniqueName = 'level-changers';
-
-            markers.push(canvasMarker);
-            canvasMarker.properties.ableToSearch = false;
-            canvasMarker.feature = {};
-            canvasMarker.feature.properties = {};
-            canvasMarker.isUnderground = true;
-
-            canvasMarker.properties.destination = destLocation.uniqueName;
-
-            canvasMarker.bindTooltip(
-                (marker: any) =>
-                    this.translate.instant(marker.properties.name),
-                {
-                    sticky: true,
-                    className: 'map-tooltip',
-                    offset: [0, 50],
-                }
-            );
-        }
-
-        this.addLayerToMap(L.layerGroup(markers), levelChangerIcon.uniqueName);
     }
 
     private addAnomalyZones(): void {
@@ -820,11 +809,22 @@ export class UndergroundComponent {
                 },
                 { sticky: true, className: 'map-tooltip', offset: new Point(0, 50) }
             );
-            /*canvasMarker
-                .bindPopup((zone: any) => this.mapService.createeAnomalyZonePopup(zone, this.container, this.game, this.items, true), {
-                    minWidth: 300,
-                })
-                .openPopup();*/
+
+            if (hasArtefacts) {
+                canvasMarker.on('click', (e: any) => this.mapService.onMarkerClick(
+                    e,
+                    this.map,
+                    this.container,
+                    this.mapComponent.bottomSheet,
+                    (container) => this.mapService.createAnomalyZoneContent(
+                        e.target,
+                        container,
+                        this.game as any,
+                        this.items,
+                        true
+                    )
+                ));
+            }
         }
 
         try {
@@ -876,6 +876,10 @@ export class UndergroundComponent {
     }
 
     private async ngOnDestroy(): Promise<void> {
+        if (this.mapComponent.openedUndergroundPopup?.component === this) {
+            this.mapComponent.openedUndergroundPopup = null as unknown as { component: UndergroundComponent, levelChanger: any };
+        }
+
         this.map?.remove();
     }
 }

@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+
+Disallow: /export/
+Disallow: /*/map/content/
+
+Sitemap: https://stalker-map.online/sitemap.xml

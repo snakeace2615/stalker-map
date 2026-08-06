@@ -2,7 +2,7 @@ import { Component, Input } from '@angular/core';
 import { LootBoxCluster } from '../../models/loot-box/loot-box-cluster.model';
 import { TranslateModule } from '@ngx-translate/core';
 import { LootBoxView } from '../../models/loot-box/loot-box-veiw.model';
-import { Item } from '../../models/item.model';
+import { asUpgradable, asWeapon, Item } from '../../models/item.model';
 import { LootBox } from '../../models/loot-box/loot-box-section.model';
 import { StuffItem } from '../../models/stuff';
 import { MapService } from '../../services/map.service';
@@ -10,6 +10,7 @@ import { ItemTooltipComponent } from '../tooltips/item-tooltip/item-tooltip.comp
 import { TooltipDirective } from '../tooltips/tooltip.directive';
 import { Game } from '../../models/game.model';
 import { HiddenMarker } from '../../models/hidden-marker.model';
+import { ShareLinkService } from '../../services/share-link.service';
 
 @Component({
     selector: 'app-loot-box-cluster',
@@ -27,12 +28,18 @@ export class LootBoxClusterComponent {
     @Input() public isUnderground: boolean;
     public itemTooltipComponent: any = ItemTooltipComponent;
 
+    protected readonly asWeapon = asWeapon;
+    protected readonly asUpgradable = asUpgradable;
+
     public boxes: LootBoxView[];
     
     public hiddenMarker: HiddenMarker;
     public shareUrl: string = '';
 
-    constructor(private mapService: MapService) { }
+    constructor(
+        private mapService: MapService,
+        private shareLinks: ShareLinkService
+    ) { }
 
     private async ngOnInit(): Promise<void> {
 
@@ -96,7 +103,13 @@ export class LootBoxClusterComponent {
             }
         }
 
-        this.shareUrl = `${window.location.origin}/map/${this.game.uniqueName}?lat=${this.cluster.z}&lng=${this.cluster.x}&type=destroyable-box${this.isUnderground ? `&underground=${this.cluster.locationId}` : ''}`;
+        this.shareUrl = this.shareLinks.forMarker(
+            this.game.uniqueName,
+            this.cluster.z,
+            this.cluster.x,
+            'destroyable-box',
+            { isUnderground: this.isUnderground, locationId: this.cluster.locationId }
+        );
         
         this.hiddenMarker = new HiddenMarker();
         this.hiddenMarker.game = this.game.uniqueName;

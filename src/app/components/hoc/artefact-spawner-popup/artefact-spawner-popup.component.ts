@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { Artefact, ArtefactSpawner, ArtefactSpawnerConfig, ArtefactSpawnerType } from '../../../models/hoc/map-hoc';
 import { TranslateModule } from '@ngx-translate/core';
-import { Item } from '../../../models/item.model';
+import { isArtefact, Item } from '../../../models/item.model';
 import { TooltipDirective } from '../../tooltips/tooltip.directive';
 import { ItemTooltipComponent } from '../../tooltips/item-tooltip/item-tooltip.component';
 
@@ -16,6 +16,7 @@ export class ArtefactSpawnerPopupComponent {
   @Input() public artefactSpawner: ArtefactSpawner;
   @Input() public artefactSpawnerConfigs: ArtefactSpawnerType[];
   @Input() public items: Item[];
+  @Input() public shareUrl: string = '';
 
   public config: ArtefactSpawnerType;
   public useListOfArtifacts: boolean;
@@ -27,6 +28,9 @@ export class ArtefactSpawnerPopupComponent {
 
   private async ngOnInit(): Promise<void> {
     if (this.artefactSpawner.spawner) {
+        console.log(this.artefactSpawner)
+        console.log(this.artefactSpawnerConfigs)
+        console.log(this.items)
       let config = this.artefactSpawnerConfigs.find(x => x.name == this.artefactSpawner.spawner);
       if (config && config.settings && config.settings.length > 0) {
         this.artefacts = [];
@@ -55,19 +59,20 @@ export class ArtefactSpawnerPopupComponent {
           this.artefacts.push(anomalyArtefacts)
         }
         else {
-          /*let common = this.artefactSpawnerData.artefacts.filter(x => x.rarity == 'EArtifactRarity::Common');
-          let uncommon = this.artefactSpawnerData.artefacts.filter(x => x.rarity == 'EArtifactRarity::Uncommon');
-          let rare = this.artefactSpawnerData.artefacts.filter(x => x.rarity == 'EArtifactRarity::Rare');
-          let epic = this.artefactSpawnerData.artefacts.filter(x => x.rarity == 'EArtifactRarity::Epic');
+            let allArtefacts = this.items.filter(isArtefact);
+            let common = allArtefacts.filter(x => x.rarity == 'EArtifactRarity::Common');
+            let uncommon = allArtefacts.filter(x => x.rarity == 'EArtifactRarity::Uncommon');
+            let rare = allArtefacts.filter(x => x.rarity == 'EArtifactRarity::Rare');
+            let epic = allArtefacts.filter(x => x.rarity == 'EArtifactRarity::Epic');
 
-          if (config.excludeRules && config.excludeRules.includes(ArtefactSpawnerPopupComponent.excludeArchiArtifacts)) {
-            epic = epic.filter(x => x.archiartifactType == 'EArchiartifactType::None');
-          }
+            if (config.excludeRules && config.excludeRules.includes(ArtefactSpawnerPopupComponent.excludeArchiArtifacts)) {
+                epic = epic.filter(x => x.archiartifactType == 'EArchiartifactType::None');
+            }
 
-          this.createArtefactItems(common);
-          this.createArtefactItems(uncommon);
-          this.createArtefactItems(rare);
-          this.createArtefactItems(epic);*/
+            this.createArtefactItems(common);
+            this.createArtefactItems(uncommon);
+            this.createArtefactItems(rare);
+            this.createArtefactItems(epic);
         }
 
         this.config = config;

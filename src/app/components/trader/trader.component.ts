@@ -15,6 +15,7 @@ import { TraderSectionBuilderService } from '../../services/trader-section-build
 import { TraderBestDealService } from '../../services/trader-best-deal.service';
 import { TraderChartService } from '../../services/trader-chart.service';
 import { TraderItemTileComponent } from './trader-item-tile/trader-item-tile.component';
+import { ShareLinkService } from '../../services/share-link.service';
 
 @Component({
   selector: 'app-trader',
@@ -64,15 +65,24 @@ export class TraderComponent implements OnInit {
   chart: Chart | null = null;
 
   public isTraderSelected: boolean = false;
+  public shareUrl: string = '';
 
   constructor(
     private translate: TranslateService,
     private sectionBuilder: TraderSectionBuilderService,
     private bestDealService: TraderBestDealService,
-    private chartService: TraderChartService
+    private chartService: TraderChartService,
+    private shareLinks: ShareLinkService
   ) {}
 
   ngOnInit(): void {
+    this.shareUrl = this.shareLinks.forMarker(
+      this.game.uniqueName,
+      this.trader.z,
+      this.trader.x,
+      'traders'
+    );
+
     this.traderBuySections = this.sectionBuilder.buildBuySections(this.trader, this.allItems);
     this.hasMultiplyBuies = this.traderBuySections.length > 1;
 
@@ -98,11 +108,6 @@ export class TraderComponent implements OnInit {
     );
 
     this.recalculateSection();
-  }
-
-  copyLink(): void {
-    const link = `${window.location.origin}/map/${this.game.uniqueName}?lat=${this.trader.z}&lng=${this.trader.x}&type=traders`;
-    navigator.clipboard.writeText(link);
   }
 
   selectSell(sell: TradeSection<TraderBuySellItemView>): void {

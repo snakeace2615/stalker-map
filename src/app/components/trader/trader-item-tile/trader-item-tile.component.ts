@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { Item } from '../../../models/item.model';
+import { asUpgradable, asWeapon, Item } from '../../../models/item.model';
 import { ItemTooltipComponent } from '../../tooltips/item-tooltip/item-tooltip.component';
 import { TooltipDirective } from '../../tooltips/tooltip.directive';
 import { TranslateModule } from '@ngx-translate/core';
@@ -21,6 +21,9 @@ export class TraderItemTileComponent {
   @Output() itemClick = new EventEmitter<Item>();
 
   readonly itemTooltipComponent = ItemTooltipComponent;
+
+  protected readonly asWeapon = asWeapon;
+  protected readonly asUpgradable = asUpgradable;
 
   get displayPrice(): string | number {
     if (this.price == null) return '';

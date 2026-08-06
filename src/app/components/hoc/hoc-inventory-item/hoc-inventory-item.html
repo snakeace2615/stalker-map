@@ -3,7 +3,7 @@
         <div class="inventory-item-count-hoc">{{stuffItem.count}}</div>
     }
 
-    @if (stuffItem.item.installedUpgrades && stuffItem.item.installedUpgrades.length > 0) {
+    @if (asUpgradable(stuffItem.item)?.installedUpgrades?.length) {
         <div class="item-additional-info">
             <div class="inventory-item-upgrade"></div>
         </div>

@@ -1,37 +1,123 @@
+:host {
+  position: fixed;
+  inset: 0;
+  z-index: 5000;
+  pointer-events: none;
+}
+
 app-item-upgrades {
   width: 350px;
   height: 500px;
   display: block;
 }
 
-.items-container {
-  display: flex;
-}
-
 .compare-container {
+  pointer-events: all;
   z-index: 5000;
-  background-color: black;
-  border: 1px solid white;
+  background-color: rgba(0, 0, 0, 0.92);
+  border: 1px solid #909090;
   color: white;
+  margin: 3rem auto 0;
+  max-width: min(96vw, 1500px);
+  max-height: calc(100vh - 4rem);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
-.mechanic-upgrades {
-  max-width: 350px;
+.compare-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid #444;
+  flex-shrink: 0;
+}
 
-  .buttons {
+.tabs {
+  display: flex;
+  gap: 0.75rem;
 
-    .remove {
-      width: 3rem;
-      height: 3rem;
-      background-image: url(/assets/images/svg/interface/icons/error.svg);
-      background-repeat: no-repeat;
-      background-size: contain;
+  .tab {
+    cursor: pointer;
+    opacity: 0.7;
+
+    &.selected {
+      opacity: 1;
+      text-decoration: underline;
     }
   }
 }
 
-.selected-item-upgrades {
+.close {
+  width: 2rem;
+  height: 2rem;
+  cursor: pointer;
+  background-image: url(/assets/images/svg/interface/icons/close.svg);
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: center;
+}
+
+.items-container {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  overflow-x: auto;
+  overflow-y: auto;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  align-items: flex-start;
+}
+
+.compare-empty {
+  padding: 2rem;
+  opacity: 0.8;
+}
+
+.weapon-title {
+  text-align: center;
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.upgrades-unavailable {
+  padding: 1rem;
+  opacity: 0.75;
+  font-size: 0.85rem;
+}
+
+.mechanic-upgrades {
+  max-width: 350px;
+  min-width: 300px;
+  flex-shrink: 0;
   position: relative;
+  border: 1px solid #333;
+  padding: 0.5rem;
+
+  .buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.25rem;
+
+    .remove,
+    .copy {
+      width: 2rem;
+      height: 2rem;
+      cursor: pointer;
+      background-repeat: no-repeat;
+      background-size: contain;
+      background-position: center;
+    }
+
+    .remove {
+      background-image: url(/assets/images/svg/interface/icons/error.svg);
+    }
+
+    .copy {
+      background-image: url(/assets/images/items/compare.svg);
+    }
+  }
 }
 
 .upgrade-item-image-container {
@@ -42,10 +128,8 @@ app-item-upgrades {
   justify-content: center;
 }
 
-.selected-item-upgrades {
-  position: relative;
-}
-
 .game-icon-container {
   position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
 }

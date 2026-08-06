@@ -4,7 +4,7 @@ import { TooltipDirective } from '../../tooltips/tooltip.directive';
 import { MechanicDiscount } from '../../../models/mechanic.model';
 import { ItemUpgrade, ItemUpgradeView, Upgrade, UpgradeCell, UpgradeProperty, UpgradeSection, UpgradeSectionRow, UpgradeSelectedEventModel } from '../../../models/upgrades/upgrades';
 import { CommonModule, NgClass, NgStyle } from '@angular/common';
-import { Item } from '../../../models/item.model';
+import { UpgradableItem } from '../../../models/item.model';
 
 @Component({
     selector: 'app-item-upgrades',
@@ -19,7 +19,7 @@ export class ItemUpgradesComponent {
     @Input() public selectedDiscount: MechanicDiscount;
     @Input() public upgradeProperties: UpgradeProperty[];
     @Input() public game: string;
-    @Input() public item: Item;
+    @Input() public item: UpgradableItem;
     @Input() public selectedItemUpgrade: ItemUpgrade;
     @Output() public upgradeSelectedEvent = new EventEmitter<UpgradeSelectedEventModel>();
 

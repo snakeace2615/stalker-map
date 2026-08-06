@@ -1,7 +1,8 @@
 import { Component } from '@angular/core';
 import { HeaderComponent } from '../header/header.component';
-import { Meta, Title } from '@angular/platform-browser';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslateModule } from '@ngx-translate/core';
+import { SeoService } from '../../services/seo.service';
+import { LocaleService } from '../../services/locale.service';
 
 @Component({
   selector: 'app-main',
@@ -11,18 +12,17 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
   styleUrl: './main.component.scss'
 })
 export class MainComponent {
-  /**
-   *
-   */
   constructor(
-    private translate: TranslateService,
-    private titleService:Title) {
+    private seo: SeoService,
+    public locale: LocaleService
+  ) {
   }
 
   private ngOnInit(): void {
-    this.translate.onLangChange.subscribe(i=>{
-      this.titleService.setTitle(this.translate.instant(`mainTitle`));
-    });
-    this.titleService.setTitle(this.translate.instant('mainTitle'));
+    this.seo.applyHomePage();
+  }
+
+  public mapHref(game: string): string {
+    return this.locale.mapPath(game);
   }
 }

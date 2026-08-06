@@ -113,3 +113,23 @@ app-item-property-bar, app-item-property-number {
 .dispersion-title .upgrade-property-icon, .dynamic-title .upgrade-property-icon {
     display: block;
 }
+
+.upgrade-item-image-container {
+  position: relative;
+
+  .add-to-compare {
+    position: absolute;
+    top: 0.25rem;
+    right: 0.25rem;
+    width: 2rem;
+    height: 2rem;
+    border: 1px solid #909090;
+    background-color: rgba(16, 20, 8, 0.85);
+    background-image: url(/assets/images/items/compare.svg);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 1.5rem;
+    cursor: pointer;
+    padding: 0;
+  }
+}

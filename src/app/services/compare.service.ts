@@ -1,5 +1,5 @@
 import { EventEmitter, Injectable } from '@angular/core';
-import { Item } from '../models/item.model';
+import { Outfit, UpgradableItem, Weapon } from '../models/item.model';
 import { v4 as uuidv4 } from 'uuid';
 import { ItemUpgrade, Upgrade, UpgradeSection } from '../models/upgrades/upgrades';
 
@@ -7,55 +7,225 @@ import { ItemUpgrade, Upgrade, UpgradeSection } from '../models/upgrades/upgrade
     providedIn: 'root'
 })
 export class CompareService {
-    public weaponsToCompare: Item[] = [];
-    public outfitsToCompare: Item[];
-    public weaponsToCompareStorageKey = 'weapons-to-compare'
+    public readonly maxWeapons = 16;
+    public readonly maxOutfits = 16;
+    public weaponsToCompare: Weapon[] = [];
+    public outfitsToCompare: Outfit[] = [];
+    public weaponsToCompareStorageKey = 'weapons-to-compare';
 
-    public addedNewWeaponEvent = new EventEmitter<void>();
+    public isOpen = false;
+    public itemsChanged = new EventEmitter<void>();
+    public openChanged = new EventEmitter<boolean>();
+
+    /** Base (pre-upgrade) snapshots keyed by compare column guid. */
+    private weaponBases = new Map<string, Weapon>();
+    private outfitBases = new Map<string, Outfit>();
 
     constructor() {
-        this.weaponsToCompare = this.getAllWeaponsToCompare(this.weaponsToCompareStorageKey);
+        this.restore();
     }
 
-    public addWeaponToCompare(item: Item, game: string): void {
-        let copy: Item = JSON.parse(JSON.stringify(item));
-        copy.guid = uuidv4();
-        copy.game = game;
-        this.weaponsToCompare.push(copy);
-        this.addedNewWeaponEvent.emit();
-
-        this.setWeaponsToCompareStorage(this.weaponsToCompare, this.weaponsToCompareStorageKey);
+    public get activeGame(): string | null {
+        return this.weaponsToCompare[0]?.game
+            ?? this.outfitsToCompare[0]?.game
+            ?? null;
     }
 
-    public removeWeapon(item: Item): void {
-        this.weaponsToCompare = this.weaponsToCompare.filter(x => x.guid != item.guid);
+    public get totalCount(): number {
+        return this.weaponsToCompare.length + this.outfitsToCompare.length;
     }
 
-    public addOutfitToCompare(item: Item, game: string): void {
-        let copy: Item = JSON.parse(JSON.stringify(item));
-        copy.guid = uuidv4();
-        copy.game = game;
-        this.outfitsToCompare.push(copy);
+    public toggle(): void {
+        this.isOpen = !this.isOpen;
+        this.openChanged.emit(this.isOpen);
     }
 
-    public removeOutfit(item: Item): void {
-        this.outfitsToCompare = this.weaponsToCompare.filter(x => x.guid != item.guid);
+    public open(): void {
+        if (!this.isOpen) {
+            this.isOpen = true;
+            this.openChanged.emit(true);
+        }
     }
 
-    public getAllWeaponsToCompare(key: string): Item[] {
-        let weaponsToCompare = localStorage.getItem(key);
-        if (weaponsToCompare) {
-            return JSON.parse(weaponsToCompare);
+    public close(): void {
+        if (this.isOpen) {
+            this.isOpen = false;
+            this.openChanged.emit(false);
+        }
+    }
+
+    /** Keep only items for the current map game. */
+    public restrictToGame(game: string): void {
+        const before = this.totalCount;
+        this.weaponsToCompare = this.weaponsToCompare.filter(x => x.game === game);
+        this.outfitsToCompare = this.outfitsToCompare.filter(x => x.game === game);
+
+        for (const guid of [...this.weaponBases.keys()]) {
+            if (!this.weaponsToCompare.some(x => x.guid === guid)) {
+                this.weaponBases.delete(guid);
+            }
+        }
+        for (const guid of [...this.outfitBases.keys()]) {
+            if (!this.outfitsToCompare.some(x => x.guid === guid)) {
+                this.outfitBases.delete(guid);
+            }
         }
 
-        return [];
+        if (this.totalCount !== before) {
+            this.persist();
+            this.itemsChanged.emit();
+        }
     }
 
-    private setWeaponsToCompareStorage(items: Item[], key: string): void {
-        localStorage.setItem(key, JSON.stringify(this.weaponsToCompare));
+    public addWeaponToCompare(item: Weapon, game: string): boolean {
+        this.ensureSameGame(game);
+
+        if (this.weaponsToCompare.length >= this.maxWeapons) {
+            return false;
+        }
+
+        const copy: Weapon = JSON.parse(JSON.stringify(item));
+        copy.guid = uuidv4();
+        copy.game = game;
+        copy.installedUpgrades = [];
+        copy.hitPowers = undefined as unknown as number[][];
+
+        this.weaponBases.set(copy.guid, JSON.parse(JSON.stringify(copy)));
+        this.weaponsToCompare.push(copy);
+        this.persist();
+        this.itemsChanged.emit();
+        return true;
     }
 
-    public selectUpgrade(upgrade: Upgrade, upgradeSection: UpgradeSection, item: Item, selectedItemUpgrade: ItemUpgrade, isCs: boolean): void {
+    public duplicateWeapon(item: Weapon): boolean {
+        const base = this.weaponBases.get(item.guid) ?? item;
+        return this.addWeaponToCompare(base, item.game);
+    }
+
+    public removeWeapon(item: Weapon): void {
+        this.weaponsToCompare = this.weaponsToCompare.filter(x => x.guid != item.guid);
+        this.weaponBases.delete(item.guid);
+        this.persist();
+        this.itemsChanged.emit();
+    }
+
+    public addOutfitToCompare(item: Outfit, game: string): boolean {
+        this.ensureSameGame(game);
+
+        if (this.outfitsToCompare.length >= this.maxOutfits) {
+            return false;
+        }
+
+        const copy: Outfit = JSON.parse(JSON.stringify(item));
+        copy.guid = uuidv4();
+        copy.game = game;
+        copy.installedUpgrades = [];
+
+        this.outfitBases.set(copy.guid, JSON.parse(JSON.stringify(copy)));
+        this.outfitsToCompare.push(copy);
+        this.persist();
+        this.itemsChanged.emit();
+        return true;
+    }
+
+    public duplicateOutfit(item: Outfit): boolean {
+        const base = this.outfitBases.get(item.guid) ?? item;
+        return this.addOutfitToCompare(base, item.game);
+    }
+
+    public removeOutfit(item: Outfit): void {
+        this.outfitsToCompare = this.outfitsToCompare.filter(x => x.guid != item.guid);
+        this.outfitBases.delete(item.guid);
+        this.persist();
+        this.itemsChanged.emit();
+    }
+
+    private ensureSameGame(game: string): void {
+        const current = this.activeGame;
+        if (current && current !== game) {
+            this.weaponsToCompare = [];
+            this.outfitsToCompare = [];
+            this.weaponBases.clear();
+            this.outfitBases.clear();
+        }
+    }
+
+    private restore(): void {
+        const raw = localStorage.getItem(this.weaponsToCompareStorageKey);
+        if (!raw) {
+            return;
+        }
+
+        try {
+            const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed)) {
+                this.weaponsToCompare = parsed;
+                for (const weapon of this.weaponsToCompare) {
+                    if (weapon.guid) {
+                        this.weaponBases.set(weapon.guid, JSON.parse(JSON.stringify(weapon)));
+                    }
+                }
+                return;
+            }
+
+            this.weaponsToCompare = parsed.weapons ?? [];
+            this.outfitsToCompare = parsed.outfits ?? [];
+
+            const weaponBases: { [guid: string]: Weapon } = parsed.weaponBases ?? parsed.bases ?? {};
+            for (const [guid, base] of Object.entries(weaponBases)) {
+                this.weaponBases.set(guid, base);
+            }
+
+            const outfitBases: { [guid: string]: Outfit } = parsed.outfitBases ?? {};
+            for (const [guid, base] of Object.entries(outfitBases)) {
+                this.outfitBases.set(guid, base);
+            }
+
+            for (const weapon of this.weaponsToCompare) {
+                if (weapon.guid && !this.weaponBases.has(weapon.guid)) {
+                    this.weaponBases.set(weapon.guid, JSON.parse(JSON.stringify(weapon)));
+                }
+            }
+            for (const outfit of this.outfitsToCompare) {
+                if (outfit.guid && !this.outfitBases.has(outfit.guid)) {
+                    this.outfitBases.set(outfit.guid, JSON.parse(JSON.stringify(outfit)));
+                }
+            }
+
+            // Enforce single-game list after restore
+            const game = this.activeGame;
+            if (game) {
+                this.weaponsToCompare = this.weaponsToCompare.filter(x => x.game === game);
+                this.outfitsToCompare = this.outfitsToCompare.filter(x => x.game === game);
+            }
+        } catch {
+            this.weaponsToCompare = [];
+            this.outfitsToCompare = [];
+            this.weaponBases.clear();
+            this.outfitBases.clear();
+        }
+    }
+
+    private persist(): void {
+        const weaponBases: { [guid: string]: Weapon } = {};
+        for (const [guid, base] of this.weaponBases.entries()) {
+            weaponBases[guid] = base;
+        }
+
+        const outfitBases: { [guid: string]: Outfit } = {};
+        for (const [guid, base] of this.outfitBases.entries()) {
+            outfitBases[guid] = base;
+        }
+
+        localStorage.setItem(this.weaponsToCompareStorageKey, JSON.stringify({
+            weapons: this.weaponsToCompare,
+            outfits: this.outfitsToCompare,
+            weaponBases,
+            outfitBases,
+        }));
+    }
+
+    public selectUpgrade(upgrade: Upgrade, upgradeSection: UpgradeSection, item: UpgradableItem, selectedItemUpgrade: ItemUpgrade, isCs: boolean): void {
         if (upgrade.isLocked) {
             return;
         }
@@ -141,9 +311,58 @@ export class CompareService {
         }
 
         this.updateViewData(upgradeSection, selectedItemUpgrade, item, upgrade.isInstalled, isCs);
+        this.persist();
     }
 
-    public updateViewData(section: UpgradeSection, selectedItemUpgrade: ItemUpgrade, item: Item, installed: boolean, isCs: boolean): void {
+    /** Assign branches / previous-upgrade links the same way MechanicComponent.selectItem does. */
+    public prepareUpgradeTree(itemUpgrade: ItemUpgrade): ItemUpgrade {
+        const prepared: ItemUpgrade = JSON.parse(JSON.stringify(itemUpgrade));
+        let branchId = 0;
+
+        for (const section of prepared.upgradeSections) {
+            if (section.branch == null || section.branch < 0) {
+                section.branch = branchId++;
+
+                if (section.elements) {
+                    const branchElements: Upgrade[] = [...section.elements];
+
+                    for (const element of branchElements) {
+                        if (!element.effects) {
+                            continue;
+                        }
+
+                        for (const effect of element.effects) {
+                            const anotherSection = prepared.upgradeSections.find(x => x.name == effect);
+                            if (!anotherSection) {
+                                continue;
+                            }
+
+                            anotherSection.branch = section.branch;
+
+                            if (!anotherSection.needPreviousUpgrade) {
+                                anotherSection.needPreviousUpgrade = [];
+                            }
+
+                            if (!anotherSection.needPreviousUpgrade.includes(element.name)) {
+                                anotherSection.needPreviousUpgrade.push(element.name);
+                            }
+
+                            if (anotherSection.elements) {
+                                for (const aElement of anotherSection.elements) {
+                                    branchElements.push(aElement);
+                                    aElement.needPreviousUpgrades = true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return prepared;
+    }
+
+    public updateViewData(section: UpgradeSection, selectedItemUpgrade: ItemUpgrade, item: UpgradableItem, installed: boolean, isCs: boolean): void {
         if (section.elements) {
             for (let element of section.elements) {
                 if (element.effects) {
@@ -174,7 +393,8 @@ export class CompareService {
         }
     }
 
-    public applyUpgradeEffect(item: Item, propName: string, effectsValues: string, koeff: number): void {
+    public applyUpgradeEffect(item: UpgradableItem, propName: string, effectsValues: string, koeff: number): void {
+        let weapon = item as Weapon;
         let propNameParts = propName.split('_');
 
         if (propNameParts.length > 1) {
@@ -190,7 +410,7 @@ export class CompareService {
 
         switch (propName) {
             case "ammoMagSize": {
-                item.ammoMagazineSize += koeff * value;
+                weapon.ammoMagazineSize += koeff * value;
                 break;
             }
             case "invWeight": {
@@ -199,8 +419,8 @@ export class CompareService {
                 break;
             }
             case "fireDispersionBase": {
-                item.fireDispersionBase += koeff * value;
-                item.fireDispersionBase = Math.round(item.fireDispersionBase * 100) / 100;
+                weapon.fireDispersionBase += koeff * value;
+                weapon.fireDispersionBase = Math.round(weapon.fireDispersionBase * 100) / 100;
                 break;
             }
             case "hitPower": {
@@ -213,32 +433,30 @@ export class CompareService {
 
                 let itemity = [];
                 itemity.push(...number);
-                itemity.push(...item.hitPower);
+                itemity.push(...weapon.hitPower);
 
-                if (item.hitPowers == null) {
-                    item.hitPowers = [];
+                if (weapon.hitPowers == null) {
+                    weapon.hitPowers = [];
 
                     if (koeff > 0) {
-                        item.hitPowers.push(itemity);
+                        weapon.hitPowers.push(itemity);
 
-                        item.hitPower = number;
+                        weapon.hitPower = number;
                     }
                     else {
-                        console.error(item.hitPower, number);
+                        console.error(weapon.hitPower, number);
                     }
                 }
                 else {
                     if (koeff > 0) {
-                        item.hitPowers.push(itemity);
+                        weapon.hitPowers.push(itemity);
 
-                        item.hitPower = number;
+                        weapon.hitPower = number;
                     }
                     else {
-                        let index = 0;
-
-                        let config = item.hitPowers.find(x => {
-                            for (let i = 0; i < item.hitPower.length; i++) {
-                                if (item.hitPower[i] != x[i]) {
+                        let config = weapon.hitPowers.find(x => {
+                            for (let i = 0; i < weapon.hitPower.length; i++) {
+                                if (weapon.hitPower[i] != x[i]) {
                                     return false;
                                 }
                             }
@@ -247,11 +465,10 @@ export class CompareService {
                         })
 
                         if (config) {
-                            let currentLenght = item.hitPower.length;
-                            let delta = config.length - currentLenght;
+                            let currentLenght = weapon.hitPower.length;
 
-                            item.hitPower = config.slice(currentLenght, config.length);
-                            item.hitPowers = item.hitPowers.filter(x => {
+                            weapon.hitPower = config.slice(currentLenght, config.length);
+                            weapon.hitPowers = weapon.hitPowers.filter(x => {
                                 if (config?.length != x.length) {
                                     return true;
                                 }
@@ -267,8 +484,6 @@ export class CompareService {
                         }
                     }
                 }
-                //item.hitPower += koeff * value;
-                //item.fireDispersionBase = Math.round(item.fireDispersionBase * 100) / 100;
                 break;
             }
             default: {

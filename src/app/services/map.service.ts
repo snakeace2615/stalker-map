@@ -1,5 +1,6 @@
 import { MapComponent } from './../components/map/map.component';
 import { ApplicationRef, ComponentRef, createComponent, EnvironmentInjector, Injectable, ViewContainerRef } from "@angular/core";
+import { Subscription } from 'rxjs';
 import { HiddenMarker } from "../models/hidden-marker.model";
 import { StuffComponent } from '../components/stuff/stuff.component';
 import { Item } from '../models/item.model';
@@ -20,6 +21,11 @@ import { TranslateService } from '@ngx-translate/core';
 import { Game } from '../models/game.model';
 import { BottomSheetWrapperComponent } from '../components/bottom-sheet-wrapper/bottom-sheet-wrapper.component';
 import { PopupComponent } from '../components/popup/popup.component';
+import { CompareComponent } from '../components/compare/compare.component';
+import { UndergroundComponent } from '../components/undeground/underground.component';
+import { MarkerToSearch } from '../models/marker-to-search.model';
+import { Map } from '../models/map.model';
+import { CompareService } from './compare.service';
 import { L } from '../leaflet/leaflet-setup';
 import { createCanvasIconClass, createCanvasMarkerClass, createCanvasRenderer } from '../leaflet/canvas-markers';
 import type { StalkerLayerGroup, StalkerMap, StalkerMarker, StalkerRulerControl } from '../leaflet/stalker-leaflet.types';
@@ -33,11 +39,18 @@ export class MapService {
     private hiddenMarksCache: HiddenMarker[];
     private mapComponent: MapComponent;
     private bottomSheetWrapper: ComponentRef<BottomSheetWrapperComponent>;
+    private activePopup: any = null;
+    private activePopups: any[] = [];
+    private compareControl: L.Control | null = null;
+    private compareComponentRef: ComponentRef<CompareComponent> | null = null;
+    private compareBadge: HTMLElement | null = null;
+    private compareSubscriptions = new Subscription();
 
     constructor(
         private translate: TranslateService,
         private environmentInjector: EnvironmentInjector,
-        private appRef: ApplicationRef) {
+        private appRef: ApplicationRef,
+        private compare: CompareService) {
 
     }
 
@@ -109,8 +122,73 @@ export class MapService {
         componentRef.instance.game = game;
         componentRef.instance.allItems = allItems;
         componentRef.instance.isUnderground = isUnderground;
+        componentRef.instance.stuffType = marker.properties.typeUniqueName || 'anomaly-zone';
 
         return componentRef;
+    }
+
+    public createUndergroundContent(
+        marker: any,
+        container: ViewContainerRef,
+        mapComponent: MapComponent,
+        gamedata: Map,
+        items: Item[],
+        game: Game,
+        mapConfig: MapConfig,
+        lootBoxConfig: LootBoxConfig
+    ): ComponentRef<UndergroundComponent> {
+        const destinationLocation = gamedata.locations.find(
+            (x) => x.id == marker.properties.levelChanger.destinationLocationId
+        ) as Location;
+
+        const componentRef = container.createComponent(UndergroundComponent);
+        componentRef.instance.gamedata = gamedata;
+        componentRef.instance.location = destinationLocation;
+        componentRef.instance.items = items;
+        componentRef.instance.game = game;
+        componentRef.instance.mapConfig = mapConfig;
+        componentRef.instance.lootBoxConfig = lootBoxConfig;
+        componentRef.instance.mapComponent = mapComponent;
+
+        if (marker.properties.markerToSearch) {
+            componentRef.instance.markerToSearch = new MarkerToSearch();
+            componentRef.instance.markerToSearch.lat = marker.properties.markerToSearch.lat;
+            componentRef.instance.markerToSearch.lng = marker.properties.markerToSearch.lng;
+            componentRef.instance.markerToSearch.type = marker.properties.markerToSearch.type
+                ? marker.properties.markerToSearch.type
+                : marker.properties.markerToSearch.layer.properties.typeUniqueName;
+            marker.properties.markerToSearch = undefined;
+        }
+
+        mapComponent.openedUndergroundPopup = {
+            component: componentRef.instance,
+            levelChanger: marker,
+        };
+
+        return componentRef;
+    }
+
+    public closeActivePopup(): void {
+        if (this.activePopup?.isOpen()) {
+            this.activePopup.close();
+        }
+    }
+
+    public closeAllPopups(): void {
+        while (this.activePopups.length > 0) {
+            const popup = this.activePopups[this.activePopups.length - 1];
+            if (popup?.isOpen()) {
+                popup.close();
+            } else {
+                this.activePopups.pop();
+            }
+        }
+    }
+
+    public setActivePopupLatLng(latLng: any): void {
+        if (this.activePopup?.isOpen()) {
+            this.activePopup.setLatLng(latLng);
+        }
     }
 
     public createMechanicContent(marker: any, container: ViewContainerRef, game: Game, allItems: Item[], mapConfig: MapConfig, upgrades: ItemUpgrade[], upgradeProperties: UpgradeProperty[]): ComponentRef<MechanicComponent> {
@@ -171,13 +249,21 @@ export class MapService {
         return { popupComponentRef, calculatedWidth };
     }
 
-    private openPreparedPopup(map: any, marker: any, innerContentRef: ComponentRef<any>, popupComponentRef: ComponentRef<PopupComponent>, calculatedWidth: number): void {
+    private openPreparedPopup(
+        map: any,
+        marker: any,
+        innerContentRef: ComponentRef<any>,
+        popupComponentRef: ComponentRef<PopupComponent>,
+        calculatedWidth: number,
+        popupOptions?: L.PopupOptions
+    ): void {
         const popup = L.popup({
             minWidth: calculatedWidth,
             maxWidth: calculatedWidth,
             className: 'stalker-custom-popup',
             autoPanPadding: [20, 20],
-            closeButton: false
+            closeButton: false,
+            ...popupOptions,
         })
             .setLatLng(marker.getLatLng())
             .setContent(popupComponentRef.location.nativeElement);
@@ -185,14 +271,26 @@ export class MapService {
         popupComponentRef.instance.popup = popup;
 
         popup.on('remove', () => {
+            this.activePopups = this.activePopups.filter((p) => p !== popup);
+            this.activePopup = this.activePopups[this.activePopups.length - 1] ?? null;
+
             popupComponentRef.destroy();
             innerContentRef.destroy();
         });
 
         popup.openOn(map);
+        this.activePopups.push(popup);
+        this.activePopup = popup;
     }
 
-    public onMarkerClick(event: any, map: any, container: ViewContainerRef, bottomSheetContainer: BottomSheetWrapperComponent, contentMaker: (container: ViewContainerRef, isPopup: boolean) => any): void {
+    public onMarkerClick(
+        event: any,
+        map: any,
+        container: ViewContainerRef,
+        bottomSheetContainer: BottomSheetWrapperComponent,
+        contentMaker: (container: ViewContainerRef, isPopup: boolean) => any,
+        popupOptions?: L.PopupOptions
+    ): void {
         const canUseSheet = bottomSheetContainer != null && (bottomSheetContainer as any).contentContainer != null;
         let wantsPopup: boolean = !(window.innerWidth < 500 && canUseSheet);
 
@@ -222,63 +320,25 @@ export class MapService {
             return;
         }
 
-        this.openPreparedPopup(map, event.target, popupContent, popupComponentRef, calculatedWidth);
+        this.openPreparedPopup(map, event.target, popupContent, popupComponentRef, calculatedWidth, popupOptions);
     }
 
     public handleStalkerClick(event: any, map: any, container: ViewContainerRef, bottomSheetContainer: BottomSheetWrapperComponent, game: Game, items: Item[], mapConfig: MapConfig, isUnderground: boolean): void {
-        const canUseSheet = bottomSheetContainer != null && (bottomSheetContainer as any).contentContainer != null;
-        let wantsPopup: boolean = !(window.innerWidth < 500 && canUseSheet);
-
-        if (!wantsPopup) {
-            bottomSheetContainer.contentContainer.clear();
-            this.createStalkerContent(
-                event.target,
-                bottomSheetContainer.contentContainer,
-                game,
-                items,
-                mapConfig,
-                isUnderground,
-                true // bottom sheet mode
-            );
-            bottomSheetContainer.show();
-            return;
-        }
-
-        // Створюємо контент для popup (щоб коректно поміряти реальну ширину)
-        const popupContent = this.createStalkerContent(
-            event.target,
+        this.onMarkerClick(
+            event,
+            map,
             container,
-            game,
-            items,
-            mapConfig,
-            isUnderground,
-            false // popup mode
-        );
-
-        const { popupComponentRef, calculatedWidth } = this.preparePopup(popupContent);
-        const mapWrapperWidth = this.getMapWrapperWidth();
-
-        if (canUseSheet && calculatedWidth > mapWrapperWidth) {
-            this.appRef.detachView(popupComponentRef.hostView);
-            popupComponentRef.destroy();
-
-            container.clear();
-
-            bottomSheetContainer.contentContainer.clear();
-            this.createStalkerContent(
+            bottomSheetContainer,
+            (contentContainer, isPopup) => this.createStalkerContent(
                 event.target,
-                bottomSheetContainer.contentContainer,
+                contentContainer,
                 game,
                 items,
                 mapConfig,
                 isUnderground,
-                true // bottom sheet mode
-            );
-            bottomSheetContainer.show();
-            return;
-        }
-
-        this.openPreparedPopup(map, event.target, popupContent, popupComponentRef, calculatedWidth);
+                !isPopup
+            )
+        );
     }
 
     public setCellSize(value: number | string, game: string): void {
@@ -286,6 +346,30 @@ export class MapService {
             '--inventory-cell-size',
             `${value}px`
         );
+
+        this.refreshActivePopupLayout();
+    }
+
+    private refreshActivePopupLayout(): void {
+        const popup = this.activePopup;
+
+        if (!popup || !popup.isOpen() || !popup._contentNode) {
+            return;
+        }
+
+        // Знімаємо стару зафіксовану ширину, щоб контент розклався
+        // природно з новим розміром клітинки, і міряємо його заново.
+        const contentNode = popup._contentNode as HTMLElement;
+        contentNode.style.width = '';
+
+        const content = contentNode.firstElementChild ?? contentNode;
+        const newWidth = Math.ceil(content.getBoundingClientRect().width);
+
+        popup.options.minWidth = newWidth;
+        popup.options.maxWidth = newWidth;
+
+        // Перерозкладає попап і заново центрує його відносно точки прив'язки.
+        popup.update();
     }
 
     private bindPopup(map: any, marker: any, innerContentRef: ComponentRef<any>) {
@@ -308,6 +392,103 @@ export class MapService {
         }
 
         return html;
+    }
+
+    public createCompareControl(map: StalkerMap): void {
+        this.destroyCompareControl();
+
+        if (this.mapComponent?.game?.gameStyle) {
+            this.compare.restrictToGame(this.mapComponent.game.gameStyle);
+        }
+
+        const service = this;
+        const CompareControl = L.Control.extend({
+            options: {
+                position: 'topright',
+            },
+
+            onAdd: function () {
+                const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control stalker-compare-control');
+                L.DomEvent.disableClickPropagation(container);
+                L.DomEvent.disableScrollPropagation(container);
+
+                const button = L.DomUtil.create('a', 'stalker-compare-button', container);
+                button.href = '#';
+                button.title = 'Compare';
+                button.setAttribute('role', 'button');
+
+                const badge = L.DomUtil.create('span', 'stalker-compare-badge', button);
+                service.compareBadge = badge;
+                service.updateCompareBadge(badge);
+
+                L.DomEvent.on(button, 'click', (event: Event) => {
+                    L.DomEvent.preventDefault(event);
+                    service.ensureComparePanel();
+                    service.compare.toggle();
+                });
+
+                return container;
+            },
+
+            onRemove: function () {
+                // cleanup handled in destroyCompareControl
+            },
+        });
+
+        this.compareControl = new CompareControl();
+        this.compareControl.addTo(map);
+
+        this.compareSubscriptions.add(
+            this.compare.itemsChanged.subscribe(() => {
+                if (this.compareBadge) {
+                    this.updateCompareBadge(this.compareBadge);
+                }
+            })
+        );
+
+        this.compareSubscriptions.add(
+            this.compare.openChanged.subscribe((isOpen: boolean) => {
+                this.ensureComparePanel();
+                if (this.compareComponentRef) {
+                    this.compareComponentRef.location.nativeElement.style.display = isOpen ? 'block' : 'none';
+                }
+            })
+        );
+    }
+
+    public destroyCompareControl(): void {
+        this.compareSubscriptions.unsubscribe();
+        this.compareSubscriptions = new Subscription();
+        this.compareBadge = null;
+
+        if (this.compareControl) {
+            this.compareControl.remove();
+            this.compareControl = null;
+        }
+
+        if (this.compareComponentRef) {
+            this.compareComponentRef.destroy();
+            this.compareComponentRef = null;
+        }
+    }
+
+    private ensureComparePanel(): void {
+        if (this.compareComponentRef || !this.mapComponent?.container) {
+            return;
+        }
+
+        this.compareComponentRef = this.mapComponent.container.createComponent(CompareComponent);
+        const element = this.compareComponentRef.location.nativeElement as HTMLElement;
+        this.compareComponentRef.instance.element = element;
+        element.style.display = this.compare.isOpen ? 'block' : 'none';
+        document.body.appendChild(element);
+        this.compareComponentRef.changeDetectorRef.detectChanges();
+    }
+
+    private updateCompareBadge(badge: HTMLElement): void {
+        const count = this.compare.totalCount;
+        badge.textContent = count > 0 ? String(count) : '';
+        badge.style.display = count > 0 ? 'flex' : 'none';
     }
 
     public addRuler(
@@ -609,8 +790,80 @@ export class MapService {
                 const container = obj.overlay ? this._overlaysList : this._baseLayersList;
                 container.appendChild(label);
 
+                if (obj.overlay && obj.layer.subFilters?.length) {
+                    this._addSubFilters(obj, container, checked);
+                }
+
                 this._checkDisabledLayers();
                 return label;
+            },
+
+            _addSubFilters: function (obj: any, container: HTMLElement, parentChecked: boolean) {
+                const nested = document.createElement('div');
+                nested.className = 'leaflet-control-layers-subfilters';
+
+                if (!obj.layer._activeSubFilters) {
+                    obj.layer._activeSubFilters = new Set(
+                        obj.layer.subFilters.map((filter: { id: string }) => filter.id)
+                    );
+                }
+
+                obj.layer._subFilterInputs = {};
+
+                for (const filter of obj.layer.subFilters) {
+                    const subLabel = document.createElement('label');
+                    subLabel.className = 'leaflet-control-layers-subfilter';
+
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.className = 'leaflet-control-layers-selector';
+                    checkbox.checked = obj.layer._activeSubFilters.has(filter.id);
+                    checkbox.disabled = !parentChecked;
+
+                    const name = document.createElement('span');
+                    name.innerHTML = filter.name;
+
+                    subLabel.appendChild(checkbox);
+                    subLabel.appendChild(name);
+                    nested.appendChild(subLabel);
+
+                    obj.layer._subFilterInputs[filter.id] = checkbox;
+
+                    L.DomEvent.disableClickPropagation(subLabel);
+                    L.DomEvent.on(checkbox, 'click', (event: Event) => {
+                        L.DomEvent.stopPropagation(event);
+                        this._onSubFilterClick(obj.layer, filter.id, checkbox.checked);
+                    }, this);
+                }
+
+                obj.layer._subFiltersContainer = nested;
+                container.appendChild(nested);
+            },
+
+            _onSubFilterClick: function (layer: any, filterId: string, checked: boolean) {
+                if (!layer._activeSubFilters) {
+                    layer._activeSubFilters = new Set();
+                }
+
+                if (checked) {
+                    layer._activeSubFilters.add(filterId);
+                } else {
+                    layer._activeSubFilters.delete(filterId);
+                }
+
+                if (typeof layer.onSubFilterChange === 'function') {
+                    layer.onSubFilterChange();
+                }
+            },
+
+            _syncSubFiltersDisabled: function (layer: any, enabled: boolean) {
+                if (!layer?._subFilterInputs) {
+                    return;
+                }
+
+                for (const input of Object.values(layer._subFilterInputs) as HTMLInputElement[]) {
+                    input.disabled = !enabled;
+                }
             },
 
             _onInputClick: function () {
@@ -705,11 +958,13 @@ export class MapService {
                     if (this._map.hasLayer(removedLayers[i])) {
                         this._map.removeLayer(removedLayers[i]);
                     }
+                    this._syncSubFiltersDisabled(removedLayers[i], false);
                 }
                 for (let i = 0; i < addedLayers.length; i++) {
                     if (!this._map.hasLayer(addedLayers[i])) {
                         this._map.addLayer(addedLayers[i]);
                     }
+                    this._syncSubFiltersDisabled(addedLayers[i], true);
                 }
 
                 this._handlingClick = false;

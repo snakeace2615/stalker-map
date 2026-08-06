@@ -45,9 +45,19 @@
   border-top: 1px solid #ccc;
 }
 
+.stalker-ruler-btn-scale {
+  display: none;
+  border-top: 1px solid #ccc;
+}
+
 .stalker-ruler-control:hover .stalker-ruler-btn-area,
 .stalker-ruler-control.is-area .stalker-ruler-btn-area,
 .stalker-ruler-control.is-active .stalker-ruler-btn-area {
+  display: flex;
+}
+
+.stalker-ruler-control:hover .stalker-ruler-btn-scale,
+.stalker-ruler-control.is-scale .stalker-ruler-btn-scale {
   display: flex;
 }
 
@@ -98,6 +108,40 @@
   border: 1px solid #bbb;
   border-radius: 2px;
   font: inherit;
+}
+
+.stalker-ruler-stat-scale {
+  align-items: flex-start;
+}
+
+.stalker-ruler-scale-input {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.stalker-ruler-scale-input input {
+  width: 72px;
+  height: 22px;
+  padding: 0 4px;
+  border: 1px solid #bbb;
+  border-radius: 2px;
+  font: inherit;
+}
+
+.stalker-ruler-scale-apply {
+  width: 100%;
+  margin-top: 8px;
+  height: 26px;
+  border: 1px solid #bbb;
+  border-radius: 2px;
+  background: #f7f7f7;
+  font: inherit;
+  cursor: pointer;
+}
+
+.stalker-ruler-scale-apply:hover {
+  background: #ececec;
 }
 
 .stalker-ruler-vertex {

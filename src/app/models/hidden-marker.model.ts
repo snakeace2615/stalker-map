@@ -9,12 +9,17 @@ export class HiddenMarker {
   public layerName: string;
   public isUnderground: boolean = false;
 
-  public static anomalZone(anomalZone: AnomalyZone, game: string, isUnder: boolean): HiddenMarker {
+  public static anomalZone(
+    anomalZone: AnomalyZone,
+    game: string,
+    isUnder: boolean,
+    layerName: string = 'anomaly-zone'
+  ): HiddenMarker {
     let markToHide: HiddenMarker = new HiddenMarker();
 
     markToHide.lat = anomalZone.z;
     markToHide.lng = anomalZone.x;
-    markToHide.layerName = 'anomaly-zone';
+    markToHide.layerName = layerName;
     markToHide.game = game;
     markToHide.isUnderground = isUnder;
 

@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
 import { Stash, StashGenerator, StashPrototype } from '../../../models/hoc/map-hoc';
-import { Item } from '../../../models/item.model';
+import { isHocWeapon, Item } from '../../../models/item.model';
 import { StuffItem } from '../../../models/stuff/stuff-item.model';
 import { ItemTooltipComponent } from '../../tooltips/item-tooltip/item-tooltip.component';
 import { HocInventoryItem } from "../hoc-inventory-item/hoc-inventory-item";
@@ -19,6 +19,7 @@ export class HocStashComponent {
     @Input() public allItems: Item[];
     @Input() public stashGenerators: StashGenerator[];
     @Input() public stashPrototypes: StashPrototype[];
+    @Input() public shareUrl: string = '';
 
     public items: StuffItem[];
     public itemTooltipComponent: any = ItemTooltipComponent;
@@ -81,7 +82,7 @@ export class HocStashComponent {
             for (let item of this.items) {
                 item.preinstalled = [];
 
-                if (item.item && item.item.preinstalledAttachments != null) {
+                if (item.item && isHocWeapon(item.item) && item.item.preinstalledAttachments != null) {
                     if (item.item.compatibleAttachments != null) {
                         for (let attName of item.item.preinstalledAttachments) {
                             let attachment = item.item.compatibleAttachments.find(x => x.uniqueName == attName);

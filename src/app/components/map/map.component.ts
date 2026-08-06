@@ -23,10 +23,10 @@ import { SmartTerrain } from '../../models/smart-terrain.model';
 import { UndergroundComponent } from '../undeground/underground.component';
 import { MarkerToSearch } from '../../models/marker-to-search.model';
 import { ItemUpgrade, UpgradeProperty } from '../../models/upgrades/upgrades';
-import { Meta, Title } from '@angular/platform-browser';
+import { SeoService } from '../../services/seo.service';
+import { ShareLinkService } from '../../services/share-link.service';
 import { MapService } from '../../services/map.service';
 import { HiddenMarker } from '../../models/hidden-marker.model';
-import { CompareComponent } from '../compare/compare.component';
 import { Game } from '../../models/game.model';
 import { BottomSheetWrapperComponent } from "../bottom-sheet-wrapper/bottom-sheet-wrapper.component";
 import { MapSearchComponent } from '../map-search/map-search.component';
@@ -88,7 +88,7 @@ export class MapComponent {
     protected mapInitialized: boolean = false;
     public undergroundMarkerToSearch: any[] = [];
 
-    protected openedUndergroundPopup: { component: UndergroundComponent, levelChanger: any };
+    public openedUndergroundPopup: { component: UndergroundComponent, levelChanger: any };
     protected openedComparePopup: any;
     protected overlaysListTop: string = 'layers-control';
     public static readonly hiddenLayerName: string = 'hidden-markers';
@@ -99,9 +99,9 @@ export class MapComponent {
     constructor(
         protected translate: TranslateService,
         protected route: ActivatedRoute,
-        protected titleService: Title,
+        protected seo: SeoService,
         protected mapService: MapService,
-        protected meta: Meta) {
+        protected shareLinks: ShareLinkService) {
         let urlGame: string = this.route.snapshot.paramMap.get('game') as string;
 
         if (MapComponent.avaliableGames[urlGame]) {
@@ -286,10 +286,7 @@ export class MapComponent {
     }
 
     private configureSeo(): void {
-        this.meta.addTag({ name: 'description', content: `Interactive maps for the S.T.A.L.K.E.R. series` })
-        this.meta.addTag({ name: 'keywords', content: `Stalker 2 map, Heart Of Chornobyl map, S2 map, Heart of Chernobyl map, s.t.a.l.k.e.r. map, interactive map, Call of Pripyat map, Clear Sky map, Shadow of Chornobyl map, Shadow of Chernobyl map, shoc map, cs map, cop map, hoc map, s2 map` })
-
-        this.titleService.setTitle(this.translate.instant(`${this.game.uniqueName}MapPageTitle`));
+        this.seo.applyMapPage(this.game.uniqueName);
     }
 
     private async loadItems(): Promise<void> {
@@ -402,6 +399,7 @@ export class MapComponent {
     }
 
     private async ngOnDestroy(): Promise<void> {
+        this.mapService.destroyCompareControl();
         this.map?.remove();
     }
 
@@ -434,8 +432,7 @@ export class MapComponent {
         this.mapService.setMapComponent(this);
 
         this.mapService.createCustomLayersControl();
-
-        this.createCompareControl();
+        this.mapService.createCompareControl(this.map);
 
         const bounds = pixelBounds(this.gamedata.heightInPixels, this.gamedata.widthInPixels);
 
@@ -551,7 +548,6 @@ export class MapComponent {
         layerController.isUnderground = false;
         layerController.addTo(this.map);
         this.layerContoller = layerController;
-        //L.control.compare({ position: 'topright' }).addTo(this.map);
 
         //L.control.stashFilter({ gameCategories: itemsTypes, categoriesConfig: this.mapConfig.itemsCategoriesSettings, layers: this.layers }).addTo(this.map);
 
@@ -631,70 +627,55 @@ export class MapComponent {
 
         this.mapService.createCarousel(this.overlaysListTop);
 
-        this.route.queryParams.subscribe((h: any) => {
-            if (h.lat != null && h.lng != null) {
-                if (h.underground > 0) {
-                    const levelChangers = this.layers.find(x => x.name == 'level-changers');
-                    if (!levelChangers?._layers) {
-                        console.error(`cant find underground mark! (${h.lat},${h.lng},${h.type},${h.underground})`);
-                        return;
-                    }
+        this.route.queryParams.subscribe((params) => {
+            const link = this.shareLinks.parse(params);
+            if (!link) {
+                const boundsTuple = bounds as L.LatLngTuple[];
+                this.map.setView(pixelCenter(boundsTuple[1][0], boundsTuple[1][1]));
+                return;
+            }
 
-                    const levelChanger = findLayerMarker(
-                        levelChangers,
-                        (marker) => hasLevelChangerProperties(marker.properties)
-                            && marker.properties.levelChanger.destinationLocationId == h.underground
-                    );
+            if (link.underground) {
+                const levelChangers = this.layers.find(x => x.name == 'level-changers');
+                const levelChanger = this.shareLinks.findUndergroundEntrance(levelChangers, link.underground);
 
-                    if (levelChanger && hasLevelChangerProperties(levelChanger.properties)) {
-                        this.map.flyTo(levelChanger.getLatLng(), this.map.getMaxZoom());
+                if (levelChanger && hasLevelChangerProperties(levelChanger.properties)) {
+                    this.map.flyTo(levelChanger.getLatLng(), this.map.getMaxZoom());
 
-                        levelChanger.properties.markerToSearch = {
-                            lat: +h.lat,
-                            lng: +h.lng,
-                            type: h.type,
-                        };
+                    levelChanger.properties.markerToSearch = {
+                        lat: link.lat,
+                        lng: link.lng,
+                        type: link.type,
+                    };
 
-                        levelChanger.openPopup();
-                    }
-                    else {
-                        console.error(`cant find underground mark! (${h.lat},${h.lng},${h.type},${h.underground})`);
-                    }
+                    levelChanger.fire('click');
                 }
                 else {
-                    let layer = this.layers.find(x => x.name == h.type);
-
-                    if (layer) {
-                        let marker: any = Object.values(layer._layers).find(
-                            (y: any) =>
-                                Math.abs(y.properties.coordinates.lat - h.lat) < 1 &&
-                                Math.abs(y.properties.coordinates.lng - h.lng) < 1);
-
-                        if (marker) {
-                            this.map.flyTo([h.lat, h.lng], this.map.getMaxZoom(), {
-                                animate: false,
-                                duration: 0.3,
-                            });
-
-                            marker.fireEvent('click');
-
-                            if (!isDevMode()) {
-                                const analytics = getAnalytics();
-                                logEvent(analytics, 'open-map-queryParams', {
-                                    game: this.gamedata.uniqueName,
-                                    language: this.translate.currentLang,
-                                    markType: h.type,
-                                    coordinates: `${h.lat} ${h.lng}`,
-                                });
-                            }
-
-                            return;
-                        }
-                    }
+                    console.error(`cant find underground mark! (${link.lat},${link.lng},${link.type},${link.underground})`);
                 }
-            } else {
-                const boundsTuple = bounds as L.LatLngTuple[];
-                this.map.setView(pixelCenter(boundsTuple[1][0], boundsTuple[1][1]))
+                return;
+            }
+
+            const marker = this.shareLinks.findSurfaceMarker(this.layers, link);
+            if (!marker) {
+                return;
+            }
+
+            this.map.flyTo([link.lat, link.lng], this.map.getMaxZoom(), {
+                animate: false,
+                duration: 0.3,
+            });
+
+            marker.fireEvent('click');
+
+            if (!isDevMode()) {
+                const analytics = getAnalytics();
+                logEvent(analytics, 'open-map-queryParams', {
+                    game: this.gamedata.uniqueName,
+                    language: this.translate.currentLang,
+                    markType: link.type,
+                    coordinates: `${link.lat} ${link.lng}`,
+                });
             }
         });
 
@@ -850,53 +831,14 @@ export class MapComponent {
                         return;
                     }
                 } else {
-                    this.openedUndergroundPopup.levelChanger.closePopup();
-                    levelChanger.openPopup();
+                    this.mapService.closeAllPopups();
+                    levelChanger.fire('click');
                 }
             } else {
-                levelChanger.openPopup();
+                levelChanger.fire('click');
             }
         } else {
             console.error(`cant find level changer for ${location.uniqueName}`);
-        }
-    }
-
-    private createCompareControl(): void {
-        let component = this;
-        L.Control.Compare = L.Control.extend({
-            onAdd: function (map: any) {
-                var div = L.DomUtil.create('div');
-                div.classList.add("compare-bottom");
-
-                L.DomEvent.on(div, 'click', this._onInputClick, this);
-
-                return div;
-            },
-
-            _onInputClick: function () {
-                if (this.componentRef == null) {
-                    this.componentRef = component.container.createComponent(CompareComponent);
-                    this.componentRef.instance.element = this.componentRef.location.nativeElement;
-
-                    document.body.appendChild(this.componentRef.location.nativeElement);
-                }
-                else {
-                    if (this.componentRef.location.nativeElement.style.display == 'none') {
-                        this.componentRef.location.nativeElement.style.display = 'block';
-                    }
-                    else {
-                        this.componentRef.location.nativeElement.style.display = 'none';
-                    }
-                }
-            },
-
-            onRemove: function (map: any) {
-                // Nothing to do here
-            }
-        } as any);
-
-        L.control.compare = function (opts: any) {
-            return new L.Control.Compare(opts);
         }
     }
 
@@ -1100,30 +1042,6 @@ export class MapComponent {
         L.control.stashFilter = function (options: any) {
             return new L.Control.StashFilter(options);
         };
-    }
-
-    private addSquareControl(): void {
-        let component = this;
-        L.Control.Compare = L.Control.extend({
-            onAdd: function (map: any) {
-                this._map = map;
-                this._allLayers = L.layerGroup();
-                var div = L.DomUtil.create('div');
-                div.classList.add("compare-bottom");
-
-                L.DomEvent.on(div, 'click', this._onInputClick, this);
-
-                return div;
-            },
-
-            _onInputClick: function () {
-                this.areas = [];
-            },
-
-            onRemove: function (map: any) {
-                // Nothing to do here
-            }
-        } as any);
     }
 
     private addLocations() {
@@ -1783,6 +1701,7 @@ export class MapComponent {
             } else {
                 anomaliesNoArt.push(canvasMarker);
                 canvasMarker.properties.ableToSearch = false;
+                canvasMarker.properties.typeUniqueName = anomalyZoneNoArtIcon.uniqueName;
                 canvasMarker.properties.name = zone.name ? zone.name : 'st_name_anomal_zone';
             }
 
@@ -2548,22 +2467,56 @@ export class MapComponent {
             );
 
             if (destLocation.isUnderground) {
-                canvasMarker.on('click', (e: any) => this.mapService.onMarkerClick(e, this.map, this.container, this.bottomSheet, (container, isPopup)=> this.mapService.createAnomalyZoneContent(e.target, container, this.game, this.items, false)));
-                canvasMarker
-                    .bindPopup(
-                        (stalker: any) =>
-                            this.createUndergroundMapPopup(stalker),
-                        {
-                            maxWidth: 500,
-                            closeOnClick: false,
-                            autoClose: false
-                        }
-                    )
-                    .openPopup();
+                canvasMarker.on('click', (e: any) => this.handleUndergroundDoorClick(e));
             }
         }
 
         this.addLayerToMap(L.layerGroup(markers), levelChangerIcon.uniqueName);
+    }
+
+    private handleUndergroundDoorClick(e: any): void {
+        const marker = e.target;
+        const destinationLocation = this.gamedata.locations.find(
+            (x) => x.id == marker.properties.levelChanger.destinationLocationId
+        ) as Location;
+
+        if (this.openedUndergroundPopup?.component.location.id == destinationLocation.id) {
+            if (marker.properties.markerToSearch) {
+                this.openedUndergroundPopup.component.markerToSearch = new MarkerToSearch();
+                this.openedUndergroundPopup.component.markerToSearch.lat = marker.properties.markerToSearch.lat;
+                this.openedUndergroundPopup.component.markerToSearch.lng = marker.properties.markerToSearch.lng;
+                this.openedUndergroundPopup.component.markerToSearch.type = marker.properties.markerToSearch.type
+                    ? marker.properties.markerToSearch.type
+                    : marker.properties.markerToSearch.layer.properties.typeUniqueName;
+                marker.properties.markerToSearch = undefined;
+                this.openedUndergroundPopup.component.goToMarker();
+                return;
+            }
+
+            this.mapService.setActivePopupLatLng(marker.getLatLng());
+            return;
+        }
+
+        this.mapService.onMarkerClick(
+            e,
+            this.map,
+            this.container,
+            this.bottomSheet,
+            (container) => this.mapService.createUndergroundContent(
+                marker,
+                container,
+                this,
+                this.gamedata,
+                this.items,
+                this.game,
+                this.mapConfig,
+                this.lootBoxConfig
+            ),
+            {
+                closeOnClick: false,
+                autoClose: false,
+            }
+        );
     }
 
     private addHiddenMarkers(markersToHide: any[]): void {
@@ -2602,64 +2555,6 @@ export class MapComponent {
         stalkerLayer.name = name;
 
         this.layers.push(stalkerLayer);
-    }
-
-    private createUndergroundMapPopup(levelChanger: any) {
-        let destinationLocation = this.gamedata.locations.find(x => x.id == levelChanger.properties.levelChanger.destinationLocationId) as Location;
-
-        if (this.openedUndergroundPopup) {
-            if (this.openedUndergroundPopup.component.location.id == destinationLocation.id) {
-                if (levelChanger.properties.markerToSearch) {
-                    this.openedUndergroundPopup.component.markerToSearch = new MarkerToSearch();
-                    this.openedUndergroundPopup.component.markerToSearch.lat = levelChanger.properties.markerToSearch.lat;
-                    this.openedUndergroundPopup.component.markerToSearch.lng = levelChanger.properties.markerToSearch.lng;
-                    this.openedUndergroundPopup.component.markerToSearch.type = levelChanger.properties.markerToSearch.type ? levelChanger.properties.markerToSearch.type : levelChanger.properties.markerToSearch.layer.properties.typeUniqueName;
-                    levelChanger.properties.markerToSearch = undefined;
-                    this.openedUndergroundPopup.component.goToMarker();
-                    return;
-                }
-                else {
-                    let popup = this.openedUndergroundPopup.levelChanger.getPopup();
-
-                    popup.setLatLng(levelChanger._latlng);
-                    return;
-                    /*this.openedUndergroundPopup.levelChanger.closePopup();
-          
-                    levelChanger.openPopup();*/
-                }
-            }
-            else {
-                this.openedUndergroundPopup.levelChanger.fire('remove');
-            }
-        }
-
-        let mapComponent = this;
-        levelChanger.getPopup().on('remove', function () {
-            levelChanger.getPopup().off('remove');
-            componentRef.instance.mapComponent.openedUndergroundPopup = null as unknown as { component: UndergroundComponent, levelChanger: any };
-            componentRef.destroy();
-        });
-
-        const componentRef = this.container.createComponent(UndergroundComponent);
-        componentRef.instance.gamedata = this.gamedata;
-        componentRef.instance.location = destinationLocation;
-        componentRef.instance.items = this.items;
-        componentRef.instance.game = this.game;
-        componentRef.instance.mapConfig = this.mapConfig;
-        componentRef.instance.lootBoxConfig = this.lootBoxConfig;
-        componentRef.instance.mapComponent = this;
-
-        if (levelChanger.properties.markerToSearch) {
-            componentRef.instance.markerToSearch = new MarkerToSearch();
-            componentRef.instance.markerToSearch.lat = levelChanger.properties.markerToSearch.lat;
-            componentRef.instance.markerToSearch.lng = levelChanger.properties.markerToSearch.lng;
-            componentRef.instance.markerToSearch.type = levelChanger.properties.markerToSearch.type ? levelChanger.properties.markerToSearch.type : levelChanger.properties.markerToSearch.layer.properties.typeUniqueName;
-            levelChanger.properties.markerToSearch = undefined;
-        }
-
-        this.openedUndergroundPopup = { component: componentRef.instance, levelChanger: levelChanger };
-
-        return componentRef.location.nativeElement;
     }
 
     public getMarkTypes(): any[] {

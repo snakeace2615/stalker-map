@@ -28,7 +28,9 @@ export class PopupComponent {
     ) {}
 
     private ngOnInit(): void {
-        this.isMarkerHidden = this.mapService.isMarkHidden(this.marker);
+        if (this.marker) {
+            this.isMarkerHidden = this.mapService.isMarkHidden(this.marker);
+        }
     }
 
     public hideShow(): void {

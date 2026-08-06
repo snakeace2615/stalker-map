@@ -7,6 +7,7 @@ import { StuffItem } from '../../models/stuff';
 import { HiddenMarker } from '../../models/hidden-marker.model';
 import { TooltipDirective } from '../tooltips/tooltip.directive';
 import { ItemTooltipComponent } from '../tooltips/item-tooltip/item-tooltip.component';
+import { ShareLinkService } from '../../services/share-link.service';
 
 @Component({
     selector: 'app-anomaly-zone',
@@ -30,7 +31,7 @@ export class AnomalyZoneComponent {
     public spawnSections: AnomalySpawnSectionView[];
     public anomalies: { anomaly: string, count: number }[];
 
-    constructor() { }
+    constructor(private shareLinks: ShareLinkService) { }
 
     private async ngOnInit(): Promise<void> {
         if (this.anomalZone.anomaliySpawnSections?.length > 0) {
@@ -62,7 +63,18 @@ export class AnomalyZoneComponent {
             }
         }
 
-        this.shareUrl = `${window.location.origin}/map/${this.game.uniqueName}?lat=${this.anomalZone.z}&lng=${this.anomalZone.x}&type=anomaly-zone${this.isUnderground ? `&underground=${this.anomalZone.locationId}` : ''}`;
-        this.hiddenMarker = HiddenMarker.anomalZone(this.anomalZone, this.game.uniqueName, this.isUnderground);
+        this.shareUrl = this.shareLinks.forMarker(
+            this.game.uniqueName,
+            this.anomalZone.z,
+            this.anomalZone.x,
+            this.stuffType || 'anomaly-zone',
+            { isUnderground: this.isUnderground, locationId: this.anomalZone.locationId }
+        );
+        this.hiddenMarker = HiddenMarker.anomalZone(
+            this.anomalZone,
+            this.game.uniqueName,
+            this.isUnderground,
+            this.stuffType || 'anomaly-zone'
+        );
     }
 }

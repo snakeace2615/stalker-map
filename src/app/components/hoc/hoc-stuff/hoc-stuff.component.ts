@@ -1,9 +1,7 @@
 import { Component, Input } from '@angular/core';
-import { NgStyle } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
-import { TooltipDirective } from '../../tooltips/tooltip.directive';
 import { Stuff } from '../../../models/hoc/map-hoc';
-import { Item } from '../../../models/item.model';
+import { isHocWeapon, Item } from '../../../models/item.model';
 import { StuffItem } from '../../../models/stuff/stuff-item.model';
 import { ItemTooltipComponent } from '../../tooltips/item-tooltip/item-tooltip.component';
 import { MapService } from '../../../services/map.service';
@@ -23,6 +21,7 @@ export class HocStuffComponent {
     @Input() public stuffType: string;
     @Input() public allItems: Item[];
     @Input() public isUnderground: boolean;
+    @Input() public shareUrl: string = '';
     public itemTooltipComponent: any = ItemTooltipComponent;
 
     public items: StuffItem[];
@@ -44,7 +43,7 @@ export class HocStuffComponent {
                 item.count = x.count;
                 item.preinstalled = [];
 
-                if (item.item && item.item.preinstalledAttachments != null) {
+                if (item.item && isHocWeapon(item.item) && item.item.preinstalledAttachments != null) {
                     if (item.item.compatibleAttachments != null) {
                         for (let attName of item.item.preinstalledAttachments) {
                             let attachment = item.item.compatibleAttachments.find(x => x.uniqueName == attName);
@@ -75,13 +74,5 @@ export class HocStuffComponent {
         if (this.items == null) {
             this.items = [];
         }
-
-        console.log(this.items)
     }
-
-    public copyLink(): void {
-        let link = `${window.location.origin}/map/${this.game.uniqueName}?lat=${this.stuff.z}&lng=${this.stuff.x}&type=${this.stuffType}`;
-        navigator.clipboard.writeText(link)
-    }
-
 }

@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { Title } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MapComponent } from '../map/map.component';
@@ -7,11 +6,12 @@ import { Map } from '../../models/map.model';
 import { HeaderComponent } from '../header/header.component';
 import { TooltipDirective } from '../tooltips/tooltip.directive';
 import { ItemTooltipComponent } from '../tooltips/item-tooltip/item-tooltip.component';
-import { Item } from '../../models/item.model';
+import { asUpgradable, asWeapon, Item } from '../../models/item.model';
 import { StuffItem } from '../../models/stuff';
 import { InventoryItem } from '../../models/inventory-item.model';
 import { StuffContent } from '../../models/content';
 import { Game } from '../../models/game.model';
+import { ShareLinkService } from '../../services/share-link.service';
 
 @Component({
   selector: 'app-map-content',
@@ -23,17 +23,20 @@ import { Game } from '../../models/game.model';
 export class MapContentComponent {
   public readonly game: Game;
   public itemTooltipComponent: any = ItemTooltipComponent;
+
+  protected readonly asWeapon = asWeapon;
+  protected readonly asUpgradable = asUpgradable;
   public items: Item[];
 
   public display: boolean;
   public stuffs: StuffContent[];
 
-  public readonly stuffTypes: string[] = ['stash', 'quest', '', 'stuff'];
+  public readonly stuffTypes: string[] = ['stash', 'quest', 'stuff', 'stuff'];
 
   constructor(
     protected translate: TranslateService,
     protected route: ActivatedRoute,
-    protected titleService:Title) {
+    private shareLinks: ShareLinkService) {
     let urlGame: string = this.route.snapshot.paramMap.get('game') as string;
 
     if (MapComponent.avaliableGames[urlGame]) {
@@ -41,11 +44,6 @@ export class MapContentComponent {
     } else {
       this.game = MapComponent.defaultGame;
     }
-  }
-
-  public copyLink(x: number, z: number, type: string, isUnderground: boolean, locationId: number): void {
-    let link = `${window.location.origin}/map/${this.game.uniqueName}?lat=${z}&lng=${x}&type=${type}${isUnderground ? `&underground=${locationId}` : ''}`;
-    navigator.clipboard.writeText(link)
   }
 
   private async ngOnInit(): Promise<void> {
@@ -81,7 +79,13 @@ export class MapContentComponent {
         if (location) {
           view.isUnderground = location.isUnderground;
           view.locaton = location.uniqueName;
-          view.link = `${window.location.origin}/map/${this.game.uniqueName}?lat=${stuff.z}&lng=${stuff.x}&type=${this.stuffTypes[stuff.typeId]}${view.isUnderground ? `&underground=${stuff.locationId}` : ''}`
+          view.link = this.shareLinks.forMarker(
+            this.game.uniqueName,
+            stuff.z,
+            stuff.x,
+            this.stuffTypes[stuff.typeId] || 'stuff',
+            { isUnderground: view.isUnderground, locationId: stuff.locationId }
+          );
         }
 
         view.items = stuff.items.map(x => this.getStuffItem(x));

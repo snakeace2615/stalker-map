@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { StuffItem } from '../../../models/stuff';
+import { asUpgradable } from '../../../models/item.model';
 import { ItemTooltipComponent } from '../../tooltips/item-tooltip/item-tooltip.component';
 import { TooltipDirective } from '../../tooltips/tooltip.directive';
 
@@ -13,4 +14,6 @@ import { TooltipDirective } from '../../tooltips/tooltip.directive';
 export class HocInventoryItem {
     @Input() public stuffItem: StuffItem;
     public itemTooltipComponent: any = ItemTooltipComponent;
+
+    protected readonly asUpgradable = asUpgradable;
 }

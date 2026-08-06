@@ -1,9 +1,10 @@
 import { Component, ViewEncapsulation } from '@angular/core';
 import { MapComponent } from '../map/map.component';
-import { Meta, Title } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { MapService } from '../../services/map.service';
+import { SeoService } from '../../services/seo.service';
+import { ShareLinkService } from '../../services/share-link.service';
 
 @Component({
   selector: 'app-map-export',
@@ -22,16 +23,16 @@ export class MapExportComponent extends MapComponent {
   constructor(
     protected override translate: TranslateService,
     protected override route: ActivatedRoute,
-    protected override titleService:Title,
+    protected override seo: SeoService,
     protected override mapService: MapService,
-    protected override meta: Meta
+    protected override shareLinks: ShareLinkService
   ) {
     super(
       translate,
       route,
-      titleService,
+      seo,
       mapService,
-      meta);
+      shareLinks);
 
     this.overlaysListTop = '';
     let lang: string = this.route.snapshot.paramMap.get('lang') as string;

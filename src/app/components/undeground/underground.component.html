@@ -1,17 +1,17 @@
-<div class="underground-popup">
-    <div class="location-name icon-undeground-door stalker-icon">{{ location.uniqueName | translate }}</div>
+<div class="header">
+    <div class="popup-name stalker-icon icon-undeground-door">{{ location.uniqueName | translate }}</div>
+</div>
+@if (undergroundConfig) {
     <div class="undeground-settings">
-        @if (undergroundConfig) {
-            <select (change)="test($event)">
-                @for (layer of undergroundConfig.levels; track layer) {
-                    <option [value]="layer" [selected]="layer == selectedLevel">{{layer}}</option>
-                }
-            </select>
-        }
+        <select (change)="test($event)">
+            @for (layer of undergroundConfig.levels; track layer) {
+                <option [value]="layer" [selected]="layer == selectedLevel">{{layer}}</option>
+            }
+        </select>
     </div>
-    <div class="map-container">
-        <div id="underground-map"></div>
-    </div>
+}
+<div class="map-container">
+    <div #undergroundMap class="underground-map"></div>
 </div>
 <div [hidden]="true">
     <template #dynamicComponents></template>

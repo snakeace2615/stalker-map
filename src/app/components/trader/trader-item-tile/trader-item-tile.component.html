@@ -11,19 +11,21 @@
       }
       {{ displayPrice }}
     </div>
-    @if (item.installedUpgrades && item.installedUpgrades.length > 0) {
+    @if (asUpgradable(item)?.installedUpgrades?.length) {
       <div class="inventory-item-upgrade"></div>
     }
   </div>
   <div class="inventory-item-image {{ gameStyle }} inventory-item-x-{{ item.gridX }} inventory-item-y-{{ item.gridY }}">
-    @if (item.hasScope && item.scopeX > -1000 && item.scopeY > -1000) {
-      <div class="wpn_addon scope" [style.left.px]="item.scopeX" [style.top.px]="item.scopeY"></div>
-    }
-    @if (item.hasSilencer && item.silencerX > -1000 && item.silencerY > -1000) {
-      <div class="wpn_addon silencer" [style.left.px]="item.silencerX" [style.top.px]="item.silencerY"></div>
-    }
-    @if (item.hasGrenadeLauncher && item.grenadeLauncherX > -1000 && item.grenadeLauncherY > -1000) {
-      <div class="wpn_addon grenade-launcher" [style.left.px]="item.grenadeLauncherX" [style.top.px]="item.grenadeLauncherY"></div>
+    @if (asWeapon(item); as weapon) {
+      @if (weapon.hasScope && weapon.scopeX > -1000 && weapon.scopeY > -1000) {
+        <div class="wpn_addon scope" [style.left.px]="weapon.scopeX" [style.top.px]="weapon.scopeY"></div>
+      }
+      @if (weapon.hasSilencer && weapon.silencerX > -1000 && weapon.silencerY > -1000) {
+        <div class="wpn_addon silencer" [style.left.px]="weapon.silencerX" [style.top.px]="weapon.silencerY"></div>
+      }
+      @if (weapon.hasGrenadeLauncher && weapon.grenadeLauncherX > -1000 && weapon.grenadeLauncherY > -1000) {
+        <div class="wpn_addon grenade-launcher" [style.left.px]="weapon.grenadeLauncherX" [style.top.px]="weapon.grenadeLauncherY"></div>
+      }
     }
   </div>
 </div>
