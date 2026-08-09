@@ -14,6 +14,10 @@
     "hocMapPageTitle": "Karte von Heart of Chornobyl",
     "sub-location": "Orte",
     "stash": "Verstecke",
+    "regions": "Regionen",
+    "diegetic-map-label": "Diegetische Karte aus dem Spiel",
+    "in-game-map-label": "Spielkarte",
+    "raw-map-label": "Entwicklerkarte",
     "st_stash": "Versteck",
     "st_monolith_stuff_title": "Monolith-Versteck",
     "quest": "Quest-Habar",
@@ -231,5 +235,12 @@
     "shocMapMetaDescription": "Interaktive Shadow-of-Chernobyl-Karte mit Verstecken, Quests, Anomalien, Händlern und Orten.",
     "csMapMetaDescription": "Interaktive Clear-Sky-Karte mit Verstecken, Quests, Anomalien, Händlern und Orten.",
     "copMapMetaDescription": "Interaktive Call-of-Pripyat-Karte mit Verstecken, Quests, Anomalien, Händlern und Orten.",
-    "hocMapMetaDescription": "Interaktive Heart-of-Chornobyl-Karte (S.T.A.L.K.E.R. 2) mit Verstecken, Quests, Artefakten, Händlern und Sehenswürdigkeiten."
+    "hocMapMetaDescription": "Interaktive Heart-of-Chornobyl-Karte (S.T.A.L.K.E.R. 2) mit Verstecken, Quests, Artefakten, Händlern und Sehenswürdigkeiten.",
+    "shocMapContentPageTitle": "Verstecke und Beute von Shadow of Chernobyl",
+    "csMapContentPageTitle": "Verstecke und Beute von Clear Sky",
+    "copMapContentPageTitle": "Verstecke und Beute von Call of Pripyat",
+    "shocMapContentMetaDescription": "Liste der Verstecke, Questgegenstände und Beute aus Shadow of Chernobyl mit direkten Links zu Markierungen auf der interaktiven Karte.",
+    "csMapContentMetaDescription": "Liste der Verstecke, Questgegenstände und Beute aus Clear Sky mit direkten Links zu Markierungen auf der interaktiven Karte.",
+    "copMapContentMetaDescription": "Liste der Verstecke, Questgegenstände und Beute aus Call of Pripyat mit direkten Links zu Markierungen auf der interaktiven Karte.",
+    "mapContentIndex": "Listen mit Verstecken und Beute"
 }

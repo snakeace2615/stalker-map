@@ -14,6 +14,10 @@
     "hocMapPageTitle": "Heart of Chornobyl map",
     "sub-location": "Secteurs",
     "stash": "Planques",
+    "regions": "Régions",
+    "diegetic-map-label": "Carte diégétique du jeu",
+    "in-game-map-label": "Carte du jeu",
+    "raw-map-label": "Carte des développeurs",
     "st_stash": "Planque",
     "st_monolith_stuff_title": "Planque du Monolithe",
     "quest": "Butin de quête",
@@ -195,5 +199,12 @@
     "shocMapMetaDescription": "Carte interactive de Shadow of Chernobyl avec caches, quêtes, anomalies, marchands et lieux.",
     "csMapMetaDescription": "Carte interactive de Clear Sky avec caches, quêtes, anomalies, marchands et lieux.",
     "copMapMetaDescription": "Carte interactive de Call of Pripyat avec caches, quêtes, anomalies, marchands et lieux.",
-    "hocMapMetaDescription": "Carte interactive de Heart of Chornobyl (S.T.A.L.K.E.R. 2) avec caches, quêtes, artefacts, marchands et points d'intérêt."
+    "hocMapMetaDescription": "Carte interactive de Heart of Chornobyl (S.T.A.L.K.E.R. 2) avec caches, quêtes, artefacts, marchands et points d'intérêt.",
+    "shocMapContentPageTitle": "Caches et butin de Shadow of Chernobyl",
+    "csMapContentPageTitle": "Caches et butin de Clear Sky",
+    "copMapContentPageTitle": "Caches et butin de Call of Pripyat",
+    "shocMapContentMetaDescription": "Liste des caches, objets de quête et butin de Shadow of Chernobyl avec des liens directs vers les marqueurs sur la carte interactive.",
+    "csMapContentMetaDescription": "Liste des caches, objets de quête et butin de Clear Sky avec des liens directs vers les marqueurs sur la carte interactive.",
+    "copMapContentMetaDescription": "Liste des caches, objets de quête et butin de Call of Pripyat avec des liens directs vers les marqueurs sur la carte interactive.",
+    "mapContentIndex": "Listes de caches et de butin"
 }

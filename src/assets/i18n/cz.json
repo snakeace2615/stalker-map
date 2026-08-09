@@ -239,11 +239,13 @@
     "zombie-lair": "Zombie respawn",
     "in-game-map-label": "Game map",
     "raw-map-label": "Devs map",
+    "diegetic-map-label": "Diegetická mapa ze hry",
     "rich-stash": "Valuable Stashes",
     "random-stash": "Random Stashes",
     "circles": "Camp Circles",
     "Rat": "Rats",
     "rich-stuff": "Valuable Loot",
+    "regions": "Regions",
     "grid": "Coordinate Grid",
     "richFilter.blueprint": "Blueprints",
     "richFilter.attachment": "Attachments",
@@ -263,5 +265,12 @@
     "shocMapMetaDescription": "Interactive Shadow of Chernobyl map with stashes, quests, anomalies, traders and locations.",
     "csMapMetaDescription": "Interactive Clear Sky map with stashes, quests, anomalies, traders and locations.",
     "copMapMetaDescription": "Interactive Call of Pripyat map with stashes, quests, anomalies, traders and locations.",
-    "hocMapMetaDescription": "Interactive Heart of Chornobyl (S.T.A.L.K.E.R. 2) map with stashes, quests, artefacts, traders and points of interest."
+    "hocMapMetaDescription": "Interactive Heart of Chornobyl (S.T.A.L.K.E.R. 2) map with stashes, quests, artefacts, traders and points of interest.",
+    "shocMapContentPageTitle": "Shadow of Chernobyl stashes and loot",
+    "csMapContentPageTitle": "Clear Sky stashes and loot",
+    "copMapContentPageTitle": "Call of Pripyat stashes and loot",
+    "shocMapContentMetaDescription": "Browse Shadow of Chernobyl stashes, quest items and loot with direct links to markers on the interactive map.",
+    "csMapContentMetaDescription": "Browse Clear Sky stashes, quest items and loot with direct links to markers on the interactive map.",
+    "copMapContentMetaDescription": "Browse Call of Pripyat stashes, quest items and loot with direct links to markers on the interactive map.",
+    "mapContentIndex": "Stashes and loot lists"
 }

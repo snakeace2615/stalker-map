@@ -61,8 +61,8 @@ export const routes: Routes = [
         children: [
             { path: '', component: MainComponent },
             { path: 'map/hoc', component: MapHocComponent },
-            { path: 'map/:game', component: MapComponent },
             { path: 'map/content/:game', component: MapContentComponent },
+            { path: 'map/:game', component: MapComponent },
         ],
     },
     { path: 'export/map/:game/:lang', component: MapExportComponent },

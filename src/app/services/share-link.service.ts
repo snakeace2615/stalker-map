@@ -54,7 +54,36 @@ export class ShareLinkService {
         type: string,
         options: { isUnderground?: boolean; locationId?: number | null } = {}
     ): string {
-        return this.build(game, {
+        return this.build(game, this.markerDeepLink(z, x, type, options));
+    }
+
+    /**
+     * Localized deep-link for crawlable HTML (content index pages).
+     * Prefer this over `forMarker` when the URL itself should be language-specific.
+     */
+    public forMarkerLocalized(
+        game: string,
+        z: number,
+        x: number,
+        type: string,
+        options: { isUnderground?: boolean; locationId?: number | null } = {}
+    ): string {
+        const link = this.markerDeepLink(z, x, type, options);
+        return this.locale.absoluteLocalizedMapUrl(game, {
+            lat: link.lat,
+            lng: link.lng,
+            type: link.type || undefined,
+            underground: link.underground,
+        });
+    }
+
+    public markerDeepLink(
+        z: number,
+        x: number,
+        type: string,
+        options: { isUnderground?: boolean; locationId?: number | null } = {}
+    ): MapDeepLink {
+        return {
             lat: z,
             lng: x,
             type,
@@ -62,7 +91,7 @@ export class ShareLinkService {
                 options.isUnderground && options.locationId != null && options.locationId > 0
                     ? options.locationId
                     : undefined,
-        });
+        };
     }
 
     public parse(params: Params | Record<string, unknown>): MapDeepLink | null {

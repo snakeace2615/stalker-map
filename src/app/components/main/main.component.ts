@@ -25,4 +25,8 @@ export class MainComponent {
   public mapHref(game: string): string {
     return this.locale.mapPath(game);
   }
+
+  public contentHref(game: string): string {
+    return this.locale.contentPath(game);
+  }
 }

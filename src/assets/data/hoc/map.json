@@ -6013,6 +6013,17 @@
       "description": null,
       "type": "ESpawnType::Shelter",
       "radius": 0,
+      "x": 4857.3394,
+      "z": 5190.013,
+      "y": 12.040005,
+      "dlc": null,
+      "locationId": 85
+    },
+    {
+      "title": "Shelter",
+      "description": null,
+      "type": "ESpawnType::Shelter",
+      "radius": 0,
       "x": 4240.7095,
       "z": 4561.6533,
       "y": 8.246379,
@@ -6893,17 +6904,6 @@
       "description": null,
       "type": "ESpawnType::Shelter",
       "radius": 0,
-      "x": 4854.6,
-      "z": 5191.037,
-      "y": 11.133334,
-      "dlc": null,
-      "locationId": 85
-    },
-    {
-      "title": "Shelter",
-      "description": null,
-      "type": "ESpawnType::Shelter",
-      "radius": 0,
       "x": 6741.223,
       "z": 5465.9146,
       "y": 12.213113,
@@ -7360,6 +7360,17 @@
       "y": 19.345776,
       "dlc": null,
       "locationId": 88
+    },
+    {
+      "title": "Shelter",
+      "description": null,
+      "type": "ESpawnType::Shelter",
+      "radius": 0,
+      "x": 2170.85,
+      "z": 5855.05,
+      "y": 20.95,
+      "dlc": null,
+      "locationId": 90
     },
     {
       "title": "Shelter",
@@ -15268,25 +15279,6 @@
     {
       "lairs": [
         {
-          "faction": "Neutrals",
-          "type": "ELairType::ALifeLair",
-          "maxSpawnRank": "ERank::Master",
-          "minSpawnRank": "ERank::Newbie",
-          "canBeCaptured": false,
-          "canAttack": false,
-          "canDefend": false,
-          "activeLair": false
-        }
-      ],
-      "x": 7256.2,
-      "z": 403.5,
-      "y": 20.22,
-      "dlc": null,
-      "locationId": 0
-    },
-    {
-      "lairs": [
-        {
           "faction": "Bandits",
           "type": "ELairType::ALifeLair",
           "maxSpawnRank": "ERank::Veteran",
@@ -15960,17 +15952,6 @@
       "description": null,
       "type": "ESpawnType::PsyAnomaly",
       "radius": 0,
-      "x": 7795.061,
-      "z": 168.55644,
-      "y": 12.784778,
-      "dlc": null,
-      "locationId": 0
-    },
-    {
-      "title": null,
-      "description": null,
-      "type": "ESpawnType::PsyAnomaly",
-      "radius": 0,
       "x": 2829.4128,
       "z": 2999.2234,
       "y": 14.533988,
@@ -16139,17 +16120,6 @@
       "x": 2803.4343,
       "z": 1609.284,
       "y": 7.7496753,
-      "dlc": null,
-      "locationId": 0
-    },
-    {
-      "title": null,
-      "description": null,
-      "type": "ESpawnType::PsyAnomaly",
-      "radius": 0,
-      "x": 7792.562,
-      "z": 174.84976,
-      "y": 12.784778,
       "dlc": null,
       "locationId": 0
     },
@@ -16675,17 +16645,6 @@
       "description": null,
       "type": "ESpawnType::PsyAnomaly",
       "radius": 0,
-      "x": 7795.288,
-      "z": 180.37569,
-      "y": 12.784778,
-      "dlc": null,
-      "locationId": 0
-    },
-    {
-      "title": null,
-      "description": null,
-      "type": "ESpawnType::PsyAnomaly",
-      "radius": 0,
       "x": 2769.6863,
       "z": 1632.9319,
       "y": 11.768713,
@@ -16832,28 +16791,6 @@
       "x": 1151.2588,
       "z": 5318.445,
       "y": 32.638588,
-      "dlc": null,
-      "locationId": 0
-    },
-    {
-      "title": null,
-      "description": null,
-      "type": "ESpawnType::PsyAnomaly",
-      "radius": 0,
-      "x": 7792.355,
-      "z": 185.75949,
-      "y": 12.784778,
-      "dlc": null,
-      "locationId": 0
-    },
-    {
-      "title": null,
-      "description": null,
-      "type": "ESpawnType::PsyAnomaly",
-      "radius": 0,
-      "x": 7794.951,
-      "z": 191.71141,
-      "y": 12.784778,
       "dlc": null,
       "locationId": 0
     },
@@ -19415,11 +19352,6 @@
           "probability": 0
         },
         {
-          "uniqueName": "A939A",
-          "count": 5,
-          "probability": 0
-        },
-        {
           "uniqueName": "Hercules",
           "count": 2,
           "probability": 0
@@ -19430,13 +19362,8 @@
           "probability": 0
         },
         {
-          "uniqueName": "A762SniperA",
-          "count": 3,
-          "probability": 0
-        },
-        {
           "uniqueName": "ArmyMedkit",
-          "count": 5,
+          "count": 3,
           "probability": 0
         },
         {
@@ -19450,27 +19377,12 @@
           "probability": 0
         },
         {
-          "uniqueName": "GunSPSA_SG",
-          "count": 1,
-          "probability": 0
-        },
-        {
-          "uniqueName": "GunSVDM_SP",
-          "count": 1,
-          "probability": 0
-        },
-        {
           "uniqueName": "A918D",
           "count": 3,
           "probability": 0
         },
         {
           "uniqueName": "A012D",
-          "count": 4,
-          "probability": 0
-        },
-        {
-          "uniqueName": "A012A",
           "count": 3,
           "probability": 0
         },
@@ -19485,24 +19397,14 @@
           "probability": 0
         },
         {
-          "uniqueName": "GunViper_PP",
-          "count": 1,
-          "probability": 0
-        },
-        {
           "uniqueName": "GunDnipro_ST",
-          "count": 1,
-          "probability": 0
-        },
-        {
-          "uniqueName": "GunLavina_ST",
           "count": 1,
           "probability": 0
         }
       ],
-      "x": 4170.729,
-      "z": 1874.1345,
-      "y": -31.910643,
+      "x": 4170.9463,
+      "z": 1873.928,
+      "y": -31.868694,
       "dlc": null,
       "locationId": 72
     },
@@ -19668,20 +19570,6 @@
       "y": 19.826975,
       "dlc": null,
       "locationId": 88
-    },
-    {
-      "items": [
-        {
-          "uniqueName": "CannedFood",
-          "count": 93,
-          "probability": 0
-        }
-      ],
-      "x": 4180.354,
-      "z": 1981.9851,
-      "y": -32.486702,
-      "dlc": null,
-      "locationId": 72
     },
     {
       "items": [
@@ -20010,37 +19898,27 @@
         },
         {
           "uniqueName": "GrenadeF1",
-          "count": 8,
-          "probability": 0
-        },
-        {
-          "uniqueName": "A545D",
-          "count": 6,
-          "probability": 0
-        },
-        {
-          "uniqueName": "A556D",
-          "count": 6,
-          "probability": 0
-        },
-        {
-          "uniqueName": "ArmyMedkit",
-          "count": 7,
-          "probability": 0
-        },
-        {
-          "uniqueName": "A762NATOS",
           "count": 4,
           "probability": 0
         },
         {
-          "uniqueName": "A012D",
+          "uniqueName": "A556D",
           "count": 5,
           "probability": 0
         },
         {
-          "uniqueName": "Medkit",
-          "count": 1,
+          "uniqueName": "A762NATOS",
+          "count": 3,
+          "probability": 0
+        },
+        {
+          "uniqueName": "A545D",
+          "count": 5,
+          "probability": 0
+        },
+        {
+          "uniqueName": "ArmyMedkit",
+          "count": 3,
           "probability": 0
         },
         {
@@ -20049,19 +19927,24 @@
           "probability": 0
         },
         {
-          "uniqueName": "Energetic",
-          "count": 2,
+          "uniqueName": "A012D",
+          "count": 4,
           "probability": 0
         },
         {
           "uniqueName": "APG7V",
           "count": 2,
           "probability": 0
+        },
+        {
+          "uniqueName": "Energetic",
+          "count": 1,
+          "probability": 0
         }
       ],
-      "x": 4177.214,
-      "z": 1953.7351,
-      "y": -52.575417,
+      "x": 4177.123,
+      "z": 1953.9966,
+      "y": -52.68067,
       "dlc": null,
       "locationId": 72
     },
@@ -20471,23 +20354,13 @@
           "probability": 0
         },
         {
-          "uniqueName": "A919D",
-          "count": 5,
+          "uniqueName": "A556D",
+          "count": 6,
           "probability": 0
         },
         {
           "uniqueName": "A012A",
-          "count": 5,
-          "probability": 0
-        },
-        {
-          "uniqueName": "A556D",
-          "count": 9,
-          "probability": 0
-        },
-        {
-          "uniqueName": "ArmyMedkit",
-          "count": 4,
+          "count": 3,
           "probability": 0
         },
         {
@@ -20498,6 +20371,11 @@
         {
           "uniqueName": "GunRhino_HG",
           "count": 1,
+          "probability": 0
+        },
+        {
+          "uniqueName": "ArmyMedkit",
+          "count": 2,
           "probability": 0
         },
         {
@@ -20516,11 +20394,6 @@
           "probability": 0
         },
         {
-          "uniqueName": "GunIntegral_PP",
-          "count": 1,
-          "probability": 0
-        },
-        {
           "uniqueName": "GunAPB_HG",
           "count": 1,
           "probability": 0
@@ -20531,9 +20404,9 @@
           "probability": 0
         }
       ],
-      "x": 4106.846,
-      "z": 1964.9232,
-      "y": -14.227024,
+      "x": 4106.8145,
+      "z": 1964.7369,
+      "y": -14.294665,
       "dlc": null,
       "locationId": 72
     },
@@ -21041,17 +20914,12 @@
       "items": [
         {
           "uniqueName": "A012D",
-          "count": 5,
+          "count": 3,
           "probability": 0
         },
         {
           "uniqueName": "A556D",
-          "count": 9,
-          "probability": 0
-        },
-        {
-          "uniqueName": "A919D",
-          "count": 4,
+          "count": 6,
           "probability": 0
         },
         {
@@ -21071,7 +20939,7 @@
         },
         {
           "uniqueName": "Energetic",
-          "count": 2,
+          "count": 1,
           "probability": 0
         },
         {
@@ -21080,19 +20948,14 @@
           "probability": 0
         },
         {
-          "uniqueName": "GunIntegral_PP",
-          "count": 1,
-          "probability": 0
-        },
-        {
           "uniqueName": "GunSVU_SP",
           "count": 1,
           "probability": 0
         }
       ],
-      "x": 4105.197,
-      "z": 1980.9502,
-      "y": -7.7849545,
+      "x": 4105.256,
+      "z": 1980.9614,
+      "y": -7.799494,
       "dlc": null,
       "locationId": 72
     },
@@ -22784,6 +22647,20 @@
       "y": 19.452034,
       "dlc": null,
       "locationId": 87
+    },
+    {
+      "items": [
+        {
+          "uniqueName": "CannedFood",
+          "count": 16,
+          "probability": 0
+        }
+      ],
+      "x": 4181.682,
+      "z": 1982.2528,
+      "y": -32.690067,
+      "dlc": null,
+      "locationId": 72
     },
     {
       "items": [
@@ -68299,15 +68176,6 @@
     },
     {
       "name": null,
-      "spawner": "BunArtifactSpawner",
-      "x": 7777.74,
-      "z": 26.86,
-      "y": 13.74,
-      "dlc": null,
-      "locationId": 0
-    },
-    {
-      "name": null,
       "spawner": "UniversalArtifactSpawner",
       "x": 4417.63,
       "z": 4414.55,
@@ -68407,15 +68275,6 @@
     },
     {
       "name": null,
-      "spawner": "PlasmaArtifactSpawner",
-      "x": 7687.34,
-      "z": 26.86,
-      "y": 13.74,
-      "dlc": null,
-      "locationId": 0
-    },
-    {
-      "name": null,
       "spawner": "UniversalArtifactSpawner",
       "x": 2804.96,
       "z": 4256.78,
@@ -68470,15 +68329,6 @@
     },
     {
       "name": null,
-      "spawner": "CloudArtifactSpawner",
-      "x": 7658.14,
-      "z": 26.86,
-      "y": 13.74,
-      "dlc": null,
-      "locationId": 0
-    },
-    {
-      "name": null,
       "spawner": "UniversalArtifactSpawner",
       "x": 7650.2583,
       "z": 6667.8325,
@@ -68506,15 +68356,6 @@
     },
     {
       "name": null,
-      "spawner": "ResinArtifactSpawner",
-      "x": 7678.84,
-      "z": 26.86,
-      "y": 13.74,
-      "dlc": null,
-      "locationId": 0
-    },
-    {
-      "name": null,
       "spawner": "UniversalArtifactSpawner",
       "x": 2244.6304,
       "z": 6237.3745,
@@ -68530,15 +68371,6 @@
       "y": 2.0811243,
       "dlc": null,
       "locationId": 87
-    },
-    {
-      "name": null,
-      "spawner": "BakedBoltsArtifactSpawner",
-      "x": 7704.84,
-      "z": 26.86,
-      "y": 13.74,
-      "dlc": null,
-      "locationId": 0
     },
     {
       "name": null,
@@ -68575,15 +68407,6 @@
       "y": 24.584328,
       "dlc": null,
       "locationId": 87
-    },
-    {
-      "name": null,
-      "spawner": "ThornArtifactSpawner",
-      "x": 7769.24,
-      "z": 26.86,
-      "y": 13.74,
-      "dlc": null,
-      "locationId": 0
     },
     {
       "name": null,
@@ -68686,15 +68509,6 @@
     },
     {
       "name": null,
-      "spawner": "BurntHunkArtifactSpawner",
-      "x": 7670.34,
-      "z": 26.86,
-      "y": 13.74,
-      "dlc": null,
-      "locationId": 0
-    },
-    {
-      "name": null,
       "spawner": "UniversalArtifactSpawner",
       "x": 3217.3335,
       "z": 6003.2124,
@@ -68737,15 +68551,6 @@
       "y": 7.377627,
       "dlc": null,
       "locationId": 82
-    },
-    {
-      "name": null,
-      "spawner": "SpongeArtifactSpawner",
-      "x": 7737.14,
-      "z": 26.86,
-      "y": 13.74,
-      "dlc": null,
-      "locationId": 0
     },
     {
       "name": null,
@@ -68812,15 +68617,6 @@
     },
     {
       "name": null,
-      "spawner": "NightStarArtifactSpawner",
-      "x": 7754.24,
-      "z": 26.86,
-      "y": 13.74,
-      "dlc": null,
-      "locationId": 0
-    },
-    {
-      "name": null,
       "spawner": "UniversalArtifactSpawner",
       "x": 2358.7334,
       "z": 5692.631,
@@ -68845,15 +68641,6 @@
       "y": 4.672277,
       "dlc": null,
       "locationId": 71
-    },
-    {
-      "name": null,
-      "spawner": "CoreArtifactSpawner",
-      "x": 7721.34,
-      "z": 26.86,
-      "y": 13.74,
-      "dlc": null,
-      "locationId": 0
     },
     {
       "name": null,
@@ -68899,15 +68686,6 @@
       "y": -6.936752,
       "dlc": null,
       "locationId": 76
-    },
-    {
-      "name": null,
-      "spawner": "SnowflakeArtifactSpawner",
-      "x": 7649.632,
-      "z": 26.86,
-      "y": 13.74,
-      "dlc": null,
-      "locationId": 0
     },
     {
       "name": null,
@@ -69007,15 +68785,6 @@
       "y": 5.1326838,
       "dlc": null,
       "locationId": 82
-    },
-    {
-      "name": null,
-      "spawner": "CandleArtifactSpawner",
-      "x": 7712.84,
-      "z": 26.86,
-      "y": 13.74,
-      "dlc": null,
-      "locationId": 0
     },
     {
       "name": null,
@@ -69145,30 +68914,12 @@
     },
     {
       "name": null,
-      "spawner": "LiquidStoneArtifactSpawner",
-      "x": 7794.74,
-      "z": 26.86,
-      "y": 13.74,
-      "dlc": null,
-      "locationId": 0
-    },
-    {
-      "name": null,
       "spawner": "UniversalArtifactSpawner",
       "x": 2549.75,
       "z": 6260.5,
       "y": -7.25,
       "dlc": null,
       "locationId": 90
-    },
-    {
-      "name": null,
-      "spawner": "EchinusArtifactSpawner",
-      "x": 7786.24,
-      "z": 26.86,
-      "y": 13.74,
-      "dlc": null,
-      "locationId": 0
     },
     {
       "name": null,
@@ -69181,30 +68932,12 @@
     },
     {
       "name": null,
-      "spawner": "HedgehogArtifactSpawner",
-      "x": 7745.64,
-      "z": 26.86,
-      "y": 13.74,
-      "dlc": null,
-      "locationId": 0
-    },
-    {
-      "name": null,
       "spawner": "UniversalArtifactSpawner",
       "x": 7313.459,
       "z": 5396.3687,
       "y": 3.7967787,
       "dlc": null,
       "locationId": 87
-    },
-    {
-      "name": null,
-      "spawner": "HellishHedgehogArtifactSpawner",
-      "x": 7696.34,
-      "z": 26.86,
-      "y": 13.74,
-      "dlc": null,
-      "locationId": 0
     }
   ],
   "artefactSpawnerConfigs": [
@@ -69716,152 +69449,6 @@
       ]
     },
     {
-      "name": "SnowflakeArtifactSpawner",
-      "settings": [
-        {
-          "name": "Newbie",
-          "count": 1,
-          "radius": 0,
-          "minCooldown": 3,
-          "maxCooldown": 15,
-          "spawnChanceBase": 40,
-          "spawnChanceBonus": 5,
-          "rarityChance": [
-            0,
-            0,
-            0,
-            0
-          ]
-        },
-        {
-          "name": "Experienced",
-          "count": 1,
-          "radius": 0,
-          "minCooldown": 3,
-          "maxCooldown": 15,
-          "spawnChanceBase": 40,
-          "spawnChanceBonus": 5,
-          "rarityChance": [
-            0,
-            0,
-            0,
-            0
-          ]
-        },
-        {
-          "name": "Veteran",
-          "count": 1,
-          "radius": 0,
-          "minCooldown": 3,
-          "maxCooldown": 15,
-          "spawnChanceBase": 40,
-          "spawnChanceBonus": 5,
-          "rarityChance": [
-            0,
-            0,
-            0,
-            0
-          ]
-        },
-        {
-          "name": "Master",
-          "count": 1,
-          "radius": 0,
-          "minCooldown": 3,
-          "maxCooldown": 15,
-          "spawnChanceBase": 40,
-          "spawnChanceBonus": 5,
-          "rarityChance": [
-            0,
-            0,
-            0,
-            0
-          ]
-        }
-      ],
-      "excludeRules": [
-        "EArtifactSpawnerExcludeRule::ExcludeQuestArtifacts",
-        "EArtifactSpawnerExcludeRule::ExcludeArchiArtifacts"
-      ],
-      "useListOfArtifacts": true,
-      "listOfArtifacts": [
-        "EArtifactSnowflake"
-      ]
-    },
-    {
-      "name": "CloudArtifactSpawner",
-      "settings": [
-        {
-          "name": "Newbie",
-          "count": 1,
-          "radius": 0,
-          "minCooldown": 3,
-          "maxCooldown": 15,
-          "spawnChanceBase": 40,
-          "spawnChanceBonus": 5,
-          "rarityChance": [
-            0,
-            0,
-            0,
-            0
-          ]
-        },
-        {
-          "name": "Experienced",
-          "count": 1,
-          "radius": 0,
-          "minCooldown": 3,
-          "maxCooldown": 15,
-          "spawnChanceBase": 40,
-          "spawnChanceBonus": 5,
-          "rarityChance": [
-            0,
-            0,
-            0,
-            0
-          ]
-        },
-        {
-          "name": "Veteran",
-          "count": 1,
-          "radius": 0,
-          "minCooldown": 3,
-          "maxCooldown": 15,
-          "spawnChanceBase": 40,
-          "spawnChanceBonus": 5,
-          "rarityChance": [
-            0,
-            0,
-            0,
-            0
-          ]
-        },
-        {
-          "name": "Master",
-          "count": 1,
-          "radius": 0,
-          "minCooldown": 3,
-          "maxCooldown": 15,
-          "spawnChanceBase": 40,
-          "spawnChanceBonus": 5,
-          "rarityChance": [
-            0,
-            0,
-            0,
-            0
-          ]
-        }
-      ],
-      "excludeRules": [
-        "EArtifactSpawnerExcludeRule::ExcludeQuestArtifacts",
-        "EArtifactSpawnerExcludeRule::ExcludeArchiArtifacts"
-      ],
-      "useListOfArtifacts": true,
-      "listOfArtifacts": [
-        "EArtifactCloud"
-      ]
-    },
-    {
       "name": "HellishHedgehogArtifactSpawner",
       "settings": [
         {
@@ -69932,152 +69519,6 @@
       "useListOfArtifacts": true,
       "listOfArtifacts": [
         "FArtifactHellishHedgehog"
-      ]
-    },
-    {
-      "name": "BurntHunkArtifactSpawner",
-      "settings": [
-        {
-          "name": "Newbie",
-          "count": 1,
-          "radius": 0,
-          "minCooldown": 3,
-          "maxCooldown": 15,
-          "spawnChanceBase": 40,
-          "spawnChanceBonus": 5,
-          "rarityChance": [
-            0,
-            0,
-            0,
-            0
-          ]
-        },
-        {
-          "name": "Experienced",
-          "count": 1,
-          "radius": 0,
-          "minCooldown": 3,
-          "maxCooldown": 15,
-          "spawnChanceBase": 40,
-          "spawnChanceBonus": 5,
-          "rarityChance": [
-            0,
-            0,
-            0,
-            0
-          ]
-        },
-        {
-          "name": "Veteran",
-          "count": 1,
-          "radius": 0,
-          "minCooldown": 3,
-          "maxCooldown": 15,
-          "spawnChanceBase": 40,
-          "spawnChanceBonus": 5,
-          "rarityChance": [
-            0,
-            0,
-            0,
-            0
-          ]
-        },
-        {
-          "name": "Master",
-          "count": 1,
-          "radius": 0,
-          "minCooldown": 3,
-          "maxCooldown": 15,
-          "spawnChanceBase": 40,
-          "spawnChanceBonus": 5,
-          "rarityChance": [
-            0,
-            0,
-            0,
-            0
-          ]
-        }
-      ],
-      "excludeRules": [
-        "EArtifactSpawnerExcludeRule::ExcludeQuestArtifacts",
-        "EArtifactSpawnerExcludeRule::ExcludeArchiArtifacts"
-      ],
-      "useListOfArtifacts": true,
-      "listOfArtifacts": [
-        "FArtifactBurntHunk"
-      ]
-    },
-    {
-      "name": "BakedBoltsArtifactSpawner",
-      "settings": [
-        {
-          "name": "Newbie",
-          "count": 1,
-          "radius": 0,
-          "minCooldown": 3,
-          "maxCooldown": 15,
-          "spawnChanceBase": 40,
-          "spawnChanceBonus": 5,
-          "rarityChance": [
-            0,
-            0,
-            0,
-            0
-          ]
-        },
-        {
-          "name": "Experienced",
-          "count": 1,
-          "radius": 0,
-          "minCooldown": 3,
-          "maxCooldown": 15,
-          "spawnChanceBase": 40,
-          "spawnChanceBonus": 5,
-          "rarityChance": [
-            0,
-            0,
-            0,
-            0
-          ]
-        },
-        {
-          "name": "Veteran",
-          "count": 1,
-          "radius": 0,
-          "minCooldown": 3,
-          "maxCooldown": 15,
-          "spawnChanceBase": 40,
-          "spawnChanceBonus": 5,
-          "rarityChance": [
-            0,
-            0,
-            0,
-            0
-          ]
-        },
-        {
-          "name": "Master",
-          "count": 1,
-          "radius": 0,
-          "minCooldown": 3,
-          "maxCooldown": 15,
-          "spawnChanceBase": 40,
-          "spawnChanceBonus": 5,
-          "rarityChance": [
-            0,
-            0,
-            0,
-            0
-          ]
-        }
-      ],
-      "excludeRules": [
-        "EArtifactSpawnerExcludeRule::ExcludeQuestArtifacts",
-        "EArtifactSpawnerExcludeRule::ExcludeArchiArtifacts"
-      ],
-      "useListOfArtifacts": true,
-      "listOfArtifacts": [
-        "FArtifactBakedBolts"
       ]
     },
     {
@@ -70154,444 +69595,6 @@
       ]
     },
     {
-      "name": "PlasmaArtifactSpawner",
-      "settings": [
-        {
-          "name": "Newbie",
-          "count": 1,
-          "radius": 0,
-          "minCooldown": 3,
-          "maxCooldown": 15,
-          "spawnChanceBase": 40,
-          "spawnChanceBonus": 5,
-          "rarityChance": [
-            0,
-            0,
-            0,
-            0
-          ]
-        },
-        {
-          "name": "Experienced",
-          "count": 1,
-          "radius": 0,
-          "minCooldown": 3,
-          "maxCooldown": 15,
-          "spawnChanceBase": 40,
-          "spawnChanceBonus": 5,
-          "rarityChance": [
-            0,
-            0,
-            0,
-            0
-          ]
-        },
-        {
-          "name": "Veteran",
-          "count": 1,
-          "radius": 0,
-          "minCooldown": 3,
-          "maxCooldown": 15,
-          "spawnChanceBase": 40,
-          "spawnChanceBonus": 5,
-          "rarityChance": [
-            0,
-            0,
-            0,
-            0
-          ]
-        },
-        {
-          "name": "Master",
-          "count": 1,
-          "radius": 0,
-          "minCooldown": 3,
-          "maxCooldown": 15,
-          "spawnChanceBase": 40,
-          "spawnChanceBonus": 5,
-          "rarityChance": [
-            0,
-            0,
-            0,
-            0
-          ]
-        }
-      ],
-      "excludeRules": [
-        "EArtifactSpawnerExcludeRule::ExcludeQuestArtifacts",
-        "EArtifactSpawnerExcludeRule::ExcludeArchiArtifacts"
-      ],
-      "useListOfArtifacts": true,
-      "listOfArtifacts": [
-        "FArtifactPlasma"
-      ]
-    },
-    {
-      "name": "CandleArtifactSpawner",
-      "settings": [
-        {
-          "name": "Newbie",
-          "count": 1,
-          "radius": 0,
-          "minCooldown": 3,
-          "maxCooldown": 15,
-          "spawnChanceBase": 40,
-          "spawnChanceBonus": 5,
-          "rarityChance": [
-            0,
-            0,
-            0,
-            0
-          ]
-        },
-        {
-          "name": "Experienced",
-          "count": 1,
-          "radius": 0,
-          "minCooldown": 3,
-          "maxCooldown": 15,
-          "spawnChanceBase": 40,
-          "spawnChanceBonus": 5,
-          "rarityChance": [
-            0,
-            0,
-            0,
-            0
-          ]
-        },
-        {
-          "name": "Veteran",
-          "count": 1,
-          "radius": 0,
-          "minCooldown": 3,
-          "maxCooldown": 15,
-          "spawnChanceBase": 40,
-          "spawnChanceBonus": 5,
-          "rarityChance": [
-            0,
-            0,
-            0,
-            0
-          ]
-        },
-        {
-          "name": "Master",
-          "count": 1,
-          "radius": 0,
-          "minCooldown": 3,
-          "maxCooldown": 15,
-          "spawnChanceBase": 40,
-          "spawnChanceBonus": 5,
-          "rarityChance": [
-            0,
-            0,
-            0,
-            0
-          ]
-        }
-      ],
-      "excludeRules": [
-        "EArtifactSpawnerExcludeRule::ExcludeQuestArtifacts",
-        "EArtifactSpawnerExcludeRule::ExcludeArchiArtifacts"
-      ],
-      "useListOfArtifacts": true,
-      "listOfArtifacts": [
-        "FArtifactCandle"
-      ]
-    },
-    {
-      "name": "ResinArtifactSpawner",
-      "settings": [
-        {
-          "name": "Newbie",
-          "count": 1,
-          "radius": 0,
-          "minCooldown": 3,
-          "maxCooldown": 15,
-          "spawnChanceBase": 40,
-          "spawnChanceBonus": 5,
-          "rarityChance": [
-            0,
-            0,
-            0,
-            0
-          ]
-        },
-        {
-          "name": "Experienced",
-          "count": 1,
-          "radius": 0,
-          "minCooldown": 3,
-          "maxCooldown": 15,
-          "spawnChanceBase": 40,
-          "spawnChanceBonus": 5,
-          "rarityChance": [
-            0,
-            0,
-            0,
-            0
-          ]
-        },
-        {
-          "name": "Veteran",
-          "count": 1,
-          "radius": 0,
-          "minCooldown": 3,
-          "maxCooldown": 15,
-          "spawnChanceBase": 40,
-          "spawnChanceBonus": 5,
-          "rarityChance": [
-            0,
-            0,
-            0,
-            0
-          ]
-        },
-        {
-          "name": "Master",
-          "count": 1,
-          "radius": 0,
-          "minCooldown": 3,
-          "maxCooldown": 15,
-          "spawnChanceBase": 40,
-          "spawnChanceBonus": 5,
-          "rarityChance": [
-            0,
-            0,
-            0,
-            0
-          ]
-        }
-      ],
-      "excludeRules": [
-        "EArtifactSpawnerExcludeRule::ExcludeQuestArtifacts",
-        "EArtifactSpawnerExcludeRule::ExcludeArchiArtifacts"
-      ],
-      "useListOfArtifacts": true,
-      "listOfArtifacts": [
-        "FArtifactResin"
-      ]
-    },
-    {
-      "name": "CoreArtifactSpawner",
-      "settings": [
-        {
-          "name": "Newbie",
-          "count": 1,
-          "radius": 0,
-          "minCooldown": 3,
-          "maxCooldown": 15,
-          "spawnChanceBase": 40,
-          "spawnChanceBonus": 5,
-          "rarityChance": [
-            0,
-            0,
-            0,
-            0
-          ]
-        },
-        {
-          "name": "Experienced",
-          "count": 1,
-          "radius": 0,
-          "minCooldown": 3,
-          "maxCooldown": 15,
-          "spawnChanceBase": 40,
-          "spawnChanceBonus": 5,
-          "rarityChance": [
-            0,
-            0,
-            0,
-            0
-          ]
-        },
-        {
-          "name": "Veteran",
-          "count": 1,
-          "radius": 0,
-          "minCooldown": 3,
-          "maxCooldown": 15,
-          "spawnChanceBase": 40,
-          "spawnChanceBonus": 5,
-          "rarityChance": [
-            0,
-            0,
-            0,
-            0
-          ]
-        },
-        {
-          "name": "Master",
-          "count": 1,
-          "radius": 0,
-          "minCooldown": 3,
-          "maxCooldown": 5,
-          "spawnChanceBase": 40,
-          "spawnChanceBonus": 5,
-          "rarityChance": [
-            0,
-            0,
-            0,
-            0
-          ]
-        }
-      ],
-      "excludeRules": [
-        "EArtifactSpawnerExcludeRule::ExcludeQuestArtifacts",
-        "EArtifactSpawnerExcludeRule::ExcludeArchiArtifacts"
-      ],
-      "useListOfArtifacts": true,
-      "listOfArtifacts": [
-        "FArtifactCore"
-      ]
-    },
-    {
-      "name": "HedgehogArtifactSpawner",
-      "settings": [
-        {
-          "name": "Newbie",
-          "count": 1,
-          "radius": 0,
-          "minCooldown": 3,
-          "maxCooldown": 15,
-          "spawnChanceBase": 40,
-          "spawnChanceBonus": 5,
-          "rarityChance": [
-            0,
-            0,
-            0,
-            0
-          ]
-        },
-        {
-          "name": "Experienced",
-          "count": 1,
-          "radius": 0,
-          "minCooldown": 3,
-          "maxCooldown": 15,
-          "spawnChanceBase": 40,
-          "spawnChanceBonus": 5,
-          "rarityChance": [
-            0,
-            0,
-            0,
-            0
-          ]
-        },
-        {
-          "name": "Veteran",
-          "count": 1,
-          "radius": 0,
-          "minCooldown": 3,
-          "maxCooldown": 15,
-          "spawnChanceBase": 40,
-          "spawnChanceBonus": 5,
-          "rarityChance": [
-            0,
-            0,
-            0,
-            0
-          ]
-        },
-        {
-          "name": "Master",
-          "count": 1,
-          "radius": 0,
-          "minCooldown": 3,
-          "maxCooldown": 15,
-          "spawnChanceBase": 40,
-          "spawnChanceBonus": 5,
-          "rarityChance": [
-            0,
-            0,
-            0,
-            0
-          ]
-        }
-      ],
-      "excludeRules": [
-        "EArtifactSpawnerExcludeRule::ExcludeQuestArtifacts",
-        "EArtifactSpawnerExcludeRule::ExcludeArchiArtifacts"
-      ],
-      "useListOfArtifacts": true,
-      "listOfArtifacts": [
-        "GArtifactHedgehog"
-      ]
-    },
-    {
-      "name": "SpongeArtifactSpawner",
-      "settings": [
-        {
-          "name": "Newbie",
-          "count": 1,
-          "radius": 0,
-          "minCooldown": 3,
-          "maxCooldown": 15,
-          "spawnChanceBase": 40,
-          "spawnChanceBonus": 5,
-          "rarityChance": [
-            0,
-            0,
-            0,
-            0
-          ]
-        },
-        {
-          "name": "Experienced",
-          "count": 1,
-          "radius": 0,
-          "minCooldown": 3,
-          "maxCooldown": 15,
-          "spawnChanceBase": 40,
-          "spawnChanceBonus": 5,
-          "rarityChance": [
-            0,
-            0,
-            0,
-            0
-          ]
-        },
-        {
-          "name": "Veteran",
-          "count": 1,
-          "radius": 0,
-          "minCooldown": 3,
-          "maxCooldown": 15,
-          "spawnChanceBase": 40,
-          "spawnChanceBonus": 5,
-          "rarityChance": [
-            0,
-            0,
-            0,
-            0
-          ]
-        },
-        {
-          "name": "Master",
-          "count": 1,
-          "radius": 0,
-          "minCooldown": 3,
-          "maxCooldown": 15,
-          "spawnChanceBase": 40,
-          "spawnChanceBonus": 5,
-          "rarityChance": [
-            0,
-            0,
-            0,
-            0
-          ]
-        }
-      ],
-      "excludeRules": [
-        "EArtifactSpawnerExcludeRule::ExcludeQuestArtifacts",
-        "EArtifactSpawnerExcludeRule::ExcludeArchiArtifacts"
-      ],
-      "useListOfArtifacts": true,
-      "listOfArtifacts": [
-        "GArtifactSponge"
-      ]
-    },
-    {
       "name": "NightStarArtifactSpawner",
       "settings": [
         {
@@ -70665,152 +69668,6 @@
       ]
     },
     {
-      "name": "LiquidStoneArtifactSpawner",
-      "settings": [
-        {
-          "name": "Newbie",
-          "count": 1,
-          "radius": 0,
-          "minCooldown": 3,
-          "maxCooldown": 15,
-          "spawnChanceBase": 40,
-          "spawnChanceBonus": 5,
-          "rarityChance": [
-            0,
-            0,
-            0,
-            0
-          ]
-        },
-        {
-          "name": "Experienced",
-          "count": 1,
-          "radius": 0,
-          "minCooldown": 3,
-          "maxCooldown": 15,
-          "spawnChanceBase": 40,
-          "spawnChanceBonus": 5,
-          "rarityChance": [
-            0,
-            0,
-            0,
-            0
-          ]
-        },
-        {
-          "name": "Veteran",
-          "count": 1,
-          "radius": 0,
-          "minCooldown": 3,
-          "maxCooldown": 15,
-          "spawnChanceBase": 40,
-          "spawnChanceBonus": 5,
-          "rarityChance": [
-            0,
-            0,
-            0,
-            0
-          ]
-        },
-        {
-          "name": "Master",
-          "count": 1,
-          "radius": 0,
-          "minCooldown": 3,
-          "maxCooldown": 15,
-          "spawnChanceBase": 40,
-          "spawnChanceBonus": 5,
-          "rarityChance": [
-            0,
-            0,
-            0,
-            0
-          ]
-        }
-      ],
-      "excludeRules": [
-        "EArtifactSpawnerExcludeRule::ExcludeQuestArtifacts",
-        "EArtifactSpawnerExcludeRule::ExcludeArchiArtifacts"
-      ],
-      "useListOfArtifacts": true,
-      "listOfArtifacts": [
-        "CArtifactLiquidStone"
-      ]
-    },
-    {
-      "name": "EchinusArtifactSpawner",
-      "settings": [
-        {
-          "name": "Newbie",
-          "count": 1,
-          "radius": 0,
-          "minCooldown": 3,
-          "maxCooldown": 15,
-          "spawnChanceBase": 40,
-          "spawnChanceBonus": 5,
-          "rarityChance": [
-            0,
-            0,
-            0,
-            0
-          ]
-        },
-        {
-          "name": "Experienced",
-          "count": 1,
-          "radius": 0,
-          "minCooldown": 3,
-          "maxCooldown": 15,
-          "spawnChanceBase": 40,
-          "spawnChanceBonus": 5,
-          "rarityChance": [
-            0,
-            0,
-            0,
-            0
-          ]
-        },
-        {
-          "name": "Veteran",
-          "count": 1,
-          "radius": 0,
-          "minCooldown": 3,
-          "maxCooldown": 15,
-          "spawnChanceBase": 40,
-          "spawnChanceBonus": 5,
-          "rarityChance": [
-            0,
-            0,
-            0,
-            0
-          ]
-        },
-        {
-          "name": "Master",
-          "count": 1,
-          "radius": 0,
-          "minCooldown": 3,
-          "maxCooldown": 15,
-          "spawnChanceBase": 40,
-          "spawnChanceBonus": 5,
-          "rarityChance": [
-            0,
-            0,
-            0,
-            0
-          ]
-        }
-      ],
-      "excludeRules": [
-        "EArtifactSpawnerExcludeRule::ExcludeQuestArtifacts",
-        "EArtifactSpawnerExcludeRule::ExcludeArchiArtifacts"
-      ],
-      "useListOfArtifacts": true,
-      "listOfArtifacts": [
-        "CArtifactEchinus"
-      ]
-    },
-    {
       "name": "BubbleArtifactSpawner",
       "settings": [
         {
@@ -70881,152 +69738,6 @@
       "useListOfArtifacts": true,
       "listOfArtifacts": [
         "CArtifactBubble"
-      ]
-    },
-    {
-      "name": "BunArtifactSpawner",
-      "settings": [
-        {
-          "name": "Newbie",
-          "count": 1,
-          "radius": 0,
-          "minCooldown": 3,
-          "maxCooldown": 15,
-          "spawnChanceBase": 40,
-          "spawnChanceBonus": 5,
-          "rarityChance": [
-            0,
-            0,
-            0,
-            0
-          ]
-        },
-        {
-          "name": "Experienced",
-          "count": 1,
-          "radius": 0,
-          "minCooldown": 3,
-          "maxCooldown": 15,
-          "spawnChanceBase": 40,
-          "spawnChanceBonus": 5,
-          "rarityChance": [
-            0,
-            0,
-            0,
-            0
-          ]
-        },
-        {
-          "name": "Veteran",
-          "count": 1,
-          "radius": 0,
-          "minCooldown": 3,
-          "maxCooldown": 15,
-          "spawnChanceBase": 40,
-          "spawnChanceBonus": 5,
-          "rarityChance": [
-            0,
-            0,
-            0,
-            0
-          ]
-        },
-        {
-          "name": "Master",
-          "count": 1,
-          "radius": 0,
-          "minCooldown": 3,
-          "maxCooldown": 15,
-          "spawnChanceBase": 40,
-          "spawnChanceBonus": 5,
-          "rarityChance": [
-            0,
-            0,
-            0,
-            0
-          ]
-        }
-      ],
-      "excludeRules": [
-        "EArtifactSpawnerExcludeRule::ExcludeQuestArtifacts",
-        "EArtifactSpawnerExcludeRule::ExcludeArchiArtifacts"
-      ],
-      "useListOfArtifacts": true,
-      "listOfArtifacts": [
-        "CArtifactBun"
-      ]
-    },
-    {
-      "name": "ThornArtifactSpawner",
-      "settings": [
-        {
-          "name": "Newbie",
-          "count": 1,
-          "radius": 0,
-          "minCooldown": 3,
-          "maxCooldown": 15,
-          "spawnChanceBase": 40,
-          "spawnChanceBonus": 5,
-          "rarityChance": [
-            0,
-            0,
-            0,
-            0
-          ]
-        },
-        {
-          "name": "Experienced",
-          "count": 1,
-          "radius": 0,
-          "minCooldown": 3,
-          "maxCooldown": 15,
-          "spawnChanceBase": 40,
-          "spawnChanceBonus": 5,
-          "rarityChance": [
-            0,
-            0,
-            0,
-            0
-          ]
-        },
-        {
-          "name": "Veteran",
-          "count": 1,
-          "radius": 0,
-          "minCooldown": 3,
-          "maxCooldown": 15,
-          "spawnChanceBase": 40,
-          "spawnChanceBonus": 5,
-          "rarityChance": [
-            0,
-            0,
-            0,
-            0
-          ]
-        },
-        {
-          "name": "Master",
-          "count": 1,
-          "radius": 0,
-          "minCooldown": 3,
-          "maxCooldown": 15,
-          "spawnChanceBase": 40,
-          "spawnChanceBonus": 5,
-          "rarityChance": [
-            0,
-            0,
-            0,
-            0
-          ]
-        }
-      ],
-      "excludeRules": [
-        "EArtifactSpawnerExcludeRule::ExcludeQuestArtifacts",
-        "EArtifactSpawnerExcludeRule::ExcludeArchiArtifacts"
-      ],
-      "useListOfArtifacts": true,
-      "listOfArtifacts": [
-        "CArtifactThorn"
       ]
     },
     {

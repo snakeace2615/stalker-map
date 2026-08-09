@@ -29,16 +29,23 @@ import { BottomSheetWrapperComponent } from '../../bottom-sheet-wrapper/bottom-s
 import { L, asStalkerMap, pixelCenter, StalkerCustomLayersControl, StalkerLayerGroup, StalkerMap } from '../../../leaflet/leaflet-setup';
 import {
     collectRichLootInfo,
-    RICH_STASH_SUB_FILTERS,
-    RICH_STUFF_SUB_FILTERS,
+    configureRichLootTags,
+    getItemSearchKeys,
+    getRichStashSubFilters,
+    getRichStuffSubFilters,
+    getRichTagSearchKeys,
+    pickPresentRichSubFilters,
+    RichLootSubFilterConfig,
 } from '../../../models/hoc/rich-loot-tags';
+import { HocRegion } from '../../../models/hoc/region.model';
+import { HOC_LAYER_CONTROL_ICONS } from '../../../models/hoc/layer-control-icons';
 
 @Component({
     selector: 'app-map-hoc',
     standalone: true,
     imports: [HeaderComponent, TranslateModule, BottomSheetWrapperComponent],
     templateUrl: './map-hoc.component.html',
-    styleUrl: './map-hoc.component.scss',
+    styleUrls: ['./map-hoc.component.scss', './map-hoc.layers.scss', '../../map/map.component.inventory.base.scss'],
     encapsulation: ViewEncapsulation.None,
 })
 export class MapHocComponent {
@@ -67,6 +74,7 @@ export class MapHocComponent {
     private dlcTypes: string[] = [];
     private enabledDlcs: Set<string> = new Set();
     private showOffMapContent = false;
+    private regions: HocRegion[] = [];
 
     constructor(
         protected translate: TranslateService,
@@ -104,11 +112,15 @@ export class MapHocComponent {
         fetch(`/assets/data/${this.game}/map.json`).then((response) => {
             if (response.ok) {
                 response.json().then((gamedata: MapHoc) => {
-                    fetch(`/assets/data/${this.game}_config.json`)
-                        .then((response) => response.json())
-                        .then((gameConfig: MapConfig) => {
-                            this.loadMap(gamedata, gameConfig);
-                        });
+                    Promise.all([
+                        fetch(`/assets/data/${this.game}_config.json`).then((r) => r.json()),
+                        fetch(`/assets/data/${this.game}/regions.json`).then((r) =>
+                            r.ok ? r.json() : []
+                        ),
+                    ]).then(([gameConfig, regions]: [MapConfig, HocRegion[]]) => {
+                        this.regions = regions ?? [];
+                        this.loadMap(gamedata, gameConfig);
+                    });
                 });
             }
         });
@@ -123,6 +135,7 @@ export class MapHocComponent {
     private loadMap(gameData: MapHoc, gameConfig: MapConfig): void {
         this.gamedata = gameData;
         this.mapConfig = gameConfig;
+        configureRichLootTags(gameConfig);
 
         this.gamedata.widthInMeters = gameConfig.mapBounds[1][1] - gameConfig.mapBounds[0][1];
         this.gamedata.heightInMeters = gameConfig.mapBounds[1][0] - gameConfig.mapBounds[0][0];
@@ -320,6 +333,10 @@ export class MapHocComponent {
             this.addArtefactSpawners();
         }
 
+        if (this.regions.length > 0) {
+            this.addRegions();
+        }
+
         let ruler: any = null;
         if (gameConfig.rulerEnabled) {
             ruler = this.mapService.addRuler(this.map, gameConfig.lengthFactor ?? 1);
@@ -428,9 +445,9 @@ export class MapHocComponent {
 
             for (const layer of layersToLayerController) {
                 if (layer.name === 'rich-stash') {
-                    this.attachRichSubFilters(layer, RICH_STASH_SUB_FILTERS);
+                    this.attachRichSubFilters(layer, getRichStashSubFilters());
                 } else if (layer.name === 'rich-stuff') {
-                    this.attachRichSubFilters(layer, RICH_STUFF_SUB_FILTERS);
+                    this.attachRichSubFilters(layer, getRichStuffSubFilters());
                 }
             }
 
@@ -465,9 +482,9 @@ export class MapHocComponent {
 
         for (const layer of layersToLayerController) {
             if (layer.name === 'rich-stash') {
-                this.attachRichSubFilters(layer, RICH_STASH_SUB_FILTERS);
+                this.attachRichSubFilters(layer, getRichStashSubFilters());
             } else if (layer.name === 'rich-stuff') {
-                this.attachRichSubFilters(layer, RICH_STUFF_SUB_FILTERS);
+                this.attachRichSubFilters(layer, getRichStuffSubFilters());
             }
         }
 
@@ -750,7 +767,22 @@ export class MapHocComponent {
         this.searchComponentRef?.instance.refreshResults();
     }
 
-    private getRichSubFilters(filters: { id: string; nameKey: string }[]) {
+    private getLayerMarkers(layer: any): { richTags?: string[] }[] {
+        const fromDlc = this.dlcMarkers.filter((marker) => marker.dlcLayer === layer);
+        if (fromDlc.length > 0) {
+            return fromDlc;
+        }
+
+        const markers: { richTags?: string[] }[] = [];
+
+        if (typeof layer?.eachLayer === 'function') {
+            layer.eachLayer((marker: any) => markers.push(marker));
+        }
+
+        return markers;
+    }
+
+    private getRichSubFilters(filters: RichLootSubFilterConfig[]) {
         return filters.map((filter) => ({
             id: filter.id,
             name: this.translate.instant(filter.nameKey),
@@ -759,15 +791,20 @@ export class MapHocComponent {
 
     private attachRichSubFilters(
         layer: any,
-        filters: { id: string; nameKey: string }[]
+        allFilters: RichLootSubFilterConfig[]
     ): void {
+        const filters = pickPresentRichSubFilters(
+            allFilters,
+            this.getLayerMarkers(layer)
+        );
+
         layer.subFilters = this.getRichSubFilters(filters);
         layer._richSubFilterDefs = filters;
 
         if (!layer._activeSubFilters) {
             layer._activeSubFilters = new Set(filters.map((filter) => filter.id));
         } else {
-            // Drop tags that no longer exist for this layer (e.g. blueprint on stuff).
+            // Drop tags that are not present in this dataset / layer.
             for (const id of [...layer._activeSubFilters]) {
                 if (!filters.some((filter) => filter.id === id)) {
                     layer._activeSubFilters.delete(id);
@@ -1156,6 +1193,91 @@ export class MapHocComponent {
                 this.addLayerToMap(L.layerGroup(layerFeatures), type.name, false);
             }
         }
+    }
+
+    /** Region polygons from regions.json (UE cm → map meters via /100). */
+    private addRegions(): void {
+        const polygons: L.Layer[] = [];
+
+        for (const region of this.regions) {
+            const coords = region.geometry?.coordinates;
+            if (!coords?.length) {
+                continue;
+            }
+
+            // Extractor converts UE cm → meters with /100; Leaflet uses [z, x].
+            const latLngs: L.LatLngExpression[] = coords.map((point) => {
+                const x = point[0] / 100;
+                const z = point[1] / 100;
+                return [z, x];
+            });
+
+            const polygon: any = L.polygon(latLngs, {
+                color: '#c9a227',
+                weight: 2,
+                opacity: 0.9,
+                fillColor: '#c9a227',
+                fillOpacity: 0.12,
+                interactive: false,
+            });
+
+            polygon.name = region.region_title;
+            polygon.description = region.region_description;
+            polygon.feature = { properties: {} };
+            polygon.properties = {
+                locationUniqueName: region.region_title,
+            };
+
+            this.createTranslatableProperty(
+                polygon.feature.properties,
+                'search',
+                [region.region_title, region.region_description].filter(Boolean),
+                this.translate
+            );
+
+            polygon.bindTooltip(
+                () => this.translate.instant(region.region_title),
+                {
+                    permanent: true,
+                    direction: 'center',
+                    className: 'region-label',
+                    opacity: 1,
+                    interactive: false,
+                }
+            );
+
+            polygons.push(polygon);
+        }
+
+        if (polygons.length > 0) {
+            const layer = L.layerGroup(polygons);
+            this.addLayerToMap(layer, 'regions', true);
+
+            const syncLabels = () => this.syncRegionLabels(layer);
+            layer.on('add', syncLabels);
+            this.map.on('zoomend', syncLabels);
+            syncLabels();
+        }
+    }
+
+    private syncRegionLabels(layer: any): void {
+        if (!this.map?.hasLayer(layer)) {
+            return;
+        }
+
+        const showLabels = this.map.getZoom() >= this.map.getMaxZoom();
+
+        layer.eachLayer((polygon: any) => {
+            if (typeof polygon.getTooltip !== 'function' || !polygon.getTooltip()) {
+                return;
+            }
+
+            if (showLabels) {
+                polygon.openTooltip();
+            } else {
+                polygon.closeTooltip();
+            }
+        });
     }
 
     private addGrid(): void {
@@ -1745,19 +1867,14 @@ export class MapHocComponent {
             let richItems: { item: Item; count?: number }[] = [];
 
             if (data.items && data.items.length > 0) {
-                let itemsToFind: any[] = [];
-
                 data.items.forEach((element: any) => {
                     let item = this.items.find((y) => y.uniqueName == element.uniqueName);
 
                     if (item) {
-                        itemsToFind.push(item?.localeName);
-                        itemsToFind.push(`synonyms.${item?.uniqueName}`);
+                        localesToFind.push(...getItemSearchKeys(item));
                         richItems.push({ item, count: element.count });
                     }
                 });
-
-                localesToFind.push(...itemsToFind);
             }
 
             const richInfo = collectRichLootInfo(richItems);
@@ -1775,6 +1892,7 @@ export class MapHocComponent {
             marker.feature.properties = {};
             marker.properties = {};
             marker.properties.richTags = richInfo.tags;
+            localesToFind.push(...getRichTagSearchKeys(richInfo.tags));
             marker.properties.locationUniqueName = data.locationId > 0 ? this.gamedata.locations[data.locationId] : null;
             this.stampShareMeta(marker, data, isRich ? 'rich-stuff' : 'stuff');
 
@@ -1822,7 +1940,7 @@ export class MapHocComponent {
         if (richMarkers.length > 0) {
             const richLayer = L.layerGroup(richMarkers);
             this.addLayerToMap(richLayer, 'rich-stuff', true);
-            this.attachRichSubFilters(richLayer, RICH_STUFF_SUB_FILTERS);
+            this.attachRichSubFilters(richLayer, getRichStuffSubFilters());
         }
     }
 
@@ -1882,7 +2000,7 @@ export class MapHocComponent {
                                                 );
 
                                                 if (item) {
-                                                    localesToFind.push(item.localeName);
+                                                    localesToFind.push(...getItemSearchKeys(item));
                                                     isRandom = false;
                                                     richItems.push({
                                                         item,
@@ -1906,7 +2024,7 @@ export class MapHocComponent {
                     );
 
                     if (item) {
-                        localesToFind.push(item.localeName);
+                        localesToFind.push(...getItemSearchKeys(item));
                         isRandom = false;
                         richItems.push({ item, count: itemIn.count });
                     }
@@ -1953,22 +2071,11 @@ export class MapHocComponent {
                 isRich ? 'rich-stash' : isRandom ? 'random-stash' : 'stash'
             );
 
-            localesToFind.push(marker.name, markers.length.toString());
-
-            /*if (data.items && data.items.length > 0) {
-              let itemsToFind: any[] = [];
-      
-              data.items.forEach((element: any) => {
-                let item = this.items.find(y => y.uniqueName == element.uniqueName);
-      
-                if (item) {
-                  itemsToFind.push(item?.localeName);
-                  itemsToFind.push(`synonyms.${item?.uniqueName}`);
-                }
-              });
-      
-              localesToFind.push(...itemsToFind);
-            }*/
+            localesToFind.push(
+                marker.name,
+                markers.length.toString(),
+                ...getRichTagSearchKeys(richInfo.tags)
+            );
 
             if (localesToFind.length > 0) {
                 this.createTranslatableProperty(
@@ -2021,7 +2128,7 @@ export class MapHocComponent {
         if (richMarkers.length > 0) {
             const richLayer = L.layerGroup(richMarkers);
             this.addLayerToMap(richLayer, 'rich-stash', true);
-            this.attachRichSubFilters(richLayer, RICH_STASH_SUB_FILTERS);
+            this.attachRichSubFilters(richLayer, getRichStashSubFilters());
         }
 
         if (randomMarkers.length > 0) {
@@ -2467,6 +2574,12 @@ export class MapHocComponent {
     private addLayerToMap(layer: any, name: any, ableToSearch: boolean = false) {
         layer.ableToSearch = ableToSearch;
         layer.name = name;
+
+        const controlIcon = HOC_LAYER_CONTROL_ICONS[name];
+        if (controlIcon) {
+            layer.controlIcon = controlIcon.iconUrl;
+            layer.controlIconColor = controlIcon.color;
+        }
 
         if (typeof layer.eachLayer === 'function') {
             layer.eachLayer((marker: any) => {

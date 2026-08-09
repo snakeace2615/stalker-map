@@ -49,6 +49,25 @@ export class LocaleService {
         game: string,
         query: Record<string, string | number | boolean | null | undefined> = {}
     ): string {
+        return this.absoluteUrl(this.neutralMapPath(game), query);
+    }
+
+    /** Absolute map URL with language prefix, e.g. `https://…/en/map/shoc?lat=…`. */
+    public absoluteLocalizedMapUrl(
+        game: string,
+        query: Record<string, string | number | boolean | null | undefined> = {}
+    ): string {
+        return this.absoluteUrl(this.mapPath(game), query);
+    }
+
+    public contentPath(game: string): string {
+        return this.localizedPath(`/map/content/${game}`);
+    }
+
+    private absoluteUrl(
+        path: string,
+        query: Record<string, string | number | boolean | null | undefined> = {}
+    ): string {
         const params = new URLSearchParams();
         for (const [key, value] of Object.entries(query)) {
             if (value === null || value === undefined || value === false) {
@@ -57,6 +76,6 @@ export class LocaleService {
             params.set(key, String(value));
         }
         const qs = params.toString();
-        return `${window.location.origin}${this.neutralMapPath(game)}${qs ? `?${qs}` : ''}`;
+        return `${window.location.origin}${path}${qs ? `?${qs}` : ''}`;
     }
 }

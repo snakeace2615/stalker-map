@@ -4,6 +4,16 @@
   height: var(--wrapper-height);
 }
 
+.leaflet-control-layers {
+  background-color: black !important;
+  color: white !important;
+}
+
+.leaflet-touch .leaflet-control-layers,
+.leaflet-touch .leaflet-bar {
+  border: 2px solid rgb(255 255 255) !important;
+}
+
 
 .leaflet-tooltip {
   border: 11px solid !important;
@@ -63,6 +73,27 @@
   font-size: 12px;
   text-shadow: 0 0 3px black;
   pointer-events: none;
+}
+
+.leaflet-tooltip.region-label {
+  border: none !important;
+  border-image: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  max-width: none;
+  min-width: 0;
+  padding: 0;
+  color: #fff !important;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-shadow: 0 0 4px #000, 0 1px 2px #000, 0 0 10px #000;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.leaflet-tooltip.region-label::before {
+  display: none;
 }
 
 .leaflet-control-layers-subfilters {

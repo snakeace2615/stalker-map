@@ -60,3 +60,27 @@
     grid-template-columns: repeat(4, 1fr);
   }
 }
+
+.content-index {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+  align-items: baseline;
+  padding: 0.5rem 10px 1.5rem;
+  color: #e8e8e8;
+}
+
+.content-index-title {
+  flex: 0 0 100%;
+  opacity: 0.75;
+  font-size: 0.95rem;
+}
+
+.content-index a {
+  color: #e8e8e8;
+  text-underline-offset: 0.2em;
+}
+
+.content-index a:hover {
+  color: #fff;
+}

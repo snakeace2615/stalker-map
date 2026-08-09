@@ -1,13 +1,15 @@
-import { ApplicationConfig } from '@angular/core';
+import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
 
 import { routes } from './app.routes';
 import { provideHttpClient } from '@angular/common/http';
 import { TranslateModule } from '@ngx-translate/core';
-import {provideTranslateHttpLoader, TranslateHttpLoader} from '@ngx-translate/http-loader';
+import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
 
 export const appConfig: ApplicationConfig = {
-  providers: [
+    providers: [
+    // App state updates rely on Zone.js; Angular 21 defaults to zoneless without this.
+    provideZoneChangeDetection(),
     provideRouter(routes),
     provideHttpClient(),
     TranslateModule.forRoot({

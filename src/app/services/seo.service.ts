@@ -46,6 +46,14 @@ export class SeoService {
         });
     }
 
+    public applyMapContentPage(game: string): void {
+        this.apply({
+            titleKey: `${game}MapContentPageTitle`,
+            descriptionKey: `${game}MapContentMetaDescription`,
+            pagePath: `/map/content/${game}`,
+        });
+    }
+
     public setHtmlLang(lang: string): void {
         this.document.documentElement.lang = HTML_LANG_MAP[lang] ?? lang;
     }

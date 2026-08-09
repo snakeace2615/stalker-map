@@ -1,0 +1,19 @@
+/* HOC layer-control icons are painted via <img> (same SVG recolor as map markers). */
+
+app-map-hoc {
+  .leaflet-control-layers-overlays .stalker-layer-icon {
+    background-image: none !important;
+    background-color: transparent !important;
+    -webkit-mask-image: none !important;
+    mask-image: none !important;
+  }
+
+  .stalker-layer-icon-img {
+    display: block;
+    width: 16px;
+    height: 16px;
+    object-fit: contain;
+    /* Keep white map markers readable on the dark layer control. */
+    filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.9));
+  }
+}

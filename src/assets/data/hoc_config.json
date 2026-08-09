@@ -121,6 +121,10 @@
       "isShowByDefault": false
     },
     {
+      "uniqueName": "regions",
+      "isShowByDefault": false
+    },
+    {
       "uniqueName": "grid",
       "isShowByDefault": false
     }
@@ -136,6 +140,51 @@
   "mapBounds": [
     [16.5027306207,2.7635682],
     [8118.35623304,8130.9993132]
+  ],
+  "richLootExpensiveThreshold": 20000,
+  "richLootSubFilters": [
+    {
+      "id": "blueprint",
+      "nameKey": "richFilter.blueprint",
+      "uniqueNamePrefixes": ["Blueprint_"],
+      "stashOnly": true
+    },
+    {
+      "id": "attachment",
+      "nameKey": "richFilter.attachment",
+      "categories": ["EItemType::Attach"]
+    },
+    {
+      "id": "nvg",
+      "nameKey": "richFilter.nvg",
+      "categories": ["EItemType::NightVisionGoggles"]
+    },
+    {
+      "id": "binoculars",
+      "nameKey": "richFilter.binoculars",
+      "categories": ["EItemType::Binoculars"]
+    },
+    {
+      "id": "money",
+      "nameKey": "richFilter.money",
+      "uniqueNamePrefixes": ["Money"]
+    },
+    {
+      "id": "artifact",
+      "nameKey": "richFilter.artifact",
+      "categories": ["EItemType::Artifact"]
+    },
+    {
+      "id": "note",
+      "nameKey": "richFilter.note",
+      "categories": ["EItemType::Info"]
+    },
+    {
+      "id": "expensive",
+      "nameKey": "richFilter.expensive",
+      "categories": ["EItemType::Armor", "QuestItem", "KeyItem"],
+      "matchByCostThreshold": true
+    }
   ],
   "languages": [
     "ua", "en", "de", "fr", "esp", "it", "pl", "cz", "tr", "sr", "br", "latam", "ar", "chi_cpr", "chi_tw", "jpn", "kor", "ru"

@@ -3,6 +3,7 @@ import { MarkersLayerConfig } from "../marker-config.model";
 import { RankSetting } from "../rank-settings.model";
 import { TraderSectionsConfig } from "../trader/trader-sections-config.model";
 import { UndergroundLevelsConfig } from "../underground-levels-config.model";
+import { RichLootSubFilterConfig } from "../hoc/rich-loot-tags";
 
 export class MapConfig {
   public minZoom: number;
@@ -21,6 +22,8 @@ export class MapConfig {
   public actor: CharacterProfile;
   public undergroundLevelsConfig: UndergroundLevelsConfig[];
   public itemsCategoriesSettings: CategoryFilterSettings[];
+  public richLootExpensiveThreshold?: number;
+  public richLootSubFilters?: RichLootSubFilterConfig[];
 
   public mapBounds: any;
   public kx: number;

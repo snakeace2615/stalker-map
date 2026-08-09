@@ -14,6 +14,10 @@
     "hocMapPageTitle": "Mapa de Heart of Chornobyl",
     "sub-location": "Ubicaciones",
     "stash": "Escondites",
+    "regions": "Regiones",
+    "diegetic-map-label": "Mapa diegético del juego",
+    "in-game-map-label": "Mapa del juego",
+    "raw-map-label": "Mapa de desarrolladores",
     "st_stash": "Escondite",
     "st_monolith_stuff_title": "Escondite de Monolith",
     "quest": "botín de misión",
@@ -195,5 +199,12 @@
     "shocMapMetaDescription": "Mapa interactivo de Shadow of Chernobyl con escondites, misiones, anomalías, comerciantes y ubicaciones.",
     "csMapMetaDescription": "Mapa interactivo de Clear Sky con escondites, misiones, anomalías, comerciantes y ubicaciones.",
     "copMapMetaDescription": "Mapa interactivo de Call of Pripyat con escondites, misiones, anomalías, comerciantes y ubicaciones.",
-    "hocMapMetaDescription": "Mapa interactivo de Heart of Chornobyl (S.T.A.L.K.E.R. 2) con escondites, misiones, artefactos, comerciantes y puntos de interés."
+    "hocMapMetaDescription": "Mapa interactivo de Heart of Chornobyl (S.T.A.L.K.E.R. 2) con escondites, misiones, artefactos, comerciantes y puntos de interés.",
+    "shocMapContentPageTitle": "Escondites y botín de Shadow of Chernobyl",
+    "csMapContentPageTitle": "Escondites y botín de Clear Sky",
+    "copMapContentPageTitle": "Escondites y botín de Call of Pripyat",
+    "shocMapContentMetaDescription": "Lista de escondites, objetos de misión y botín de Shadow of Chernobyl con enlaces directos a marcadores en el mapa interactivo.",
+    "csMapContentMetaDescription": "Lista de escondites, objetos de misión y botín de Clear Sky con enlaces directos a marcadores en el mapa interactivo.",
+    "copMapContentMetaDescription": "Lista de escondites, objetos de misión y botín de Call of Pripyat con enlaces directos a marcadores en el mapa interactivo.",
+    "mapContentIndex": "Listas de escondites y botín"
 }

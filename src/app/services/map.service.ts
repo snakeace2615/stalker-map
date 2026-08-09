@@ -769,22 +769,37 @@ export class MapService {
                 L.DomEvent.on(input, 'click', this._onInputClick, this);
                 L.DomEvent.on(subHeaderCheckbox, 'click', this._onInputClickTop, this);
 
+                const icon = document.createElement('span');
+                icon.classList.add('stalker-layer-icon', 'stalker-search-item', obj.layer.name);
+                icon.setAttribute('aria-hidden', 'true');
+
+                if (obj.layer.controlIcon) {
+                    const img = document.createElement('img');
+                    img.alt = '';
+                    img.className = 'stalker-layer-icon-img';
+                    icon.appendChild(img);
+                    this._paintLayerControlIcon(
+                        img,
+                        obj.layer.controlIcon,
+                        obj.layer.controlIconColor
+                    );
+                }
+
                 const name = document.createElement('span');
                 name.innerHTML = `${obj.name}`;
-                name.classList.add('stalker-search-item', obj.layer.name);
+                name.classList.add('stalker-layer-name');
 
                 // Helps from preventing layer control flicker when checkboxes are disabled
                 // https://github.com/Leaflet/Leaflet/issues/2771
                 const holder = document.createElement('span');
-                //const holderTop = document.createElement('span');
+                holder.classList.add('leaflet-control-layers-row');
 
                 //labelTop.appendChild(holderTop);
                 label.appendChild(holder);
 
                 //holderTop.appendChild(inputTop)
                 holder.appendChild(input);
-
-                //holderTop.appendChild(nameTop)
+                holder.appendChild(icon);
                 holder.appendChild(name);
 
                 const container = obj.overlay ? this._overlaysList : this._baseLayersList;
@@ -796,6 +811,28 @@ export class MapService {
 
                 this._checkDisabledLayers();
                 return label;
+            },
+
+            _paintLayerControlIcon: function (
+                img: HTMLImageElement,
+                iconUrl: string,
+                color?: string
+            ) {
+                if (!color || !iconUrl.toLowerCase().endsWith('.svg')) {
+                    img.src = iconUrl;
+                    return;
+                }
+
+                fetch(iconUrl)
+                    .then((response) => (response.ok ? response.text() : Promise.reject()))
+                    .then((svg: string) => {
+                        const colored = svg.replace(/#FFFFFF/gim, color);
+                        const svgBlob = new Blob([colored], { type: 'image/svg+xml' });
+                        img.src = URL.createObjectURL(svgBlob);
+                    })
+                    .catch(() => {
+                        img.src = iconUrl;
+                    });
             },
 
             _addSubFilters: function (obj: any, container: HTMLElement, parentChecked: boolean) {

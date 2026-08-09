@@ -272,11 +272,13 @@
     "zombie-lair": "Odradzanie zombie",
     "in-game-map-label": "Mapa w grze",
     "raw-map-label": "Mapa deweloperska",
+    "diegetic-map-label": "Mapa diegetyczna z gry",
     "rich-stash": "Cenne schowki",
     "random-stash": "Losowe schowki",
     "circles": "Koła obozów",
     "Rat": "Szczury",
     "rich-stuff": "Cenny łup",
+    "regions": "Regiony",
     "grid": "Siatka",
     "richFilter.blueprint": "Schematy",
     "richFilter.attachment": "Dodatki",
@@ -296,5 +298,12 @@
     "shocMapMetaDescription": "Interaktywna mapa Cieni Czarnobyla ze skrytkami, zadaniami, anomaliami, handlarzami i lokacjami.",
     "csMapMetaDescription": "Interaktywna mapa Czystego Nieba ze skrytkami, zadaniami, anomaliami, handlarzami i lokacjami.",
     "copMapMetaDescription": "Interaktywna mapa Zewu Prypeci ze skrytkami, zadaniami, anomaliami, handlarzami i lokacjami.",
-    "hocMapMetaDescription": "Interaktywna mapa Serca Czarnobyla (S.T.A.L.K.E.R. 2) ze skrytkami, zadaniami, artefaktami, handlarzami i punktami zainteresowania."
+    "hocMapMetaDescription": "Interaktywna mapa Serca Czarnobyla (S.T.A.L.K.E.R. 2) ze skrytkami, zadaniami, artefaktami, handlarzami i punktami zainteresowania.",
+    "shocMapContentPageTitle": "Skrytki i łup Cienia Czarnobyla",
+    "csMapContentPageTitle": "Skrytki i łup Czystego Nieba",
+    "copMapContentPageTitle": "Skrytki i łup Zewu Prypeci",
+    "shocMapContentMetaDescription": "Lista skrytek, przedmiotów zadaniowych i łupu Cienia Czarnobyla z bezpośrednimi linkami do znaczników na interaktywnej mapie.",
+    "csMapContentMetaDescription": "Lista skrytek, przedmiotów zadaniowych i łupu Czystego Nieba z bezpośrednimi linkami do znaczników na interaktywnej mapie.",
+    "copMapContentMetaDescription": "Lista skrytek, przedmiotów zadaniowych i łupu Zewu Prypeci z bezpośrednimi linkami do znaczników na interaktywnej mapie.",
+    "mapContentIndex": "Listy skrytek i łupu"
 }
