@@ -1,4 +1,8 @@
-<div tooltip [component]="itemTooltipComponent" [componentData]="{item: stuffItem.item}" class="inventory-item hoc inventory-item-width-{{stuffItem.item.width}} inventory-item-height-{{stuffItem.item.height}}">
+<div tooltip [component]="itemTooltipComponent" [componentData]="{item: stuffItem.item}" class="inventory-item hoc"
+    [style.--item-w]="stuffItem.item.width"
+    [style.--item-h]="stuffItem.item.height"
+    [style.--grid-x]="stuffItem.item.gridX"
+    [style.--grid-y]="stuffItem.item.gridY">
     @if (stuffItem.count > 1) {
         <div class="inventory-item-count-hoc">{{stuffItem.count}}</div>
     }
@@ -9,5 +13,5 @@
         </div>
     }
 
-    <div class="inventory-item-image hoc inventory-item-x-{{stuffItem.item.gridX}} inventory-item-y-{{stuffItem.item.gridY}}"></div>
+    <div class="inventory-item-image hoc"></div>
 </div>

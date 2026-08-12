@@ -3,6 +3,8 @@ export type HocLayerControlIcon = {
     iconUrl: string;
     /** Recolor `#FFFFFF` in SVG (same as canvas markers). Omit for PNGs / multi-color SVGs. */
     color?: string;
+    /** Display scale in the layer control (default 1). Game PNGs look better at 2. */
+    scale?: number;
 };
 
 export const HOC_LAYER_CONTROL_ICONS: Record<string, HocLayerControlIcon> = {
@@ -58,18 +60,22 @@ export const HOC_LAYER_CONTROL_ICONS: Record<string, HocLayerControlIcon> = {
     },
     traders: {
         iconUrl: '/assets/images/s2/Markers/Texture_Trader_NotActive_General_Shadow.png',
+        scale: 2,
     },
     medics: {
         iconUrl: '/assets/images/s2/Markers/Texture_Medecine_NotActive_General_Shadow.png',
+        scale: 2,
     },
     guides: {
         iconUrl: '/assets/images/s2/Markers/Texture_Guide_NotActive_General_Shadow.png',
+        scale: 2,
     },
     'sub-location': {
         iconUrl: '/assets/images/s2/Markers/T_LocationOrigin_NotActive_Shadow.png',
+        scale: 2,
     },
     'stalker-respawn': {
-        iconUrl: '/assets/images/svg/marks/character.svg',
+        iconUrl: '/assets/images/svg/factions/stalkers.svg',
     },
     'monster-lair': {
         iconUrl: '/assets/images/svg/marks/monsters.svg',

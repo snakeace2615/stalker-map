@@ -17,10 +17,14 @@
                             }
                         </div>
                         <div class="inventory-container">
-                            <div class="inventory inventory-columns-6">
+                            <div class="inventory inventory-columns" [style.--inventory-columns]="6">
                                 @for (stuffItem of stuff.items; track stuffItem) {
                                     <div tooltip [component]="itemTooltipComponent" [componentData]="{item: stuffItem.item}"
-                                        class="inventory-item inventory-item-width-{{stuffItem.item.width}} inventory-item-height-{{stuffItem.item.height}}">
+                                        class="inventory-item"
+                                        [style.--item-w]="stuffItem.item.width"
+                                        [style.--item-h]="stuffItem.item.height"
+                                        [style.--grid-x]="stuffItem.item.gridX"
+                                        [style.--grid-y]="stuffItem.item.gridY">
                                         <div class="item-additional-info">
                                             @if (stuffItem.count > 1) {
                                                 <div class="inventory-item-count">x{{stuffItem.count}}</div>
@@ -30,7 +34,7 @@
                                                 <div class="inventory-item-upgrade"></div>
                                             }
                                         </div>
-                                        <div class="inventory-item-image {{this.game.gameStyle}} inventory-item-x-{{stuffItem.item.gridX}} inventory-item-y-{{stuffItem.item.gridY}}">
+                                        <div class="inventory-item-image {{this.game.gameStyle}}">
                                             @if (asWeapon(stuffItem.item); as weapon) {
                                                 @if (weapon.hasScope && weapon.scopeX > -1000 && weapon.scopeY > -1000) {
                                                     <div class="wpn_addon scope" [style.left.px]="weapon.scopeX" [style.top.px]="weapon.scopeY"></div>

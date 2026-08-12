@@ -206,5 +206,15 @@
     "shocMapContentMetaDescription": "Liste des caches, objets de quête et butin de Shadow of Chernobyl avec des liens directs vers les marqueurs sur la carte interactive.",
     "csMapContentMetaDescription": "Liste des caches, objets de quête et butin de Clear Sky avec des liens directs vers les marqueurs sur la carte interactive.",
     "copMapContentMetaDescription": "Liste des caches, objets de quête et butin de Call of Pripyat avec des liens directs vers les marqueurs sur la carte interactive.",
-    "mapContentIndex": "Listes de caches et de butin"
+    "mapContentIndex": "Listes de caches et de butin",
+    "shelters": "Abris",
+    "Shelter": "Abri",
+    "botPlayerShelters": "Abris PNJ",
+    "medics": "Médecins",
+    "guides": "Guides",
+    "artefacts": "Artefacts",
+    "roads": "Routes",
+    "hubs": "Hubs",
+    "electro": "Électro",
+    "mutants": "Mutants dangereux"
 }

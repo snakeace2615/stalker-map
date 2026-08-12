@@ -16,4 +16,15 @@ app-map-hoc {
     /* Keep white map markers readable on the dark layer control. */
     filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.9));
   }
+
+  .stalker-layer-icon--scaled {
+    flex-basis: calc(16px * var(--layer-icon-scale, 1));
+    width: calc(16px * var(--layer-icon-scale, 1));
+    height: calc(16px * var(--layer-icon-scale, 1));
+  }
+
+  .stalker-layer-icon--scaled .stalker-layer-icon-img {
+    width: calc(16px * var(--layer-icon-scale, 1));
+    height: calc(16px * var(--layer-icon-scale, 1));
+  }
 }

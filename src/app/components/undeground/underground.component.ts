@@ -1,5 +1,5 @@
 import { NgClass } from "@angular/common";
-import { Component, ElementRef, Input, ViewChild, ViewContainerRef } from "@angular/core";
+import { Component, ElementRef, Input, NgZone, ViewChild, ViewContainerRef } from "@angular/core";
 import { TranslateModule, TranslateService } from "@ngx-translate/core";
 import { Map } from '../../models/map.model';
 import { Location } from '../../models/location.model';
@@ -14,7 +14,7 @@ import { MapComponent } from "../map/map.component";
 import { HiddenMarker } from "../../models/hidden-marker.model";
 import { MapService } from "../../services/map.service";
 import { ShareLinkService } from "../../services/share-link.service";
-import { L, asLatLngBounds, asStalkerLayerGroup, asStalkerMap, findLayerMarker, pixelBounds, pixelCenter, StalkerCustomLayersControl, StalkerLayerGroup, StalkerMap } from '../../leaflet/leaflet-setup';
+import { L, asLatLngBounds, asStalkerLayerGroup, createStalkerMap, findLayerMarker, pixelBounds, pixelCenter, StalkerCustomLayersControl, StalkerLayerGroup, StalkerMap } from '../../leaflet/leaflet-setup';
 
 @Component({
     selector: 'app-underground',
@@ -57,7 +57,8 @@ export class UndergroundComponent {
     constructor(
         private translate: TranslateService,
         private mapService: MapService,
-        private shareLinks: ShareLinkService) { }
+        private shareLinks: ShareLinkService,
+        private ngZone: NgZone) { }
 
     public test(event: any): void {
         this.setLayer(event.target.value);
@@ -148,6 +149,11 @@ export class UndergroundComponent {
     }
 
     private async ngOnInit(): Promise<void> {
+        if (NgZone.isInAngularZone()) {
+            this.ngZone.runOutsideAngular(() => { void this.ngOnInit(); });
+            return;
+        }
+
         let minZoom = 1;
         let maxZoom = 3;
         let zoom = 1.5;
@@ -207,7 +213,7 @@ export class UndergroundComponent {
             }
         }
 
-        this.map = asStalkerMap(L.map(this.undergroundMapEl.nativeElement, {
+        this.map = createStalkerMap(this.undergroundMapEl.nativeElement, {
             center: pixelCenter(this.location.heightInMeters, this.location.widthInMeters),
             zoom: zoom,
             minZoom: minZoom,
@@ -216,7 +222,7 @@ export class UndergroundComponent {
             markerZoomAnimation: !0,
             zoomAnimation: !0,
             zoomControl: !1
-        }));
+        });
 
         this.map.scaleFactor = scaleFactor;
 
@@ -470,7 +476,7 @@ export class UndergroundComponent {
                     shape.coordinates.slice(i * 2, i * 2 + 2)
                 );
                 
-                polygons.push(L.polygon(coors.map(([x, z]) => [this.zShift + z, this.xShift + x]), {color: type.stroke, fill: type.fill}))
+                polygons.push(L.polygon(coors.map(([x, z]) => [this.zShift + z, this.xShift + x]), {color: type.stroke, fill: type.fill, renderer: this.canvasRenderer, interactive: false}))
             }
             
             for (let shape of shapeCollection.circles) {
@@ -478,7 +484,7 @@ export class UndergroundComponent {
                     continue;
                 }
 
-                let circle = L.circle([this.zShift + shape.z, this.xShift + shape.x], {radius: shape.radius, color: type.stroke, fill: type.fill});
+                let circle = L.circle([this.zShift + shape.z, this.xShift + shape.x], {radius: shape.radius, color: type.stroke, fill: type.fill, renderer: this.canvasRenderer, interactive: false});
                 
                 polygons.push(circle);
             }

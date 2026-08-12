@@ -2,12 +2,15 @@
     <div class="popup scrollbar">
         <div>{{config.name}}</div>
         @if (useListOfArtifacts) {
-            <div class="artefacts inventory inventory-columns-7">
+            <div class="artefacts inventory inventory-columns" [style.--inventory-columns]="7">
                 @for (artefact of artefacts[0]; track artefact) {
                     <div tooltip [component]="itemTooltipComponent" [componentData]="{item: artefact.item}"
-                        class="inventory-item inventory-item-width-{{artefact.item.width}} inventory-item-height-{{artefact.item.height}}">
-                        <div
-                            class="inventory-item-image hoc inventory-item-x-{{artefact.item.gridX}} inventory-item-y-{{artefact.item.gridY}}">
+                        class="inventory-item"
+                        [style.--item-w]="artefact.item.width"
+                        [style.--item-h]="artefact.item.height"
+                        [style.--grid-x]="artefact.item.gridX"
+                        [style.--grid-y]="artefact.item.gridY">
+                        <div class="inventory-item-image hoc">
                         </div>
                     </div>
                 }
@@ -24,12 +27,15 @@
                             </div>
                         }
                     </div>
-                    <div class="artefacts inventory inventory-columns-7">
+                    <div class="artefacts inventory inventory-columns" [style.--inventory-columns]="7">
                         @for (artefact of artefactRate; track artefact) {
                             <div tooltip [component]="itemTooltipComponent" [componentData]="{item: artefact.item}"
-                                class="inventory-item inventory-item-width-{{artefact.item.width}} inventory-item-height-{{artefact.item.height}}">
-                                <div
-                                    class="inventory-item-image hoc inventory-item-x-{{artefact.item.gridX}} inventory-item-y-{{artefact.item.gridY}}">
+                                class="inventory-item"
+                                [style.--item-w]="artefact.item.width"
+                                [style.--item-h]="artefact.item.height"
+                                [style.--grid-x]="artefact.item.gridX"
+                                [style.--grid-y]="artefact.item.gridY">
+                                <div class="inventory-item-image hoc">
                                 </div>
                             </div>
                         }

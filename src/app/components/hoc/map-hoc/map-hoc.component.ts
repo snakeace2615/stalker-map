@@ -3,6 +3,7 @@ import {
     ComponentRef,
     HostListener,
     isDevMode,
+    NgZone,
     ViewChild,
     ViewContainerRef,
     ViewEncapsulation,
@@ -26,7 +27,7 @@ import { HocStuffComponent } from '../hoc-stuff/hoc-stuff.component';
 import { Game } from '../../../models/game.model';
 import { MapSearchComponent } from '../../map-search/map-search.component';
 import { BottomSheetWrapperComponent } from '../../bottom-sheet-wrapper/bottom-sheet-wrapper.component';
-import { L, asStalkerMap, pixelCenter, StalkerCustomLayersControl, StalkerLayerGroup, StalkerMap } from '../../../leaflet/leaflet-setup';
+import { L, createStalkerMap, pixelCenter, StalkerCustomLayersControl, StalkerLayerGroup, StalkerMap } from '../../../leaflet/leaflet-setup';
 import {
     collectRichLootInfo,
     configureRichLootTags,
@@ -81,7 +82,8 @@ export class MapHocComponent {
         protected route: ActivatedRoute,
         protected seo: SeoService,
         protected mapService: MapService,
-        private shareLinks: ShareLinkService
+        private shareLinks: ShareLinkService,
+        private ngZone: NgZone
     ) { }
     
     showHideAll($event: any = null) {
@@ -133,6 +135,11 @@ export class MapHocComponent {
     private scaleFactor: number = 1;
 
     private loadMap(gameData: MapHoc, gameConfig: MapConfig): void {
+        if (NgZone.isInAngularZone()) {
+            this.ngZone.runOutsideAngular(() => this.loadMap(gameData, gameConfig));
+            return;
+        }
+
         this.gamedata = gameData;
         this.mapConfig = gameConfig;
         configureRichLootTags(gameConfig);
@@ -207,7 +214,7 @@ export class MapHocComponent {
             );
         }
 
-        this.map = asStalkerMap(L.map('map', {
+        this.map = createStalkerMap('map', {
             center: center,
             zoom: gameConfig.startZoom,
             minZoom: gameConfig.minZoom,
@@ -216,7 +223,7 @@ export class MapHocComponent {
             markerZoomAnimation: !0,
             zoomAnimation: !0,
             zoomControl: !1,
-        }));
+        });
 
         this.map.scaleFactor = this.scaleFactor;
 
@@ -517,6 +524,11 @@ export class MapHocComponent {
     }
 
     private createSearchController(): void {
+        if (!NgZone.isInAngularZone()) {
+            this.ngZone.run(() => this.createSearchController());
+            return;
+        }
+
         if (this.searchControl) {
             this.searchControl.remove();
             this.searchControl = undefined;
@@ -929,9 +941,14 @@ export class MapHocComponent {
 
                 if (itemModel) {
                     const inventoryContainer = L.DomUtil.create('div', 'leaflet-control-slider-inventory', container);
-                    const inventory = L.DomUtil.create('div', `inventory inventory-columns-${itemModel.width}`, inventoryContainer);
-                    const itemContainer = L.DomUtil.create('div', `hoc inventory-item inventory-item-height-${itemModel.height} inventory-item-width-${itemModel.width}`, inventory);
-                    const item =  L.DomUtil.create('div', `hoc inventory-item-image inventory-item-x-${itemModel.gridX} inventory-item-y-${itemModel.gridY}`, itemContainer);
+                    const inventory = L.DomUtil.create('div', 'inventory inventory-columns', inventoryContainer);
+                    inventory.style.setProperty('--inventory-columns', String(itemModel.width));
+                    const itemContainer = L.DomUtil.create('div', 'hoc inventory-item', inventory);
+                    itemContainer.style.setProperty('--item-w', String(itemModel.width));
+                    itemContainer.style.setProperty('--item-h', String(itemModel.height));
+                    itemContainer.style.setProperty('--grid-x', String(itemModel.gridX));
+                    itemContainer.style.setProperty('--grid-y', String(itemModel.gridY));
+                    const item = L.DomUtil.create('div', 'hoc inventory-item-image', itemContainer);
                 }
                 
 
@@ -1132,8 +1149,6 @@ export class MapHocComponent {
         }
 
         this.addGrid();
-
-        console.log(markerTypes);
     }
 
     private addShapes() {
@@ -1168,8 +1183,10 @@ export class MapHocComponent {
 
                 const polygon = L.polygon(newCoors as L.LatLngExpression[], {
                     color: type.stroke,
-                    fillColor: fillColor, // Leaflet використовує fillColor для кольору заливки
-                    fill: !!fillColor
+                    fillColor: fillColor,
+                    fill: !!fillColor,
+                    renderer: this.canvasRenderer,
+                    interactive: false,
                 });
 
                 layerFeatures.push(polygon);
@@ -1183,7 +1200,9 @@ export class MapHocComponent {
                     radius: shape.radius,
                     color: type.stroke,
                     fillColor: fillColor,
-                    fill: !!fillColor
+                    fill: !!fillColor,
+                    renderer: this.canvasRenderer,
+                    interactive: false,
                 });
 
                 layerFeatures.push(circle);
@@ -1218,7 +1237,7 @@ export class MapHocComponent {
                 opacity: 0.9,
                 fillColor: '#c9a227',
                 fillOpacity: 0.12,
-                interactive: false,
+                renderer: this.canvasRenderer,
             });
 
             polygon.name = region.region_title;
@@ -1298,13 +1317,13 @@ export class MapHocComponent {
         for (let i = 1; i < width; i++) {
             let x = i * gridGap + xShift;
 
-            grid.push(L.polyline([[startHeight, x], [endHeight, x]], { color: 'white', weight: 1, opacity: 0.5 }));
+            grid.push(L.polyline([[startHeight, x], [endHeight, x]], { color: 'white', weight: 1, opacity: 0.5, interactive: false, renderer: this.canvasRenderer }));
         }
 
         for (let i = heightStart; i < height; i++) {
             let y = yShift + i * gridGap;
 
-            grid.push(L.polyline([[y, 0], [y, this.gamedata.widthInMeters]], { color: 'white', weight: 1, opacity: 0.5 }));
+            grid.push(L.polyline([[y, 0], [y, this.gamedata.widthInMeters]], { color: 'white', weight: 1, opacity: 0.5, interactive: false, renderer: this.canvasRenderer }));
         }
 
         let letters = ['А', 'Б', 'В', 'Г', 'Ґ', 'Д', 'Е', 'Є', 'Ж', 'З', 'И', 'І', 'Ї', 'Й', 'К', 'Л', 'М', 'Н', 'О', 'П', 'Р', 'С', 'Т'];
@@ -1754,7 +1773,6 @@ export class MapHocComponent {
                     desc = lair.faction
                 }
                 else {
-                    console.log(lair)
                     continue;
                 }
 
@@ -2579,6 +2597,7 @@ export class MapHocComponent {
         if (controlIcon) {
             layer.controlIcon = controlIcon.iconUrl;
             layer.controlIconColor = controlIcon.color;
+            layer.controlIconScale = controlIcon.scale ?? 1;
         }
 
         if (typeof layer.eachLayer === 'function') {

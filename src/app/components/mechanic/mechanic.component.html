@@ -7,18 +7,17 @@
                 <div class="upgrade-item-image-container">
                     @if (game.gameStyle == 'cs') {
                         <div
-                            class="inventory-item-image {{game.gameStyle}} inventory-item-x-{{selectedItem.gridX}} inventory-item-y-{{selectedItem.gridY}}"
-                            [ngStyle]="{'width': selectedItem.width * 50 + 'px', 'height': selectedItem.height * 50 + 'px'}"></div>
+                            class="inventory-item-image {{game.gameStyle}}"
+                            [style.--grid-x]="selectedItem.gridX"
+                            [style.--grid-y]="selectedItem.gridY"
+                            [style.width.px]="selectedItem.width * 50"
+                            [style.height.px]="selectedItem.height * 50"></div>
                     }
                     @else if (game.gameStyle == 'cop') {
                         <div class='upgrade-item-image {{selectedItem.category}}' [ngStyle]="{
                             'width': selectedItem.upgr_icon_width + 'px',
                             'height': selectedItem.upgr_icon_height + 'px',
                             'background-position': 'left -' + selectedItem.upgr_icon_x + 'px top -' + selectedItem.upgr_icon_y + 'px'}"></div>
-                    }
-                    @if (selectedItem.$type == 'weapon' || selectedItem.$type == 'outfit') {
-                        <button type="button" class="add-to-compare" (click)="addItemToCompare(selectedItem)"
-                            title="Add to compare"></button>
                     }
                 </div>
                 <app-item-upgrades [selectedDiscount]="selectedDiscount" [upgradeProperties]="upgradeProperties"
@@ -499,7 +498,11 @@
                 <div class="buy inventory">
                     @for (item of itemsToRepait; track item) {
                         <div tooltip [component]="itemTooltipComponent" [componentData]="{item: item}"
-                            class="inventory-item inventory-item-width-{{item.width}} inventory-item-height-{{item.height}}"
+                            class="inventory-item"
+                            [style.--item-w]="item.width"
+                            [style.--item-h]="item.height"
+                            [style.--grid-x]="item.gridX"
+                            [style.--grid-y]="item.gridY"
                             (click)="selectItem(item)">
                             <div class="item-additional-info">
                                 <div class="inventory-item-count">
@@ -509,13 +512,8 @@
                                 @if (asUpgradable(item)?.installedUpgrades?.length) {
                                     <div class="inventory-item-upgrade"></div>
                                 }
-
-                                @if (item.$type == 'weapon' || item.$type == 'outfit') {
-                                    <div class="inventory-item-upgrade inventory-item-compare"
-                                        (click)="addItemToCompare(item, $event)" title="Add to compare"></div>
-                                }
                             </div>
-                            <div class="inventory-item-image {{game.gameStyle}} inventory-item-x-{{item.gridX}} inventory-item-y-{{item.gridY}}">
+                            <div class="inventory-item-image {{game.gameStyle}}">
                                 @if (asWeapon(item); as weapon) {
                                     @if (weapon.hasScope && weapon.scopeX > -1000 && weapon.scopeY > -1000) {
                                         <div class="wpn_addon scope" [style.left.px]="weapon.scopeX" [style.top.px]="weapon.scopeY"></div>

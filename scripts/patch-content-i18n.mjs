@@ -98,5 +98,4 @@ for (const file of fs.readdirSync(dir).filter((f) => f.endsWith('.json'))) {
   const data = JSON.parse(fs.readFileSync(full, 'utf8'));
   Object.assign(data, translations[lang] || en);
   fs.writeFileSync(full, JSON.stringify(data, null, 4) + '\n');
-  console.log('updated', file);
 }

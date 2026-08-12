@@ -234,42 +234,46 @@ input[type=checkbox]+label:before {
   border-bottom: 1px solid #555656;*/
 }
 
-.scrollbar::-webkit-scrollbar-track {
-	background-color: rgba(9,10,10,1);
-  border: 1px solid #555656;
-}
+.scrollbar,
+.inventory,
+.custom-scroll,
+.inventory-container,
+.leaflet-control-layers-expanded .leaflet-control-layers-list,
+.mechanic-popup .leaflet-popup-content {
+  scrollbar-width: thin;
+  scrollbar-color: #fff rgba(9, 10, 10, 1);
 
-.scrollbar::-webkit-scrollbar-thumb {
-	background-color:rgba(9,10,10,1);
-  border: 1px solid white;
-  margin: 3px;
-}
+  &::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+    border: 1px solid #fff;
+  }
 
-.scrollbar::-webkit-scrollbar {
-  border: 1px solid white;
-}
+  &::-webkit-scrollbar-track {
+    background-color: rgba(9, 10, 10, 1);
+    border: 1px solid #555656;
+  }
 
-.inventory::-webkit-scrollbar-track {
-	background-color: rgba(9,10,10,1);
-  border: 1px solid #555656;
-}
-
-.inventory::-webkit-scrollbar-thumb {
-	background-color:rgba(9,10,10,1);
-  border: 1px solid white;
-  margin: 3px;
-}
-
-.inventory::-webkit-scrollbar {
-  border: 1px solid white;
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(9, 10, 10, 1);
+    border: 1px solid #fff;
+  }
 }
 
 .inventory-item {
+  --item-w: 1;
+  --item-h: 1;
+  --grid-x: 0;
+  --grid-y: 0;
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
   box-sizing: border-box;
   margin: 0;
-  position: relative
+  position: relative;
+  grid-column: span var(--item-w);
+  grid-row: span var(--item-h);
+  width: calc(var(--item-w) * var(--inventory-cell-size));
+  height: calc(var(--item-h) * var(--inventory-cell-size));
 }
 
 .inventory-item:hover {
@@ -281,7 +285,9 @@ input[type=checkbox]+label:before {
   min-height: 100%;
   max-height: 100%;
   object-fit: cover;
-  background-image: url(/assets/images/items/ui_icon_equipment.png)
+  background-image: url(/assets/images/items/ui_icon_equipment.png);
+  background-position-x: calc(var(--grid-x, 0) * -1 * var(--inventory-cell-size));
+  background-position-y: calc(var(--grid-y, 0) * -1 * var(--inventory-cell-size));
 }
 
 .inventory-item-image.shoc {
@@ -345,33 +351,9 @@ input[type=checkbox]+label:before {
   }
 }
 
-@for $i from 0 through 50 {
-    .inventory-item-x-#{$i} {
-      background-position-x: calc($i * -1 * var(--inventory-cell-size));
-    }
-
-    .inventory-item-y-#{$i} {
-      background-position-y: calc($i * -1 * var(--inventory-cell-size));
-    }
-}
-
-@for $i from 1 through 10 {
-    .inventory-columns-#{$i} {
-      grid-template-columns: repeat($i, var(--inventory-cell-size)) !important;
-      width: calc($i * var(--inventory-cell-size) + 1px);
-    }
-}
-
-@for $i from 1 through 10 {
-    .inventory-item-width-#{$i} {
-      grid-column: span $i;
-      width: calc($i * var(--inventory-cell-size));
-    }
-
-    .inventory-item-height-#{$i} {
-      grid-row: span $i;
-      height: calc($i * var(--inventory-cell-size));
-    }
+.inventory.inventory-columns {
+  grid-template-columns: repeat(var(--inventory-columns), var(--inventory-cell-size)) !important;
+  width: calc(var(--inventory-columns) * var(--inventory-cell-size) + 1px);
 }
 
 .stalker-avatar.shoc {
@@ -418,26 +400,6 @@ app-item-tooltip, app-upgrade-tooltip {
   opacity: 0;
 }
 
-.custom-scroll {
-  scrollbar-width: thin; /* Firefox */
-  scrollbar-color: white rgba(9, 10, 10, 1); /* Firefox: thumb track */
-}
-
-.custom-scroll::-webkit-scrollbar-track {
-  background-color: rgba(9,10,10,1);
-  border: 1px solid #555656;
-}
-
-.custom-scroll::-webkit-scrollbar-thumb {
-  background-color: rgba(9,10,10,1);
-  border: 1px solid white;
-  margin: 3px;
-}
-
-.custom-scroll::-webkit-scrollbar {
-  border: 1px solid white;
-}
-
 @media (max-width: 1000px) {
     
 
@@ -447,9 +409,9 @@ app-item-tooltip, app-upgrade-tooltip {
 }
 
 .leaflet-control-slider-container {
-    border: 2px solid rgba(0, 0, 0, 0.2);
+    border: 2px solid #fff;
     background-clip: padding-box;
-    background: #fff;
+    background: rgba(9, 10, 10, 0.95);
     border-radius: 5px;
     display: flex;
     flex-direction: column;
@@ -473,6 +435,7 @@ app-item-tooltip, app-upgrade-tooltip {
     height: 44px;
     display: block;
     background-size: contain;
+    filter: invert(1);
 }
 
 .leaflet-control-slider-container:hover {
@@ -1082,7 +1045,7 @@ app-compare {
 .mechanic-popup .leaflet-popup-content {
   max-height: calc(var(--wrapper-height) - 100px);
   max-width: calc(100vw - 100px);
-  overflow: scroll;
+  overflow: auto;
 }
 
 .inventory-item-count-hoc {

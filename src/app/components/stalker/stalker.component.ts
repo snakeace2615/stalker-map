@@ -9,7 +9,7 @@ import { MapService } from '../../services/map.service';
 import { TooltipDirective } from '../tooltips/tooltip.directive';
 import { ItemTooltipComponent } from '../tooltips/item-tooltip/item-tooltip.component';
 import { Game } from '../../models/game.model';
-import { NgStyle, NgTemplateOutlet, NgClass } from '@angular/common';
+import { NgStyle, NgTemplateOutlet } from '@angular/common';
 import { HiddenMarker } from '../../models/hidden-marker.model';
 import { ShareLinkService } from '../../services/share-link.service';
 
@@ -18,7 +18,7 @@ import { ShareLinkService } from '../../services/share-link.service';
     standalone: true,
     templateUrl: './stalker.component.html',
     styleUrl: './stalker.component.scss',
-    imports: [TranslateModule, StalkerProfileComponent, TooltipDirective, NgTemplateOutlet, NgStyle, NgClass]
+    imports: [TranslateModule, StalkerProfileComponent, TooltipDirective, NgTemplateOutlet, NgStyle]
 })
 export class StalkerComponent {
     @Input() public stalker: Stalker;

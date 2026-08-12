@@ -22,4 +22,4 @@ export type {
 
 export { asStalkerLayerGroup, findLayerMarker, getLayerMarkers, hasLevelChangerProperties, isStalkerMarker } from './stalker-leaflet.types';
 
-export { asStalkerMap, asLatLngBounds, asLatLngExpressions, pixelBounds, pixelCenter } from './stalker-leaflet.utils';
+export { asStalkerMap, asLatLngBounds, asLatLngExpressions, createStalkerMap, pixelBounds, pixelCenter } from './stalker-leaflet.utils';

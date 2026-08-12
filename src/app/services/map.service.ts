@@ -1,5 +1,5 @@
 import { MapComponent } from './../components/map/map.component';
-import { ApplicationRef, ComponentRef, createComponent, EnvironmentInjector, Injectable, ViewContainerRef } from "@angular/core";
+import { ApplicationRef, ComponentRef, createComponent, EnvironmentInjector, Injectable, NgZone, ViewContainerRef } from "@angular/core";
 import { Subscription } from 'rxjs';
 import { HiddenMarker } from "../models/hidden-marker.model";
 import { StuffComponent } from '../components/stuff/stuff.component';
@@ -41,17 +41,20 @@ export class MapService {
     private bottomSheetWrapper: ComponentRef<BottomSheetWrapperComponent>;
     private activePopup: any = null;
     private activePopups: any[] = [];
-    private compareControl: L.Control | null = null;
     private compareComponentRef: ComponentRef<CompareComponent> | null = null;
-    private compareBadge: HTMLElement | null = null;
     private compareSubscriptions = new Subscription();
 
     constructor(
         private translate: TranslateService,
         private environmentInjector: EnvironmentInjector,
         private appRef: ApplicationRef,
-        private compare: CompareService) {
+        private compare: CompareService,
+        private ngZone: NgZone) {
 
+    }
+
+    private runInAngular<T>(fn: () => T): T {
+        return NgZone.isInAngularZone() ? fn() : this.ngZone.run(fn);
     }
 
     public setMapComponent(mapComponent: MapComponent): void {
@@ -291,6 +294,18 @@ export class MapService {
         contentMaker: (container: ViewContainerRef, isPopup: boolean) => any,
         popupOptions?: L.PopupOptions
     ): void {
+        if (!NgZone.isInAngularZone()) {
+            this.ngZone.run(() => this.onMarkerClick(
+                event,
+                map,
+                container,
+                bottomSheetContainer,
+                contentMaker,
+                popupOptions
+            ));
+            return;
+        }
+
         const canUseSheet = bottomSheetContainer != null && (bottomSheetContainer as any).contentContainer != null;
         let wantsPopup: boolean = !(window.innerWidth < 500 && canUseSheet);
 
@@ -394,57 +409,12 @@ export class MapService {
         return html;
     }
 
-    public createCompareControl(map: StalkerMap): void {
-        this.destroyCompareControl();
+    public initComparePanel(): void {
+        this.destroyComparePanel();
 
         if (this.mapComponent?.game?.gameStyle) {
             this.compare.restrictToGame(this.mapComponent.game.gameStyle);
         }
-
-        const service = this;
-        const CompareControl = L.Control.extend({
-            options: {
-                position: 'topright',
-            },
-
-            onAdd: function () {
-                const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control stalker-compare-control');
-                L.DomEvent.disableClickPropagation(container);
-                L.DomEvent.disableScrollPropagation(container);
-
-                const button = L.DomUtil.create('a', 'stalker-compare-button', container);
-                button.href = '#';
-                button.title = 'Compare';
-                button.setAttribute('role', 'button');
-
-                const badge = L.DomUtil.create('span', 'stalker-compare-badge', button);
-                service.compareBadge = badge;
-                service.updateCompareBadge(badge);
-
-                L.DomEvent.on(button, 'click', (event: Event) => {
-                    L.DomEvent.preventDefault(event);
-                    service.ensureComparePanel();
-                    service.compare.toggle();
-                });
-
-                return container;
-            },
-
-            onRemove: function () {
-                // cleanup handled in destroyCompareControl
-            },
-        });
-
-        this.compareControl = new CompareControl();
-        this.compareControl.addTo(map);
-
-        this.compareSubscriptions.add(
-            this.compare.itemsChanged.subscribe(() => {
-                if (this.compareBadge) {
-                    this.updateCompareBadge(this.compareBadge);
-                }
-            })
-        );
 
         this.compareSubscriptions.add(
             this.compare.openChanged.subscribe((isOpen: boolean) => {
@@ -456,15 +426,9 @@ export class MapService {
         );
     }
 
-    public destroyCompareControl(): void {
+    public destroyComparePanel(): void {
         this.compareSubscriptions.unsubscribe();
         this.compareSubscriptions = new Subscription();
-        this.compareBadge = null;
-
-        if (this.compareControl) {
-            this.compareControl.remove();
-            this.compareControl = null;
-        }
 
         if (this.compareComponentRef) {
             this.compareComponentRef.destroy();
@@ -473,6 +437,11 @@ export class MapService {
     }
 
     private ensureComparePanel(): void {
+        if (!NgZone.isInAngularZone()) {
+            this.runInAngular(() => this.ensureComparePanel());
+            return;
+        }
+
         if (this.compareComponentRef || !this.mapComponent?.container) {
             return;
         }
@@ -483,12 +452,6 @@ export class MapService {
         element.style.display = this.compare.isOpen ? 'block' : 'none';
         document.body.appendChild(element);
         this.compareComponentRef.changeDetectorRef.detectChanges();
-    }
-
-    private updateCompareBadge(badge: HTMLElement): void {
-        const count = this.compare.totalCount;
-        badge.textContent = count > 0 ? String(count) : '';
-        badge.style.display = count > 0 ? 'flex' : 'none';
     }
 
     public addRuler(
@@ -695,6 +658,18 @@ export class MapService {
 
                 this._separator.style.display = overlaysPresent && baseLayersPresent ? '' : 'none';
 
+                if (L.DomUtil.hasClass(this._container, 'leaflet-control-layers-expanded')) {
+                    this.expand();
+                }
+
+                return this;
+            },
+
+            expand: function () {
+                L.Control.Layers.prototype.expand.call(this);
+                // Let CSS max-height handle overflow; Leaflet's inline height
+                // often misses the extra subfilter rows.
+                this._section.style.height = '';
                 return this;
             },
 
@@ -777,6 +752,12 @@ export class MapService {
                     const img = document.createElement('img');
                     img.alt = '';
                     img.className = 'stalker-layer-icon-img';
+                    const scale = Number(obj.layer.controlIconScale) || 1;
+                    if (scale !== 1) {
+                        icon.classList.add('stalker-layer-icon--scaled');
+                        icon.style.setProperty('--layer-icon-scale', String(scale));
+                        img.style.setProperty('--layer-icon-scale', String(scale));
+                    }
                     icon.appendChild(img);
                     this._paintLayerControlIcon(
                         img,

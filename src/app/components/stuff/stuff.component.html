@@ -5,9 +5,13 @@
 @if (stuff.description) {
     <div class='description'>{{stuff.description | translate}}</div>
 }
-<div class="inventory" [ngClass]="{'inventory-columns-6': isPopup}">
+<div class="inventory" [class.inventory-columns]="isPopup" [style.--inventory-columns]="isPopup ? 6 : null">
     @for (stuffItem of items; track stuffItem) {
-        <div tooltip [component]="itemTooltipComponent" [componentData]="{item: stuffItem.item}" class="inventory-item {{this.game.gameStyle}} inventory-item-width-{{stuffItem.item.width}} inventory-item-height-{{stuffItem.item.height}}">
+        <div tooltip [component]="itemTooltipComponent" [componentData]="{item: stuffItem.item}" class="inventory-item {{this.game.gameStyle}}"
+            [style.--item-w]="stuffItem.item.width"
+            [style.--item-h]="stuffItem.item.height"
+            [style.--grid-x]="stuffItem.item.gridX"
+            [style.--grid-y]="stuffItem.item.gridY">
             <div class="item-additional-info">
                 @if (stuffItem.count > 1) {
                     <div class="inventory-item-count">x{{stuffItem.count}}</div>
@@ -17,7 +21,7 @@
                     <div class="inventory-item-upgrade"></div>
                 }
             </div>
-            <div class="inventory-item-image {{this.game.gameStyle}} inventory-item-x-{{stuffItem.item.gridX}} inventory-item-y-{{stuffItem.item.gridY}}">
+            <div class="inventory-item-image {{this.game.gameStyle}}">
                 @if (asWeapon(stuffItem.item); as weapon) {
                     @if (weapon.hasScope && weapon.scopeX > -1000 && weapon.scopeY > -1000) {
                         <div class="wpn_addon scope" [style.left.px]="weapon.scopeX" [style.top.px]="weapon.scopeY"></div>

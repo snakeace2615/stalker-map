@@ -305,5 +305,14 @@
     "shocMapContentMetaDescription": "Lista skrytek, przedmiotów zadaniowych i łupu Cienia Czarnobyla z bezpośrednimi linkami do znaczników na interaktywnej mapie.",
     "csMapContentMetaDescription": "Lista skrytek, przedmiotów zadaniowych i łupu Czystego Nieba z bezpośrednimi linkami do znaczników na interaktywnej mapie.",
     "copMapContentMetaDescription": "Lista skrytek, przedmiotów zadaniowych i łupu Zewu Prypeci z bezpośrednimi linkami do znaczników na interaktywnej mapie.",
-    "mapContentIndex": "Listy skrytek i łupu"
+    "mapContentIndex": "Listy skrytek i łupu",
+    "shelters": "Schronienia",
+    "Shelter": "Schronienie",
+    "botPlayerShelters": "Schronienia NPC",
+    "medics": "Medycy",
+    "guides": "Przewodnicy",
+    "artefacts": "Artefakty",
+    "roads": "Drogi",
+    "hubs": "Huby",
+    "electro": "Elektro"
 }

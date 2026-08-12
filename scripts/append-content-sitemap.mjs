@@ -4,7 +4,6 @@ const sitemapPath = 'src/sitemap.xml';
 let xml = fs.readFileSync(sitemapPath, 'utf8');
 
 if (xml.includes('/map/content/')) {
-  console.log('content urls already present');
   process.exit(0);
 }
 
@@ -45,4 +44,3 @@ for (const game of games) {
 
 xml = xml.replace('</urlset>', `${block}</urlset>`);
 fs.writeFileSync(sitemapPath, xml);
-console.log('appended', games.length * langs.length, 'urls');

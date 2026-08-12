@@ -1,4 +1,4 @@
-import { Component, ViewEncapsulation } from '@angular/core';
+import { Component, NgZone, ViewEncapsulation } from '@angular/core';
 import { MapComponent } from '../map/map.component';
 import { ActivatedRoute } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
@@ -25,14 +25,16 @@ export class MapExportComponent extends MapComponent {
     protected override route: ActivatedRoute,
     protected override seo: SeoService,
     protected override mapService: MapService,
-    protected override shareLinks: ShareLinkService
+    protected override shareLinks: ShareLinkService,
+    ngZone: NgZone
   ) {
     super(
       translate,
       route,
       seo,
       mapService,
-      shareLinks);
+      shareLinks,
+      ngZone);
 
     this.overlaysListTop = '';
     let lang: string = this.route.snapshot.paramMap.get('lang') as string;

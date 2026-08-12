@@ -2,7 +2,11 @@
   tooltip
   [component]="itemTooltipComponent"
   [componentData]="{ item: item }"
-  class="inventory-item inventory-item-width-{{ item.width }} inventory-item-height-{{ item.height }}"
+  class="inventory-item"
+  [style.--item-w]="item.width"
+  [style.--item-h]="item.height"
+  [style.--grid-x]="item.gridX"
+  [style.--grid-y]="item.gridY"
   (click)="onClick()">
   <div class="item-additional-info">
     <div class="inventory-item-count">
@@ -15,7 +19,7 @@
       <div class="inventory-item-upgrade"></div>
     }
   </div>
-  <div class="inventory-item-image {{ gameStyle }} inventory-item-x-{{ item.gridX }} inventory-item-y-{{ item.gridY }}">
+  <div class="inventory-item-image {{ gameStyle }}">
     @if (asWeapon(item); as weapon) {
       @if (weapon.hasScope && weapon.scopeX > -1000 && weapon.scopeY > -1000) {
         <div class="wpn_addon scope" [style.left.px]="weapon.scopeX" [style.top.px]="weapon.scopeY"></div>

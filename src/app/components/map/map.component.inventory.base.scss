@@ -121,6 +121,17 @@
   gap: 6px;
 }
 
+.leaflet-control-layers-expanded {
+  max-height: calc(var(--wrapper-height, 100vh) - 20px);
+}
+
+.leaflet-control-layers-expanded .leaflet-control-layers-list {
+  max-height: calc(var(--wrapper-height, 100vh) - 32px);
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
 .leaflet-control-layers-overlays .stalker-layer-icon {
   flex: 0 0 16px;
   width: 16px;

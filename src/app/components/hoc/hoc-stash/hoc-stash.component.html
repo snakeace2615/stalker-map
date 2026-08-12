@@ -6,7 +6,7 @@
         }
     </div>
     @if (items && items.length > 0) {
-        <div class="inventory inventory-columns-7">
+        <div class="inventory inventory-columns" [style.--inventory-columns]="7">
             @for (stuffItem of items; track stuffItem) {
                 <app-hoc-inventory-item [stuffItem]="stuffItem"></app-hoc-inventory-item>
             }

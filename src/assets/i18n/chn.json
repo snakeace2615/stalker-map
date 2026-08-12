@@ -272,5 +272,15 @@
     "shocMapContentMetaDescription": "Browse Shadow of Chernobyl stashes, quest items and loot with direct links to markers on the interactive map.",
     "csMapContentMetaDescription": "Browse Clear Sky stashes, quest items and loot with direct links to markers on the interactive map.",
     "copMapContentMetaDescription": "Browse Call of Pripyat stashes, quest items and loot with direct links to markers on the interactive map.",
-    "mapContentIndex": "Stashes and loot lists"
+    "mapContentIndex": "Stashes and loot lists",
+    "shelters": "Shelters",
+    "Shelter": "Shelter",
+    "botPlayerShelters": "NPC shelters",
+    "medics": "Medics",
+    "guides": "Guides",
+    "artefacts": "Artefacts",
+    "roads": "Roads",
+    "hubs": "Hubs",
+    "electro": "Electro",
+    "mutants": "Dangerous mutants"
 }

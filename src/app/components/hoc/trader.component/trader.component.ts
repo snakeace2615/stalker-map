@@ -84,8 +84,6 @@ export class TraderComponent {
 
         this.buyitems = this.buyitems.sort((a,b) => b.item.area - a.item.area)
 
-        console.log(buyLimitations)
-
         if (items.length > 0) {
             const uniqueTrades = Array.from(
                 items.reduce((acc, current) => {

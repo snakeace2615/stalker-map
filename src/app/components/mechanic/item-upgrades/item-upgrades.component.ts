@@ -322,10 +322,8 @@ export class ItemUpgradesComponent {
 
     private assignBranches(upgradeSections: UpgradeSection[]) {
         let upgrades: Upgrade[] = upgradeSections.flatMap(x => x.elements);
-        console.log(upgrades)
         
         let roots: Upgrade[] = upgrades.filter(x => x.effects == null || x.effects.length == 0);
-        console.log(roots);
 
         // 4. Функція для проходу вгору по дереву (від кінця до початку)
         function walkBackwards(current: Upgrade, branchId: number) {

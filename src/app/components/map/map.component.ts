@@ -6,6 +6,7 @@ import {
     ViewContainerRef,
     ViewChild,
     isDevMode,
+    NgZone,
 } from '@angular/core';
 import { HeaderComponent } from '../header/header.component';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -30,7 +31,7 @@ import { HiddenMarker } from '../../models/hidden-marker.model';
 import { Game } from '../../models/game.model';
 import { BottomSheetWrapperComponent } from "../bottom-sheet-wrapper/bottom-sheet-wrapper.component";
 import { MapSearchComponent } from '../map-search/map-search.component';
-import { L, asLatLngBounds, asLatLngExpressions, asStalkerLayerGroup, asStalkerMap, findLayerMarker, hasLevelChangerProperties, pixelBounds, pixelCenter, StalkerCustomLayersControl, StalkerLayerGroup, StalkerLocationsLayer, StalkerMap, StalkerMarker } from '../../leaflet/leaflet-setup';
+import { L, asLatLngBounds, asLatLngExpressions, asStalkerLayerGroup, createStalkerMap, findLayerMarker, hasLevelChangerProperties, pixelBounds, pixelCenter, StalkerCustomLayersControl, StalkerLayerGroup, StalkerLocationsLayer, StalkerMap, StalkerMarker } from '../../leaflet/leaflet-setup';
 
 @Component({
     selector: 'app-map',
@@ -101,7 +102,8 @@ export class MapComponent {
         protected route: ActivatedRoute,
         protected seo: SeoService,
         protected mapService: MapService,
-        protected shareLinks: ShareLinkService) {
+        protected shareLinks: ShareLinkService,
+        private ngZone: NgZone) {
         let urlGame: string = this.route.snapshot.paramMap.get('game') as string;
 
         if (MapComponent.avaliableGames[urlGame]) {
@@ -399,11 +401,16 @@ export class MapComponent {
     }
 
     private async ngOnDestroy(): Promise<void> {
-        this.mapService.destroyCompareControl();
+        this.mapService.destroyComparePanel();
         this.map?.remove();
     }
 
     private loadMap(gameData: Map, gameConfig: MapConfig): void {
+        if (NgZone.isInAngularZone()) {
+            this.ngZone.runOutsideAngular(() => this.loadMap(gameData, gameConfig));
+            return;
+        }
+
         this.gamedata = gameData;
         this.mapConfig = gameConfig;
 
@@ -411,7 +418,7 @@ export class MapComponent {
             transformation: new L.Transformation(gameConfig.kx ?? 1, 0, -1, 0),
         });
 
-        this.map = asStalkerMap(L.map('map', {
+        this.map = createStalkerMap('map', {
             center: pixelCenter(gameData.heightInPixels, gameData.widthInPixels),
             zoom: gameConfig.startZoom,
             minZoom: gameConfig.minZoom,
@@ -420,7 +427,7 @@ export class MapComponent {
             markerZoomAnimation: !0,
             zoomAnimation: !0,
             zoomControl: !1
-        }));
+        });
 
         var transformation = this.map.options.crs!.transformation;
         console.log(transformation._a, transformation._b, transformation._c, transformation._d);
@@ -432,7 +439,7 @@ export class MapComponent {
         this.mapService.setMapComponent(this);
 
         this.mapService.createCustomLayersControl();
-        this.mapService.createCompareControl(this.map);
+        this.mapService.initComparePanel();
 
         const bounds = pixelBounds(this.gamedata.heightInPixels, this.gamedata.widthInPixels);
 
@@ -691,6 +698,11 @@ export class MapComponent {
     }
 
     private createSearchController(): void {
+        if (!NgZone.isInAngularZone()) {
+            this.ngZone.run(() => this.createSearchController());
+            return;
+        }
+
         if (this.searchControl) {
             this.searchControl.remove();
             this.searchControl = undefined;
@@ -1550,7 +1562,7 @@ export class MapComponent {
 
                 let newCoors = coors.map(([x, z]) => [z, x]);
 
-                let polygon = L.polygon(asLatLngExpressions(newCoors), {color: type.stroke, fill: type.fill});
+                let polygon = L.polygon(asLatLngExpressions(newCoors), {color: type.stroke, fill: type.fill, renderer: this.canvasRenderer, interactive: false});
 
                 polygons.push(polygon);
             }
@@ -1562,7 +1574,7 @@ export class MapComponent {
                     continue;
                 }
 
-                let circle = L.circle([shape.z, shape.x], {radius: shape.radius, color: type.stroke, fill: type.fill});
+                let circle = L.circle([shape.z, shape.x], {radius: shape.radius, color: type.stroke, fill: type.fill, renderer: this.canvasRenderer, interactive: false});
                 
                 polygons.push(circle);
             }
@@ -2475,6 +2487,11 @@ export class MapComponent {
     }
 
     private handleUndergroundDoorClick(e: any): void {
+        if (!NgZone.isInAngularZone()) {
+            this.ngZone.run(() => this.handleUndergroundDoorClick(e));
+            return;
+        }
+
         const marker = e.target;
         const destinationLocation = this.gamedata.locations.find(
             (x) => x.id == marker.properties.levelChanger.destinationLocationId
@@ -2542,7 +2559,7 @@ export class MapComponent {
                 geo.lng = x.x;
                 geo.lat = x.z;
                 return geo;
-            }), { color: 'grey', weight: 2 });
+            }), { color: 'grey', weight: 2, renderer: this.canvasRenderer, interactive: false });
             roads.push(polyline);
         }
 

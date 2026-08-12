@@ -24,8 +24,11 @@
                             </div>
                             <div class="upgrade-item-image-container">
                                 @if (weapon.game == 'cs') {
-                                    <div class="inventory-item-image {{weapon.game}} inventory-item-x-{{weapon.gridX}} inventory-item-y-{{weapon.gridY}}"
-                                        [ngStyle]="{'width': weapon.width * 50 + 'px', 'height': weapon.height * 50 + 'px'}"></div>
+                                    <div class="inventory-item-image {{weapon.game}}"
+                                        [style.--grid-x]="weapon.gridX"
+                                        [style.--grid-y]="weapon.gridY"
+                                        [style.width.px]="weapon.width * 50"
+                                        [style.height.px]="weapon.height * 50"></div>
                                 }
                                 @else if (weapon.game == 'cop') {
                                     <div class='upgrade-item-image {{weapon.category}}' [ngStyle]="{
@@ -34,8 +37,11 @@
                                         'background-position': 'left -' + weapon.upgr_icon_x + 'px top -' + weapon.upgr_icon_y + 'px'}"></div>
                                 }
                                 @else if (weapon.game == 'hoc') {
-                                    <div class="inventory-item-image hoc inventory-item-x-{{weapon.gridX}} inventory-item-y-{{weapon.gridY}}"
-                                        [ngStyle]="{'width': weapon.width * 50 + 'px', 'height': weapon.height * 50 + 'px'}"></div>
+                                    <div class="inventory-item-image hoc"
+                                        [style.--grid-x]="weapon.gridX"
+                                        [style.--grid-y]="weapon.gridY"
+                                        [style.width.px]="weapon.width * 50"
+                                        [style.height.px]="weapon.height * 50"></div>
                                 }
                             </div>
 
@@ -126,8 +132,11 @@
                             </div>
                             <div class="upgrade-item-image-container">
                                 @if (outfit.game == 'cs') {
-                                    <div class="inventory-item-image {{outfit.game}} inventory-item-x-{{outfit.gridX}} inventory-item-y-{{outfit.gridY}}"
-                                        [ngStyle]="{'width': outfit.width * 50 + 'px', 'height': outfit.height * 50 + 'px'}"></div>
+                                    <div class="inventory-item-image {{outfit.game}}"
+                                        [style.--grid-x]="outfit.gridX"
+                                        [style.--grid-y]="outfit.gridY"
+                                        [style.width.px]="outfit.width * 50"
+                                        [style.height.px]="outfit.height * 50"></div>
                                 }
                                 @else if (outfit.game == 'cop') {
                                     <div class='upgrade-item-image {{outfit.category}}' [ngStyle]="{

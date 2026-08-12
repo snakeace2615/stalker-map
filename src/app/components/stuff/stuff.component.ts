@@ -6,14 +6,13 @@ import { MapService } from '../../services/map.service';
 import { ItemTooltipComponent } from '../tooltips/item-tooltip/item-tooltip.component';
 import { TooltipDirective } from '../tooltips/tooltip.directive';
 import { Game } from '../../models/game.model';
-import { NgClass } from '@angular/common';
 import { HiddenMarker } from '../../models/hidden-marker.model';
 import { ShareLinkService } from '../../services/share-link.service';
 
 @Component({
     selector: 'app-stuff',
     standalone: true,
-    imports: [TranslateModule, TooltipDirective, NgClass],
+    imports: [TranslateModule, TooltipDirective],
     templateUrl: './stuff.component.html',
     styleUrl: './stuff.component.scss'
 })

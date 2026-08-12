@@ -206,5 +206,15 @@
     "shocMapContentMetaDescription": "Lista de escondites, objetos de misión y botín de Shadow of Chernobyl con enlaces directos a marcadores en el mapa interactivo.",
     "csMapContentMetaDescription": "Lista de escondites, objetos de misión y botín de Clear Sky con enlaces directos a marcadores en el mapa interactivo.",
     "copMapContentMetaDescription": "Lista de escondites, objetos de misión y botín de Call of Pripyat con enlaces directos a marcadores en el mapa interactivo.",
-    "mapContentIndex": "Listas de escondites y botín"
+    "mapContentIndex": "Listas de escondites y botín",
+    "shelters": "Refugios",
+    "Shelter": "Refugio",
+    "botPlayerShelters": "Refugios de PNJ",
+    "medics": "Médicos",
+    "guides": "Guías",
+    "artefacts": "Artefactos",
+    "roads": "Caminos",
+    "hubs": "Hubs",
+    "electro": "Electro",
+    "mutants": "Mutantes peligrosos"
 }

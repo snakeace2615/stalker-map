@@ -242,5 +242,15 @@
     "shocMapContentMetaDescription": "Liste der Verstecke, Questgegenstände und Beute aus Shadow of Chernobyl mit direkten Links zu Markierungen auf der interaktiven Karte.",
     "csMapContentMetaDescription": "Liste der Verstecke, Questgegenstände und Beute aus Clear Sky mit direkten Links zu Markierungen auf der interaktiven Karte.",
     "copMapContentMetaDescription": "Liste der Verstecke, Questgegenstände und Beute aus Call of Pripyat mit direkten Links zu Markierungen auf der interaktiven Karte.",
-    "mapContentIndex": "Listen mit Verstecken und Beute"
+    "mapContentIndex": "Listen mit Verstecken und Beute",
+    "shelters": "Unterstände",
+    "Shelter": "Unterstand",
+    "botPlayerShelters": "NPC-Unterstände",
+    "medics": "Sanitäter",
+    "guides": "Führer",
+    "artefacts": "Artefakte",
+    "roads": "Straßen",
+    "hubs": "Hubs",
+    "electro": "Elektro",
+    "mutants": "Gefährliche Mutanten"
 }

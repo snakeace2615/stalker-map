@@ -319,7 +319,6 @@ export class MechanicComponent {
                 this.upgradedItemDamage = [damage];
             }
 
-            console.log(this.itemDamage)
             this.resetWeaponStats();
         }
 

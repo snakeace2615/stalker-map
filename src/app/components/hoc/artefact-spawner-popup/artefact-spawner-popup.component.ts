@@ -28,9 +28,6 @@ export class ArtefactSpawnerPopupComponent {
 
   private async ngOnInit(): Promise<void> {
     if (this.artefactSpawner.spawner) {
-        console.log(this.artefactSpawner)
-        console.log(this.artefactSpawnerConfigs)
-        console.log(this.items)
       let config = this.artefactSpawnerConfigs.find(x => x.name == this.artefactSpawner.spawner);
       if (config && config.settings && config.settings.length > 0) {
         this.artefacts = [];

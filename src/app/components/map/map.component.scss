@@ -75,21 +75,6 @@ color: white !important;
   flex-direction: row-reverse;
 }
 
-.inventory::-webkit-scrollbar-track {
-	background-color: rgba(9,10,10,1);
-  border: 1px solid #555656;
-}
-
-.inventory::-webkit-scrollbar-thumb {
-	background-color:rgba(9,10,10,1);
-  border: 1px solid white;
-  margin: 3px;
-}
-
-.inventory::-webkit-scrollbar {
-  border: 1px solid white;
-}
-
 .inventory-item {
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
@@ -161,36 +146,4 @@ color: white !important;
   width: 25px;
   height: 100%;
   opacity: .75;
-}
-
-.stalker-compare-control {
-  .stalker-compare-button {
-    width: 36px;
-    height: 36px;
-    display: block;
-    background-color: #fff;
-    background-image: url(/assets/images/items/compare.svg);
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: 28px 28px;
-    position: relative;
-    border-bottom: none !important;
-  }
-
-  .stalker-compare-badge {
-    position: absolute;
-    top: -4px;
-    right: -4px;
-    min-width: 1.1rem;
-    height: 1.1rem;
-    padding: 0 3px;
-    border-radius: 999px;
-    background: #c43c2c;
-    color: #fff;
-    font-size: 0.7rem;
-    line-height: 1.1rem;
-    align-items: center;
-    justify-content: center;
-    display: none;
-  }
 }

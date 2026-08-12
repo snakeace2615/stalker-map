@@ -24,10 +24,13 @@
                     <div class="inventory">
                         @for (artefact of section.anomalySpawnItems; track artefact) {
                             <div tooltip [component]="itemTooltipComponent" [componentData]="{item: artefact.item}"
-                                class="inventory-item inventory-item-width-1 inventory-item-height-1">
+                                class="inventory-item"
+                                [style.--item-w]="1"
+                                [style.--item-h]="1"
+                                [style.--grid-x]="artefact.item.gridX"
+                                [style.--grid-y]="artefact.item.gridY">
                                 <div class="inventory-item-percentage">{{Math.floor(artefact.probability * 100)}}%</div>
-                                <div
-                                    class="inventory-item-image {{this.game.gameStyle}} inventory-item-x-{{artefact.item.gridX}} inventory-item-y-{{artefact.item.gridY}}">
+                                <div class="inventory-item-image {{this.game.gameStyle}}">
                                 </div>
                             </div>
                         }

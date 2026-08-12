@@ -9,20 +9,20 @@
       "isShowByDefault": false
     },
     {
-      "uniqueName": "acidic_zone",
+      "uniqueName": "acidic",
+      "isShowByDefault": false
+    },
+    {
+      "uniqueName": "psychic",
+      "isShowByDefault": false
+    },
+    {
+      "uniqueName": "radioactive",
       "isShowByDefault": true
     },
     {
-      "uniqueName": "psychic_zone",
-      "isShowByDefault": true
-    },
-    {
-      "uniqueName": "radioactive_zone",
-      "isShowByDefault": true
-    },
-    {
-      "uniqueName": "thermal_zone",
-      "isShowByDefault": true
+      "uniqueName": "thermal",
+      "isShowByDefault": false
     },
     {
       "uniqueName": "traders",
@@ -87,22 +87,6 @@
     {
       "uniqueName": "roads",
       "isShowByDefault": true
-    },
-    {
-      "uniqueName": "acidic",
-      "isShowByDefault": false
-    },
-    {
-      "uniqueName": "psychic",
-      "isShowByDefault": false
-    },
-    {
-      "uniqueName": "radioactive",
-      "isShowByDefault": false
-    },
-    {
-      "uniqueName": "thermal",
-      "isShowByDefault": false
     },
     {
       "uniqueName": "mines",

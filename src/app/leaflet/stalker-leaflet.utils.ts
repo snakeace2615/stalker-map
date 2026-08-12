@@ -1,10 +1,20 @@
 import type { LatLngBoundsExpression, LatLngExpression, Map } from 'leaflet';
 import * as L from 'leaflet';
 
+import { patchCanvasRenderer } from './canvas-markers';
 import type { StalkerMap } from './stalker-leaflet.types';
 
 export function asStalkerMap(map: Map): StalkerMap {
     return map as StalkerMap;
+}
+
+export function createStalkerMap(
+    element: string | HTMLElement,
+    options: L.MapOptions
+): StalkerMap {
+    patchCanvasRenderer();
+
+    return asStalkerMap(L.map(element, options));
 }
 
 export function pixelBounds(height: number, width: number): LatLngBoundsExpression {
