@@ -9,22 +9,6 @@
       "isShowByDefault": false
     },
     {
-      "uniqueName": "acidic",
-      "isShowByDefault": false
-    },
-    {
-      "uniqueName": "psychic",
-      "isShowByDefault": false
-    },
-    {
-      "uniqueName": "radioactive",
-      "isShowByDefault": true
-    },
-    {
-      "uniqueName": "thermal",
-      "isShowByDefault": false
-    },
-    {
       "uniqueName": "traders",
       "isShowByDefault": true
     },
@@ -101,7 +85,19 @@
       "isShowByDefault": false
     },
     {
-      "uniqueName": "hidden-markers",
+      "uniqueName": "acidic",
+      "isShowByDefault": false
+    },
+    {
+      "uniqueName": "psychic",
+      "isShowByDefault": false
+    },
+    {
+      "uniqueName": "radioactive",
+      "isShowByDefault": false
+    },
+    {
+      "uniqueName": "thermal",
       "isShowByDefault": false
     },
     {
@@ -110,6 +106,10 @@
     },
     {
       "uniqueName": "grid",
+      "isShowByDefault": false
+    },
+    {
+      "uniqueName": "hidden-markers",
       "isShowByDefault": false
     }
   ],
