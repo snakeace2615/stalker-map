@@ -18,6 +18,7 @@ export interface StalkerRulerLabels {
 export interface StalkerRulerControlOptions extends L.ControlOptions {
     lengthFactor?: number;
     speed?: number;
+    debugScale?: boolean;
     labels?: StalkerRulerLabels;
     circleMarker?: L.CircleMarkerOptions;
     lineStyle?: L.PolylineOptions;
@@ -123,6 +124,7 @@ const StalkerRuler = L.Control.extend({
         position: 'topright',
         lengthFactor: 1,
         speed: 1.4,
+        debugScale: false,
         labels: {
             length: 'Distance:',
             azimuth: 'Azimuth:',
@@ -182,41 +184,47 @@ const StalkerRuler = L.Control.extend({
         this._areaButton.setAttribute('role', 'button');
         this._areaButton.innerHTML = this._areaIconHtml();
 
-        this._scaleButton = L.DomUtil.create('a', 'stalker-ruler-btn stalker-ruler-btn-scale', this._buttons);
-        this._scaleButton.href = '#';
-        this._scaleButton.title = 'Scale (m / 100px)';
-        this._scaleButton.setAttribute('role', 'button');
-        this._scaleButton.innerHTML = this._scaleIconHtml();
-
         this._panel = L.DomUtil.create('div', 'stalker-ruler-panel', this._container);
         this._panel.hidden = true;
 
-        this._scalePanel = L.DomUtil.create('div', 'stalker-ruler-panel stalker-ruler-scale-panel', this._container);
-        this._scalePanel.hidden = true;
-        this._scalePanel.innerHTML = `
-            <div class="stalker-ruler-stat">
-                <span class="stalker-ruler-stat-label">Now</span>
-                <span class="stalker-ruler-stat-value stalker-ruler-scale-current">—</span>
-            </div>
-            <div class="stalker-ruler-stat stalker-ruler-stat-scale">
-                <span class="stalker-ruler-stat-label">Target</span>
-                <label class="stalker-ruler-scale-input">
-                    <input type="number" min="0.001" step="any" />
-                    <span>m / ${SCALE_SAMPLE_PX}px</span>
-                </label>
-            </div>
-            <button type="button" class="stalker-ruler-scale-apply">Set zoom</button>
-        `;
-        this._scaleCurrentEl = this._scalePanel.querySelector('.stalker-ruler-scale-current');
-        this._scaleInput = this._scalePanel.querySelector('input');
-        this._scaleApplyBtn = this._scalePanel.querySelector('.stalker-ruler-scale-apply');
+        this._debugScale = !!this.options.debugScale;
         this._scaleOpen = false;
+        if (this._debugScale) {
+            this._container.classList.add('is-debug');
+
+            this._scaleButton = L.DomUtil.create('a', 'stalker-ruler-btn stalker-ruler-btn-scale', this._buttons);
+            this._scaleButton.href = '#';
+            this._scaleButton.title = 'Scale (m / 100px)';
+            this._scaleButton.setAttribute('role', 'button');
+            this._scaleButton.innerHTML = this._scaleIconHtml();
+
+            this._scalePanel = L.DomUtil.create('div', 'stalker-ruler-panel stalker-ruler-scale-panel', this._container);
+            this._scalePanel.hidden = true;
+            this._scalePanel.innerHTML = `
+                <div class="stalker-ruler-stat">
+                    <span class="stalker-ruler-stat-label">Now</span>
+                    <span class="stalker-ruler-stat-value stalker-ruler-scale-current">—</span>
+                </div>
+                <div class="stalker-ruler-stat stalker-ruler-stat-scale">
+                    <span class="stalker-ruler-stat-label">Target</span>
+                    <label class="stalker-ruler-scale-input">
+                        <input type="number" min="0.001" step="any" />
+                        <span>m / ${SCALE_SAMPLE_PX}px</span>
+                    </label>
+                </div>
+                <button type="button" class="stalker-ruler-scale-apply">Set zoom</button>
+            `;
+            this._scaleCurrentEl = this._scalePanel.querySelector('.stalker-ruler-scale-current');
+            this._scaleInput = this._scalePanel.querySelector('input');
+            this._scaleApplyBtn = this._scalePanel.querySelector('.stalker-ruler-scale-apply');
+
+            L.DomEvent.on(this._scaleButton, 'click', this._onScaleButtonClick, this);
+            L.DomEvent.on(this._scaleApplyBtn, 'click', this._onScaleApplyClick, this);
+            L.DomEvent.on(this._scaleInput, 'keydown', this._onScaleInputKeydown, this);
+        }
 
         L.DomEvent.on(this._routeButton, 'click', this._onRouteButtonClick, this);
         L.DomEvent.on(this._areaButton, 'click', this._onAreaButtonClick, this);
-        L.DomEvent.on(this._scaleButton, 'click', this._onScaleButtonClick, this);
-        L.DomEvent.on(this._scaleApplyBtn, 'click', this._onScaleApplyClick, this);
-        L.DomEvent.on(this._scaleInput, 'keydown', this._onScaleInputKeydown, this);
 
         this._layer = L.layerGroup();
         this._shapeLayer = L.layerGroup().addTo(this._layer);
@@ -232,9 +240,11 @@ const StalkerRuler = L.Control.extend({
         this._setScaleOpen(false);
         L.DomEvent.off(this._routeButton, 'click', this._onRouteButtonClick, this);
         L.DomEvent.off(this._areaButton, 'click', this._onAreaButtonClick, this);
-        L.DomEvent.off(this._scaleButton, 'click', this._onScaleButtonClick, this);
-        L.DomEvent.off(this._scaleApplyBtn, 'click', this._onScaleApplyClick, this);
-        L.DomEvent.off(this._scaleInput, 'keydown', this._onScaleInputKeydown, this);
+        if (this._debugScale) {
+            L.DomEvent.off(this._scaleButton, 'click', this._onScaleButtonClick, this);
+            L.DomEvent.off(this._scaleApplyBtn, 'click', this._onScaleApplyClick, this);
+            L.DomEvent.off(this._scaleInput, 'keydown', this._onScaleInputKeydown, this);
+        }
     },
 
     isActive(this: any): boolean {
@@ -285,6 +295,10 @@ const StalkerRuler = L.Control.extend({
     },
 
     _setScaleOpen(this: any, open: boolean) {
+        if (!this._debugScale) {
+            return;
+        }
+
         this._scaleOpen = open;
         this._container.classList.toggle('is-scale', open);
         this._scaleButton.classList.toggle('is-active', open);

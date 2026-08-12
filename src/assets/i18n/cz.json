@@ -20,6 +20,7 @@
     "stuff": "Loot",
     "st_name_habar": "Loot",
     "stuff_at_location": "Loot scattered around the level",
+    "rich_stuff_at_location": "Valuable loot scattered around the level",
     "inventory_box": "Loot in a box",
     "destroyable-box": "Loot in the boxes",
     "loot-box-cluster": "Loot in the boxes",

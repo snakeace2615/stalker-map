@@ -26,10 +26,10 @@
       <img src="assets/images/posters/s2.webp" alt="Heart of Chornobyl">
     </a>
   </div>
-  <nav class="content-index" [attr.aria-label]="'mapContentIndex' | translate">
+  <nav class="content-index" aria-hidden="true">
     <div class="content-index-title">{{ 'mapContentIndex' | translate }}</div>
-    <a [href]="contentHref('shoc')">{{ 'shocMapContentPageTitle' | translate }}</a>
-    <a [href]="contentHref('cs')">{{ 'csMapContentPageTitle' | translate }}</a>
-    <a [href]="contentHref('cop')">{{ 'copMapContentPageTitle' | translate }}</a>
+    <a [href]="contentHref('shoc')" tabindex="-1">{{ 'shocMapContentPageTitle' | translate }}</a>
+    <a [href]="contentHref('cs')" tabindex="-1">{{ 'csMapContentPageTitle' | translate }}</a>
+    <a [href]="contentHref('cop')" tabindex="-1">{{ 'copMapContentPageTitle' | translate }}</a>
   </nav>
 </div>

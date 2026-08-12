@@ -20,6 +20,7 @@
     "stuff": "Хабар",
     "st_name_habar": "Хабар",
     "stuff_at_location": "Розкиданий по локації хабар",
+    "rich_stuff_at_location": "Розкиданий по локації цінний хабар",
     "inventory_box": "Хабар в ящику",
     "destroyable-box": "Хабар в ящиках",
     "loot-box-cluster": "Хабар в ящиках",

@@ -16,6 +16,7 @@
     "stuff": "Хабар",
     "st_name_habar": "Хабар",
     "stuff_at_location": "Разбросанный по локации хабар",
+    "rich_stuff_at_location": "Разбросанный по локации ценный хабар",
     "inventory_box": "Хабар в ящике",
     "destroyable-box": "Хабар в ящиках",
     "loot-box-cluster": "Хабар в ящиках",

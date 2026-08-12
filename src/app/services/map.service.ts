@@ -1,5 +1,5 @@
 import { MapComponent } from './../components/map/map.component';
-import { ApplicationRef, ComponentRef, createComponent, EnvironmentInjector, Injectable, NgZone, ViewContainerRef } from "@angular/core";
+import { ApplicationRef, ComponentRef, createComponent, EnvironmentInjector, Injectable, isDevMode, NgZone, ViewContainerRef } from "@angular/core";
 import { Subscription } from 'rxjs';
 import { HiddenMarker } from "../models/hidden-marker.model";
 import { StuffComponent } from '../components/stuff/stuff.component';
@@ -463,6 +463,7 @@ export class MapService {
             position: 'topright',
             lengthFactor,
             speed,
+            debugScale: isDevMode(),
             labels: {
                 length: this.translate.instant('length'),
                 azimuth: this.translate.instant('azimuth'),

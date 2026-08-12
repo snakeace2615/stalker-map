@@ -29,6 +29,7 @@ declare module 'leaflet' {
         position?: ControlPosition;
         lengthFactor?: number;
         speed?: number;
+        debugScale?: boolean;
         labels?: {
             length?: string;
             azimuth?: string;
