@@ -1,5 +1,5 @@
 import { Component, Input } from "@angular/core";
-import { TranslateModule, TranslateService } from "@ngx-translate/core";
+import { TranslateService } from "@ngx-translate/core";
 import { MapService } from "../../services/map.service";
 import { ToastService } from "../../services/toast.service";
 import { HiddenMarker } from "../../models/hidden-marker.model";
@@ -10,7 +10,7 @@ import { NgClass } from "@angular/common";
     standalone: true,
     templateUrl: './popup.component.html',
     styleUrl: './popup.component.scss',
-    imports: [TranslateModule, NgClass]
+    imports: [NgClass]
 })
 export class PopupComponent {
     @Input() public title: string;

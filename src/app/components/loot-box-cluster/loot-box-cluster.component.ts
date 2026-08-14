@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { LootBoxCluster } from '../../models/loot-box/loot-box-cluster.model';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { LootBoxView } from '../../models/loot-box/loot-box-veiw.model';
 import { asUpgradable, asWeapon, Item } from '../../models/item.model';
 import { LootBox } from '../../models/loot-box/loot-box-section.model';
@@ -15,7 +15,7 @@ import { ShareLinkService } from '../../services/share-link.service';
 @Component({
     selector: 'app-loot-box-cluster',
     standalone: true,
-    imports: [TranslateModule, TooltipDirective],
+    imports: [TranslatePipe, TooltipDirective],
     templateUrl: './loot-box-cluster.component.html',
     styleUrl: './loot-box-cluster.component.scss'
 })

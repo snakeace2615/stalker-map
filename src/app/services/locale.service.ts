@@ -16,7 +16,7 @@ export class LocaleService {
     constructor(private readonly translate: TranslateService) {}
 
     public get currentLang(): AppLanguage {
-        const lang = this.translate.currentLang;
+        const lang = this.translate.currentLang();
         return isAppLanguage(lang) ? lang : DEFAULT_LANG;
     }
 

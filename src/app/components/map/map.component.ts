@@ -9,7 +9,7 @@ import {
     NgZone,
 } from '@angular/core';
 import { HeaderComponent } from '../header/header.component';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ActivatedRoute } from '@angular/router';
 import { Point } from '../../models/point.model';
 import { getAnalytics, logEvent } from 'firebase/analytics';
@@ -24,6 +24,7 @@ import { SmartTerrain } from '../../models/smart-terrain.model';
 import { UndergroundComponent } from '../undeground/underground.component';
 import { MarkerToSearch } from '../../models/marker-to-search.model';
 import { ItemUpgrade, UpgradeProperty } from '../../models/upgrades/upgrades';
+import { DEFAULT_LANG } from '../../locale';
 import { SeoService } from '../../services/seo.service';
 import { ShareLinkService } from '../../services/share-link.service';
 import { MapService } from '../../services/map.service';
@@ -36,7 +37,7 @@ import { L, asLatLngBounds, asLatLngExpressions, asStalkerLayerGroup, createStal
 @Component({
     selector: 'app-map',
     standalone: true,
-    imports: [HeaderComponent, TranslateModule, BottomSheetWrapperComponent],
+    imports: [HeaderComponent, TranslatePipe, BottomSheetWrapperComponent],
     templateUrl: './map.component.html',
     styleUrls: [
         './map.component.inventory.base.scss',
@@ -213,7 +214,7 @@ export class MapComponent {
         }
 
         await Promise.all([
-            this.loadLocales(this.translate.currentLang),
+            this.loadLocales(this.translate.currentLang() ?? DEFAULT_LANG),
             this.loadItems(),
             this.loadLootBoxConfig(),
             this.loadUpgrades(),
@@ -351,7 +352,7 @@ export class MapComponent {
     }
 
     private async loadLocales(language: string): Promise<void> {
-        await fetch(`/assets/data/${this.game.uniqueName}/${this.translate.currentLang}.json`)
+        await fetch(`/assets/data/${this.game.uniqueName}/${language}.json`)
             .then((response) => {
                 if (response.ok) {
                     response.json().then((locales: any) => {
@@ -374,7 +375,7 @@ export class MapComponent {
 
                                 if (!(importLocales == null || importLocales.length == 0)) {
 
-                                    fetch(`/assets/data/${game}/${this.translate.currentLang}.json`)
+                                    fetch(`/assets/data/${game}/${language}.json`)
                                         .then((response) => {
                                             if (response.ok) {
                                                 response.json().then((locales: any) => {
@@ -679,7 +680,7 @@ export class MapComponent {
                 const analytics = getAnalytics();
                 logEvent(analytics, 'open-map-queryParams', {
                     game: this.gamedata.uniqueName,
-                    language: this.translate.currentLang,
+                    language: this.translate.currentLang(),
                     markType: link.type,
                     coordinates: `${link.lat} ${link.lng}`,
                 });
@@ -692,7 +693,7 @@ export class MapComponent {
             const analytics = getAnalytics();
             logEvent(analytics, 'open-map', {
                 game: this.gamedata.uniqueName,
-                language: this.translate.currentLang,
+                language: this.translate.currentLang(),
             });
         }
     }

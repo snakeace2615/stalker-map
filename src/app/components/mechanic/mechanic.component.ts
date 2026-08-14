@@ -5,7 +5,7 @@ import { asUpgradable, asWeapon, isOutfit, isWeapon, Item, Outfit, UpgradableIte
 import { RankSetting } from '../../models/rank-settings.model';
 import { RelationType } from '../../models/gamedata/map-config';
 import { CharacterProfile } from '../../models/character-profile.model';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { StalkerProfileComponent } from "../stalker-profile/stalker-profile.component";
 import { CommonModule, NgClass, NgStyle } from '@angular/common';
 import { ItemUpgrade, Upgrade, UpgradeProperty, UpgradeSection, UpgradeSelectedEventModel } from '../../models/upgrades/upgrades';
@@ -22,7 +22,7 @@ import { ShareLinkService } from '../../services/share-link.service';
 @Component({
     selector: 'app-mechanic',
     standalone: true,
-    imports: [TranslateModule, StalkerProfileComponent, NgStyle, NgClass, TooltipDirective, ItemPropertyComponent, ItemPropertyNumberComponent, ItemUpgradesComponent, CommonModule],
+    imports: [TranslatePipe, StalkerProfileComponent, NgStyle, NgClass, TooltipDirective, ItemPropertyComponent, ItemPropertyNumberComponent, ItemUpgradesComponent, CommonModule],
     templateUrl: './mechanic.component.html',
     styleUrl: './mechanic.component.scss'
 })

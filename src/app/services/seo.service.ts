@@ -60,7 +60,7 @@ export class SeoService {
 
     private apply(config: SeoPageConfig): void {
         this.current = config;
-        this.setHtmlLang(this.translate.currentLang || DEFAULT_LANG);
+        this.setHtmlLang(this.translate.currentLang() || DEFAULT_LANG);
         this.applyTags(config);
     }
 
@@ -76,7 +76,7 @@ export class SeoService {
                     return;
                 }
 
-                const lang = this.translate.currentLang || DEFAULT_LANG;
+                const lang = this.translate.currentLang() || DEFAULT_LANG;
                 const title = translations[config.titleKey];
                 const description = translations[config.descriptionKey];
                 const path = this.localizedPath(config.pagePath, lang);

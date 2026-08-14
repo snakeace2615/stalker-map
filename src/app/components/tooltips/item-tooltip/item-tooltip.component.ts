@@ -1,11 +1,11 @@
 import { Component, Input } from '@angular/core';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { Item } from '../../../models/item.model';
 
 @Component({
   selector: 'app-item-tooltip',
   standalone: true,
-  imports: [TranslateModule],
+  imports: [TranslatePipe],
   templateUrl: './item-tooltip.component.html',
   styleUrl: './item-tooltip.component.scss'
 })

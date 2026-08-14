@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { Stash, StashGenerator, StashPrototype } from '../../../models/hoc/map-hoc';
 import { isHocWeapon, Item } from '../../../models/item.model';
 import { StuffItem } from '../../../models/stuff/stuff-item.model';
@@ -9,7 +9,7 @@ import { HocInventoryItem } from "../hoc-inventory-item/hoc-inventory-item";
 @Component({
     selector: 'app-hoc-stash',
     standalone: true,
-    imports: [TranslateModule, HocInventoryItem],
+    imports: [TranslatePipe, HocInventoryItem],
     templateUrl: './hoc-stash.component.html',
     styleUrl: './hoc-stash.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush

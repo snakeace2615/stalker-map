@@ -1,13 +1,13 @@
 import { Component } from '@angular/core';
 import { HeaderComponent } from '../header/header.component';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { SeoService } from '../../services/seo.service';
 import { LocaleService } from '../../services/locale.service';
 
 @Component({
   selector: 'app-main',
   standalone: true,
-  imports: [HeaderComponent, TranslateModule],
+  imports: [HeaderComponent, TranslatePipe],
   templateUrl: './main.component.html',
   styleUrl: './main.component.scss'
 })

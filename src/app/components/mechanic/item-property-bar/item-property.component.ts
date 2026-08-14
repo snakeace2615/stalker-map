@@ -1,11 +1,10 @@
 import { NgClass, NgStyle } from '@angular/common';
 import { Component, Input } from '@angular/core';
-import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-item-property-bar',
   standalone: true,
-  imports: [TranslateModule, NgStyle, NgClass],
+  imports: [NgStyle, NgClass],
   templateUrl: './item-property.component.html',
   styleUrl: './item-property.component.scss'
 })

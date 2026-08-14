@@ -1,6 +1,6 @@
 import { NgClass } from "@angular/common";
 import { Component, ElementRef, Input, NgZone, ViewChild, ViewContainerRef } from "@angular/core";
-import { TranslateModule, TranslateService } from "@ngx-translate/core";
+import { TranslatePipe, TranslateService } from "@ngx-translate/core";
 import { Map } from '../../models/map.model';
 import { Location } from '../../models/location.model';
 import { StuffModel } from "../../models/stuff";
@@ -21,7 +21,7 @@ import { L, asLatLngBounds, asStalkerLayerGroup, createStalkerMap, findLayerMark
     standalone: true,
     templateUrl: './underground.component.html',
     styleUrl: './underground.component.scss',
-    imports: [TranslateModule]
+    imports: [TranslatePipe]
 })
 
 export class UndergroundComponent {

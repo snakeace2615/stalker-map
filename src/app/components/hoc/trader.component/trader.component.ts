@@ -3,12 +3,12 @@ import { TradeGenerator, TradeItem, TradeItemGenerator, TraderHoc, TraderPossibl
 import { isHocWeapon, Item } from '../../../models/item.model';
 import { ItemTooltipComponent } from '../../tooltips/item-tooltip/item-tooltip.component';
 import { TooltipDirective } from '../../tooltips/tooltip.directive';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { NgStyle, NgTemplateOutlet } from '@angular/common';
 
 @Component({
   selector: 'app-trader.component',
-  imports: [TooltipDirective, TranslateModule, NgTemplateOutlet],
+  imports: [TooltipDirective, TranslatePipe, NgTemplateOutlet],
   templateUrl: './trader.component.html',
   styleUrl: './trader.component.scss',
 })

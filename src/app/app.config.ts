@@ -3,7 +3,7 @@ import { provideRouter } from '@angular/router';
 
 import { routes } from './app.routes';
 import { provideHttpClient } from '@angular/common/http';
-import { TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
 
 export const appConfig: ApplicationConfig = {
@@ -12,9 +12,9 @@ export const appConfig: ApplicationConfig = {
     provideZoneChangeDetection(),
     provideRouter(routes),
     provideHttpClient(),
-    TranslateModule.forRoot({
-      defaultLanguage: 'en',
-      loader: provideTranslateHttpLoader({prefix:"./assets/i18n/", suffix:".json"}),
-      isolate: true
-    }).providers!]
+    provideTranslateService({
+      fallbackLang: 'en',
+      loader: provideTranslateHttpLoader({ prefix: './assets/i18n/', suffix: '.json' }),
+    }),
+    ]
 };

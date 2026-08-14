@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { AnomalyZone } from '../../models/anomaly-zone';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { AnomalySpawnSectionView } from '../../models/anomaly-zone/anomaly-spawn-section.view.model';
 import { Item } from '../../models/item.model';
 import { StuffItem } from '../../models/stuff';
@@ -12,7 +12,7 @@ import { ShareLinkService } from '../../services/share-link.service';
 @Component({
     selector: 'app-anomaly-zone',
     standalone: true,
-    imports: [TranslateModule, TooltipDirective],
+    imports: [TranslatePipe, TooltipDirective],
     templateUrl: './anomaly-zone.component.html',
     styleUrl: './anomaly-zone.component.scss'
 })

@@ -1,7 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { TradeSection, TraderModel, BestBuySellModel, SelectedItem, TraderBuySellItemView, TraderSupplyItemView } from '../../models/trader';
 import { NgClass, NgStyle, NgTemplateOutlet } from '@angular/common';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Item } from '../../models/item.model';
 import { StalkerProfileComponent } from '../stalker-profile/stalker-profile.component';
 import { RankSetting } from '../../models/rank-settings.model';
@@ -22,7 +22,7 @@ import { ShareLinkService } from '../../services/share-link.service';
   standalone: true,
   templateUrl: './trader.component.html',
   styleUrl: './trader.component.scss',
-  imports: [TranslateModule, NgClass, NgStyle, StalkerProfileComponent, TraderItemTileComponent, NgTemplateOutlet]
+  imports: [TranslatePipe, NgClass, NgStyle, StalkerProfileComponent, TraderItemTileComponent, NgTemplateOutlet]
 })
 export class TraderComponent implements OnInit {
   @Input() trader: TraderModel;

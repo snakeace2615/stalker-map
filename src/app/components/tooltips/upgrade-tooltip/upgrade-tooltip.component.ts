@@ -1,11 +1,11 @@
 import { Component, Input } from '@angular/core';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { Upgrade, UpgradeProperty } from '../../../models/upgrades/upgrades';
 
 @Component({
   selector: 'app-upgrade-tooltip',
   standalone: true,
-  imports: [TranslateModule],
+  imports: [TranslatePipe],
   templateUrl: './upgrade-tooltip.component.html',
   styleUrl: './upgrade-tooltip.component.scss'
 })

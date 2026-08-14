@@ -1,13 +1,13 @@
 import { Component, Input } from '@angular/core';
 import { CharacterProfile } from '../../models/character-profile.model';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { NgStyle } from '@angular/common';
 import { RankSetting } from '../../models/rank-settings.model';
 
 @Component({
   selector: 'stalker-profile',
   standalone: true,
-  imports: [TranslateModule, NgStyle],
+  imports: [TranslatePipe, NgStyle],
   templateUrl: './stalker-profile.component.html',
   styleUrl: './stalker-profile.component.scss'
 })

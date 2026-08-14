@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { StuffItem, StuffModel } from '../../models/stuff';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { asUpgradable, asWeapon, Item } from '../../models/item.model';
 import { MapService } from '../../services/map.service';
 import { ItemTooltipComponent } from '../tooltips/item-tooltip/item-tooltip.component';
@@ -12,7 +12,7 @@ import { ShareLinkService } from '../../services/share-link.service';
 @Component({
     selector: 'app-stuff',
     standalone: true,
-    imports: [TranslateModule, TooltipDirective],
+    imports: [TranslatePipe, TooltipDirective],
     templateUrl: './stuff.component.html',
     styleUrl: './stuff.component.scss'
 })

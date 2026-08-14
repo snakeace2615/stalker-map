@@ -5,14 +5,14 @@ import { ItemUpgradesComponent } from '../mechanic/item-upgrades/item-upgrades.c
 import { MechanicDiscount } from '../../models/mechanic.model';
 import { ItemUpgrade, UpgradeProperty, UpgradeSelectedEventModel } from '../../models/upgrades/upgrades';
 import { ItemPropertyNumberComponent } from "../mechanic/item-property-number/item-property-number.component";
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { Outfit, Weapon } from '../../models/item.model';
 import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-compare',
     standalone: true,
-    imports: [ItemUpgradesComponent, NgStyle, ItemPropertyNumberComponent, TranslateModule],
+    imports: [ItemUpgradesComponent, NgStyle, ItemPropertyNumberComponent, TranslatePipe],
     templateUrl: './compare.component.html',
     styleUrl: './compare.component.scss'
 })

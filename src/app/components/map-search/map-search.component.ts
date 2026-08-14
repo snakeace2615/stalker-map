@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslateService } from '@ngx-translate/core';
 
 export interface MapSearchResult {
     marker: any;
@@ -17,7 +17,7 @@ export interface MapSearchGroup {
 @Component({
     selector: 'app-map-search',
     standalone: true,
-    imports: [TranslateModule],
+    imports: [],
     templateUrl: './map-search.component.html',
     styleUrl: './map-search.component.scss',
 })

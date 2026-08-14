@@ -1,12 +1,12 @@
 import { Component, Input } from '@angular/core';
 import { HiddenMarker } from '../../models/hidden-marker.model';
 import { MapService } from '../../services/map.service';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-hide-unhide',
   standalone: true,
-  imports: [TranslateModule],
+  imports: [TranslatePipe],
   templateUrl: './hide-unhide.component.html',
   styleUrl: './hide-unhide.component.scss'
 })

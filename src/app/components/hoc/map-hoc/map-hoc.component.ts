@@ -8,7 +8,8 @@ import {
     ViewContainerRef,
     ViewEncapsulation,
 } from '@angular/core';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { DEFAULT_LANG } from '../../../locale';
 import { SeoService } from '../../../services/seo.service';
 import { ActivatedRoute } from '@angular/router';
 import { getAnalytics, logEvent } from 'firebase/analytics';
@@ -44,7 +45,7 @@ import { HOC_LAYER_CONTROL_ICONS } from '../../../models/hoc/layer-control-icons
 @Component({
     selector: 'app-map-hoc',
     standalone: true,
-    imports: [HeaderComponent, TranslateModule, BottomSheetWrapperComponent],
+    imports: [HeaderComponent, TranslatePipe, BottomSheetWrapperComponent],
     templateUrl: './map-hoc.component.html',
     styleUrls: ['./map-hoc.component.scss', './map-hoc.layers.scss', '../../map/map.component.inventory.base.scss'],
     encapsulation: ViewEncapsulation.None,
@@ -100,7 +101,7 @@ export class MapHocComponent {
 
     private async ngOnInit(): Promise<void> {
         await Promise.all([
-            this.loadLocales(this.translate.currentLang),
+            this.loadLocales(this.translate.currentLang() ?? DEFAULT_LANG),
             this.loadItems(),
             //this.loadLootBoxConfig(),
             //this.loadUpgrades(),
@@ -228,7 +229,7 @@ export class MapHocComponent {
         this.map.scaleFactor = this.scaleFactor;
 
         this.map.attributionControl!.addAttribution('&copy; <a href="https://stalker-map.online">stalker-map.online</a>');
-        this.map.attributionControl!.addAttribution('<a href="https://github.com/joric">Tile maps by joric</a>');
+        this.map.attributionControl!.addAttribution('<a href="https://github.com/joric/stalker2_tileset">Tile maps by joric</a>');
 
         let baseLayers = [];
 
@@ -518,7 +519,7 @@ export class MapHocComponent {
             const analytics = getAnalytics();
             logEvent(analytics, 'open-map', {
                 game: 'hoc',
-                language: this.translate.currentLang,
+                language: this.translate.currentLang(),
             });
         }
     }
@@ -605,7 +606,7 @@ export class MapHocComponent {
                 const analytics = getAnalytics();
                 logEvent(analytics, 'open-map-queryParams', {
                     game: this.game,
-                    language: this.translate.currentLang,
+                    language: this.translate.currentLang(),
                     markType: link.type,
                     coordinates: `${link.lat} ${link.lng}`,
                 });
@@ -2629,7 +2630,7 @@ export class MapHocComponent {
 
     private async loadLocales(language: string): Promise<void> {
         await fetch(
-            `/assets/data/${this.game}/${this.translate.currentLang}.json`
+            `/assets/data/${this.game}/${language}.json`
         ).then((response) => {
             if (response.ok) {
                 response.json().then((locales: any) => {
@@ -2650,7 +2651,7 @@ export class MapHocComponent {
 
                             if (!(importLocales == null || importLocales.length == 0)) {
                                 fetch(
-                                    `/assets/data/${game}/${this.translate.currentLang}.json`
+                                    `/assets/data/${game}/${language}.json`
                                 ).then((response) => {
                                     if (response.ok) {
                                         response.json().then((locales: any) => {

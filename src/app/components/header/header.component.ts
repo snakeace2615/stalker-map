@@ -1,14 +1,14 @@
 import { NgClass } from '@angular/common';
 import { Component, ElementRef, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { LocaleService } from '../../services/locale.service';
 import { isAppLanguage } from '../../locale';
 
 @Component({
     selector: 'app-header',
     standalone: true,
-    imports: [TranslateModule, RouterModule, NgClass],
+    imports: [TranslatePipe, RouterModule, NgClass],
     templateUrl: './header.component.html',
     styleUrl: './header.component.scss'
 })
@@ -45,7 +45,7 @@ export class HeaderComponent {
             this.selectedLanguage = lang;
             this.locale.persistLang(lang);
 
-            if (this.translate.currentLang !== lang) {
+            if (this.translate.currentLang() !== lang) {
                 this.translate.use(lang);
             }
         });

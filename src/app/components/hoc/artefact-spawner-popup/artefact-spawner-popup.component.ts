@@ -1,6 +1,5 @@
 import { Component, Input } from '@angular/core';
 import { Artefact, ArtefactSpawner, ArtefactSpawnerConfig, ArtefactSpawnerType } from '../../../models/hoc/map-hoc';
-import { TranslateModule } from '@ngx-translate/core';
 import { isArtefact, Item } from '../../../models/item.model';
 import { TooltipDirective } from '../../tooltips/tooltip.directive';
 import { ItemTooltipComponent } from '../../tooltips/item-tooltip/item-tooltip.component';
@@ -8,7 +7,7 @@ import { ItemTooltipComponent } from '../../tooltips/item-tooltip/item-tooltip.c
 @Component({
   selector: 'app-artefact-spawner-popup',
   standalone: true,
-  imports: [TranslateModule, TooltipDirective],
+  imports: [TooltipDirective],
   templateUrl: './artefact-spawner-popup.component.html',
   styleUrl: './artefact-spawner-popup.component.scss'
 })

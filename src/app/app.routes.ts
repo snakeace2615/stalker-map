@@ -20,7 +20,7 @@ const langCanActivate: CanActivateFn = (route) => {
     const translate = inject(TranslateService);
     const locale = inject(LocaleService);
     locale.persistLang(lang);
-    if (translate.currentLang !== lang) {
+    if (translate.currentLang() !== lang) {
         translate.use(lang);
     }
     return true;

@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { MapComponent } from '../map/map.component';
 import { Map } from '../../models/map.model';
 import { HeaderComponent } from '../header/header.component';
@@ -12,12 +12,13 @@ import { InventoryItem } from '../../models/inventory-item.model';
 import { StuffContent } from '../../models/content';
 import { Game } from '../../models/game.model';
 import { ShareLinkService } from '../../services/share-link.service';
+import { DEFAULT_LANG } from '../../locale';
 import { SeoService } from '../../services/seo.service';
 
 @Component({
   selector: 'app-map-content',
   standalone: true,
-  imports: [TranslateModule, HeaderComponent, TooltipDirective],
+  imports: [TranslatePipe, HeaderComponent, TooltipDirective],
   templateUrl: './map-content.component.html',
   styleUrl: './map-content.component.scss'
 })
@@ -59,7 +60,7 @@ export class MapContentComponent implements OnInit {
     });
 
     await Promise.all([
-      this.loadLocales(this.translate.currentLang),
+      this.loadLocales(this.translate.currentLang() ?? DEFAULT_LANG),
       this.loadItems(),
     ]);
 
@@ -137,7 +138,7 @@ export class MapContentComponent implements OnInit {
   }
 
   private async loadLocales(language: string): Promise<void> {
-    const langFile = this.translate.currentLang || language;
+    const langFile = language;
     const response = await fetch(`/assets/data/${this.game.uniqueName}/${langFile}.json`);
     if (response.ok) {
       const locales = await response.json();

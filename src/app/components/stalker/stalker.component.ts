@@ -2,7 +2,7 @@ import { Component, Input } from '@angular/core';
 import { Stalker } from '../../models/stalker.model';
 import { asUpgradable, asWeapon, Item } from '../../models/item.model';
 import { StuffItem } from '../../models/stuff';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { StalkerProfileComponent } from "../stalker-profile/stalker-profile.component";
 import { RankSetting } from '../../models/rank-settings.model';
 import { MapService } from '../../services/map.service';
@@ -18,7 +18,7 @@ import { ShareLinkService } from '../../services/share-link.service';
     standalone: true,
     templateUrl: './stalker.component.html',
     styleUrl: './stalker.component.scss',
-    imports: [TranslateModule, StalkerProfileComponent, TooltipDirective, NgTemplateOutlet, NgStyle]
+    imports: [TranslatePipe, StalkerProfileComponent, TooltipDirective, NgTemplateOutlet, NgStyle]
 })
 export class StalkerComponent {
     @Input() public stalker: Stalker;
