@@ -36,8 +36,11 @@ import type { StalkerLayerGroup, StalkerMap, StalkerMarker, StalkerRulerControl 
 
 export class MapService {
     private hiddenMarksLocalStorageKey: string = 'hidden-markers';
-    private hiddenMarksCache: HiddenMarker[];
+    private hiddenMarksCache?: HiddenMarker[];
     private mapComponent: MapComponent;
+    private hiddenMarkerGame: string;
+    private hideMarkerHandler?: (marker: HiddenMarker) => void;
+    private unhideMarkerHandler?: (marker: HiddenMarker) => void;
     private bottomSheetWrapper: ComponentRef<BottomSheetWrapperComponent>;
     private activePopup: any = null;
     private activePopups: any[] = [];
@@ -59,6 +62,20 @@ export class MapService {
 
     public setMapComponent(mapComponent: MapComponent): void {
         this.mapComponent = mapComponent;
+        this.hiddenMarkerGame = mapComponent.game.uniqueName;
+        this.hideMarkerHandler = undefined;
+        this.unhideMarkerHandler = undefined;
+    }
+
+    public setHiddenMarkerHandlers(
+        game: string,
+        hideMarker: (marker: HiddenMarker) => void,
+        unhideMarker: (marker: HiddenMarker) => void
+    ): void {
+        this.hiddenMarkerGame = game;
+        this.hiddenMarksCache = undefined;
+        this.hideMarkerHandler = hideMarker;
+        this.unhideMarkerHandler = unhideMarker;
     }
 
     public createStashContent(stash: any, container: ViewContainerRef, game: Game, allItems: Item[], isUnderground: boolean, isPopup: boolean) {
@@ -505,7 +522,11 @@ export class MapService {
 
         this.setHiddenMarkers(hiddenMarkers);
 
-        this.mapComponent.hideMarker(markerToHide);
+        if (this.hideMarkerHandler) {
+            this.hideMarkerHandler(markerToHide);
+        } else {
+            this.mapComponent.hideMarker(markerToHide);
+        }
     }
 
     public unhideMark(marker: HiddenMarker): void {
@@ -528,7 +549,11 @@ export class MapService {
         });
 
         this.setHiddenMarkers(hiddenMarkers);
-        this.mapComponent.unhideMarker(marker);
+        if (this.unhideMarkerHandler) {
+            this.unhideMarkerHandler(marker);
+        } else {
+            this.mapComponent.unhideMarker(marker);
+        }
     }
 
     public getAllHiddenMarkers(): HiddenMarker[] {
@@ -542,10 +567,10 @@ export class MapService {
                 this.hiddenMarksCache = JSON.parse(allHiddenMarkers);
 
                 if (this.hiddenMarksCache) {
-                    this.hiddenMarksCache = this.hiddenMarksCache.filter(x => x.game == this.mapComponent.game.uniqueName);
+                    this.hiddenMarksCache = this.hiddenMarksCache.filter(x => x.game == this.hiddenMarkerGame);
                 }
 
-                return this.hiddenMarksCache;
+                return this.hiddenMarksCache ?? [];
             }
         }
 

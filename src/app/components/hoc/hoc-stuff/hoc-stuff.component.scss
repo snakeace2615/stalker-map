@@ -24,3 +24,7 @@
   background-image: url(/assets/images/items/attachments.png);
     background-size: calc(var(--inventory-cell-size) * var(--attachment-width-in-cell));
 }
+
+.header {
+    color: white;
+}

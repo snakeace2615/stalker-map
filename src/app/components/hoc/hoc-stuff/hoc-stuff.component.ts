@@ -7,6 +7,7 @@ import { ItemTooltipComponent } from '../../tooltips/item-tooltip/item-tooltip.c
 import { MapService } from '../../../services/map.service';
 import { Game } from '../../../models/game.model';
 import { HocInventoryItem } from "../hoc-inventory-item/hoc-inventory-item";
+import { HiddenMarker } from '../../../models/hidden-marker.model';
 
 @Component({
     selector: 'app-hoc-stuff',
@@ -22,6 +23,7 @@ export class HocStuffComponent {
     @Input() public allItems: Item[];
     @Input() public isUnderground: boolean;
     @Input() public shareUrl: string = '';
+    public hiddenMarker: HiddenMarker;
     public itemTooltipComponent: any = ItemTooltipComponent;
 
     public items: StuffItem[];
@@ -36,6 +38,12 @@ export class HocStuffComponent {
     constructor(private mapService: MapService) { }
 
     private async ngOnInit(): Promise<void> {
+        this.hiddenMarker = new HiddenMarker();
+        this.hiddenMarker.game = this.game.uniqueName;
+        this.hiddenMarker.layerName = this.stuffType;
+        this.hiddenMarker.lat = this.stuff.z;
+        this.hiddenMarker.lng = this.stuff.x;
+
         if (this.stuff.items) {
             this.items = this.stuff.items.map(x => {
                 let item = new StuffItem();

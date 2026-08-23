@@ -5,6 +5,7 @@ import { isHocWeapon, Item } from '../../../models/item.model';
 import { StuffItem } from '../../../models/stuff/stuff-item.model';
 import { ItemTooltipComponent } from '../../tooltips/item-tooltip/item-tooltip.component';
 import { HocInventoryItem } from "../hoc-inventory-item/hoc-inventory-item";
+import { HiddenMarker } from '../../../models/hidden-marker.model';
 
 @Component({
     selector: 'app-hoc-stash',
@@ -20,11 +21,19 @@ export class HocStashComponent {
     @Input() public stashGenerators: StashGenerator[];
     @Input() public stashPrototypes: StashPrototype[];
     @Input() public shareUrl: string = '';
+    @Input() public stashType: string = 'stash';
+    public hiddenMarker: HiddenMarker;
 
     public items: StuffItem[];
     public itemTooltipComponent: any = ItemTooltipComponent;
 
     private async ngOnInit(): Promise<void> {
+        this.hiddenMarker = new HiddenMarker();
+        this.hiddenMarker.game = 'hoc';
+        this.hiddenMarker.layerName = this.stashType;
+        this.hiddenMarker.lat = this.stash.z;
+        this.hiddenMarker.lng = this.stash.x;
+
         this.items = [];
 
         if (this.stash.itemGeneratorSettings?.length > 0) {

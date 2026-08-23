@@ -226,6 +226,12 @@ export class MapHocComponent {
             zoomControl: !1,
         });
 
+        this.mapService.setHiddenMarkerHandlers(
+            this.game,
+            (marker) => this.hideMarker(marker),
+            (marker) => this.unhideMarker(marker)
+        );
+
         this.map.scaleFactor = this.scaleFactor;
 
         this.map.attributionControl!.addAttribution('&copy; <a href="https://stalker-map.online">stalker-map.online</a>');
@@ -259,7 +265,7 @@ export class MapHocComponent {
                     noWrap: true
                 })
 
-            let inGameMap = L.tileLayer('https://joric.github.io/stalker2_tileset/tiles/{z}/{x}/{y}.jpg',
+            /*let inGameMap = L.tileLayer('https://joric.github.io/stalker2_tileset/tiles/{z}/{x}/{y}.jpg',
                 {
                     tileSize: tileSize,
                     zoomOffset: zoomOffset,
@@ -267,7 +273,18 @@ export class MapHocComponent {
                     maxZoom: maxZoom,
                     maxNativeZoom: 4,
                     noWrap: true
+                })*/
+
+            let dlc1Map = L.tileLayer('https://joric.github.io/stalker2_tileset/extras/dlc/{z}/{y}/{x}.webp',
+                {
+                    tileSize: tileSize,
+                    zoomOffset: zoomOffset,
+                    minZoom: gameConfig.minZoom,
+                    maxZoom: maxZoom,
+                    maxNativeZoom: 3,
+                    noWrap: true
                 })
+
             //D:\stalker-map\src\assets\images\s2\tiles\Mip_00\tile_2_0.png
             let diegeticMap = L.tileLayer('/assets/images/s2/tiles/Mip_0{z}/tile_{y}_{x}.png',
                 {
@@ -280,20 +297,27 @@ export class MapHocComponent {
                     noWrap: true
                 })
 
-            inGameMap.ableToSearch = false;
-            inGameMap.addToTop = false;
+            //inGameMap.ableToSearch = false;
+            //inGameMap.addToTop = false;
+
             rawGameMap.ableToSearch = false;
             rawGameMap.addToTop = false;
+            
             diegeticMap.ableToSearch = false;
             diegeticMap.addToTop = false;
 
+            dlc1Map.ableToSearch = false;
+            dlc1Map.addToTop = false;
+
             rawGameMap.name = 'raw-map-label';
-            inGameMap.name = 'in-game-map-label';
+            //inGameMap.name = 'in-game-map-label';
+            dlc1Map.name = 'in-game-map-label';
             diegeticMap.name = 'diegetic-map-label';
 
-            inGameMap.addTo(this.map);
+            dlc1Map.addTo(this.map);
 
-            baseLayers.push(inGameMap);
+            //baseLayers.push(inGameMap);
+            baseLayers.push(dlc1Map);
             baseLayers.push(rawGameMap);
             baseLayers.push(diegeticMap);
         }
@@ -655,20 +679,61 @@ export class MapHocComponent {
         this.dlcMarkers.push(marker);
     }
 
+    public hideMarker(markerToHide: { lat: number; lng: number; layerName: string }): void {
+        const markerLayer: any = this.allLayers.find((layer) => layer.name === markerToHide.layerName);
+        if (!markerLayer) {
+            return;
+        }
+
+        let marker: any;
+        markerLayer.eachLayer((layer: any) => {
+            if (layer.properties?.coordinates?.lat == markerToHide.lat &&
+                layer.properties?.coordinates?.lng == markerToHide.lng) {
+                marker = layer;
+            }
+        });
+
+        if (!marker) {
+            return;
+        }
+
+        markerLayer.removeLayer(marker);
+        marker.setOpacity?.(0.5);
+    }
+
+    public unhideMarker(markerToShow: { lat: number; lng: number; layerName: string }): void {
+        const markerLayer: any = this.allLayers.find((layer) => layer.name === markerToShow.layerName);
+        if (!markerLayer) {
+            return;
+        }
+
+        const marker = this.dlcMarkers.find((item) =>
+            item.dlcLayer === markerLayer &&
+            item.properties?.coordinates?.lat == markerToShow.lat &&
+            item.properties?.coordinates?.lng == markerToShow.lng
+        );
+
+        if (marker && this.isMarkerVisible(marker)) {
+            markerLayer.addLayer(marker);
+            marker.setOpacity?.(1);
+        }
+    }
+
     private collectDlcTypes(): string[] {
         const types = new Set<string>();
+        const order = ['None', 'PreOrder', 'Deluxe', 'Ultimate', 'DLC1'];
 
         for (const marker of this.dlcMarkers) {
             types.add(marker.dlc);
         }
 
         return Array.from(types).sort((a, b) => {
-            if (a === 'None') {
-                return -1;
-            }
+            const aIndex = order.indexOf(a);
+            const bIndex = order.indexOf(b);
 
-            if (b === 'None') {
-                return 1;
+            if (aIndex !== -1 || bIndex !== -1) {
+                return (aIndex === -1 ? order.length : aIndex) -
+                    (bIndex === -1 ? order.length : bIndex);
             }
 
             return a.localeCompare(b);
@@ -2517,6 +2582,7 @@ export class MapHocComponent {
     ): ComponentRef<HocStashComponent> {
         const componentRef = container.createComponent(HocStashComponent);
         componentRef.instance.stash = marker.data;
+        componentRef.instance.stashType = marker.properties?.typeUniqueName || 'stash';
         componentRef.instance.allItems = this.items;
         componentRef.instance.stashGenerators = this.gamedata.stashGenerators;
         componentRef.instance.stashPrototypes = this.gamedata.stashPrototypes;
@@ -2631,6 +2697,17 @@ export class MapHocComponent {
             layer.eachLayer((marker: any) => {
                 if (marker?.dlc != null) {
                     marker.dlcLayer = layer;
+
+                    if (marker.properties?.coordinates && this.mapService.isMarkHidden({
+                        game: this.game,
+                        layerName: name,
+                        lat: marker.properties.coordinates.lat,
+                        lng: marker.properties.coordinates.lng,
+                        isUnderground: false,
+                    })) {
+                        layer.removeLayer(marker);
+                        marker.setOpacity?.(0.5);
+                    }
                 }
             });
         }
