@@ -36,6 +36,24 @@ function updateMarkerDrawSize(marker: any): void {
     marker._drawRadiusHalf = marker._radius * imageFactor;
 }
 
+export function refreshCanvasMarkerSize(marker: any): void {
+    if (!marker?._map) {
+        return;
+    }
+
+    updateMarkerDrawSize(marker);
+
+    if (typeof marker._project === 'function') {
+        marker._project();
+    }
+
+    if (typeof marker._updateBounds === 'function') {
+        marker._updateBounds();
+    }
+
+    marker._renderer?._requestRedraw?.(marker);
+}
+
 function redrawKeepMapSizeRenderers(markers: Set<any>): void {
     const renderers = new Set<any>();
 

@@ -41,6 +41,7 @@ import {
 } from '../../../models/hoc/rich-loot-tags';
 import { HocRegion } from '../../../models/hoc/region.model';
 import { HOC_LAYER_CONTROL_ICONS } from '../../../models/hoc/layer-control-icons';
+import { refreshCanvasMarkerSize } from '../../../leaflet/canvas-markers';
 
 @Component({
     selector: 'app-map-hoc',
@@ -325,6 +326,7 @@ export class MapHocComponent {
         this.canvasRenderer = this.mapService.getCanvasRenderer();
         this.svgIcon = this.mapService.getCanvasIconConstructor();
         this.svgMarker = this.mapService.getCanvasMarkerConstructor();
+        this.addLayerToMap(L.layerGroup(), 'hidden-markers', true);
 
         if (this.gamedata.markers && this.gamedata.markers.length > 0) {
             this.addMarkers();
@@ -681,6 +683,7 @@ export class MapHocComponent {
 
     public hideMarker(markerToHide: { lat: number; lng: number; layerName: string }): void {
         const markerLayer: any = this.allLayers.find((layer) => layer.name === markerToHide.layerName);
+        const hiddenLayer: any = this.allLayers.find((layer) => layer.name === 'hidden-markers');
         if (!markerLayer) {
             return;
         }
@@ -697,12 +700,27 @@ export class MapHocComponent {
             return;
         }
 
+        const renderedSize = {
+            radius: marker._radius,
+            radius2: marker._radius2,
+            drawRadius: marker._drawRadius,
+            drawRadiusHalf: marker._drawRadiusHalf,
+        };
         markerLayer.removeLayer(marker);
         marker.setOpacity?.(0.5);
+        hiddenLayer?.addLayer(marker);
+        if (marker._map) {
+            marker._radius = renderedSize.radius;
+            marker._radius2 = renderedSize.radius2;
+            marker._drawRadius = renderedSize.drawRadius;
+            marker._drawRadiusHalf = renderedSize.drawRadiusHalf;
+            marker._renderer?._requestRedraw?.(marker);
+        }
     }
 
     public unhideMarker(markerToShow: { lat: number; lng: number; layerName: string }): void {
         const markerLayer: any = this.allLayers.find((layer) => layer.name === markerToShow.layerName);
+        const hiddenLayer: any = this.allLayers.find((layer) => layer.name === 'hidden-markers');
         if (!markerLayer) {
             return;
         }
@@ -713,9 +731,14 @@ export class MapHocComponent {
             item.properties?.coordinates?.lng == markerToShow.lng
         );
 
+        if (marker) {
+            hiddenLayer?.removeLayer(marker);
+        }
+
         if (marker && this.isMarkerVisible(marker)) {
             markerLayer.addLayer(marker);
             marker.setOpacity?.(1);
+            refreshCanvasMarkerSize(marker);
         }
     }
 
@@ -799,6 +822,16 @@ export class MapHocComponent {
     }
 
     private isMarkerVisible(marker: any): boolean {
+        if (marker.properties?.coordinates && this.mapService.isMarkHidden({
+            game: this.game,
+            layerName: marker.dlcLayer?.name,
+            lat: marker.properties.coordinates.lat,
+            lng: marker.properties.coordinates.lng,
+            isUnderground: false,
+        })) {
+            return false;
+        }
+
         if (marker.dlc != null) {
             if (!this.enabledDlcs.has(marker.dlc)) {
                 return false;
@@ -2707,6 +2740,8 @@ export class MapHocComponent {
                     })) {
                         layer.removeLayer(marker);
                         marker.setOpacity?.(0.5);
+                        const hiddenLayer = this.allLayers.find((item) => item.name === 'hidden-markers');
+                        hiddenLayer?.addLayer(marker);
                     }
                 }
             });
