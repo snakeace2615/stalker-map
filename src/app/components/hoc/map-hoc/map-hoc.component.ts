@@ -1876,6 +1876,14 @@ export class MapHocComponent {
             }),
             keepMapSize: true
         };
+        let artifactStuffIcon = {
+            icon: new this.svgIcon({
+                iconUrl: '/assets/images/svg/marks/colored/items.svg',
+                iconAnchor: [0, 0],
+                color: "#08fef8"
+            }),
+            keepMapSize: true
+        };
 
         let markers = [];
         let richMarkers = [];
@@ -1898,10 +1906,15 @@ export class MapHocComponent {
 
             const richInfo = collectRichLootInfo(richItems);
             const isRich = richInfo.isRich;
+            const hasArtifact = richInfo.tags.includes('artifact');
 
             let marker = new this.svgMarker(
                 [data.z, data.x],
-                { renderer: this.canvasRenderer, icon: isRich ? richStuffIcon : stuffIcon, radius: radius }
+                {
+                    renderer: this.canvasRenderer,
+                    icon: hasArtifact ? artifactStuffIcon : isRich ? richStuffIcon : stuffIcon,
+                    radius: radius
+                }
             )
 
             marker.name = isRich ? 'rich_stuff_at_location' : 'stuff_at_location';
@@ -1991,6 +2004,15 @@ export class MapHocComponent {
             keepMapSize: true,
         };
 
+        let artifactStashIcon = {
+            icon: new this.svgIcon({
+                iconUrl: '/assets/images/svg/marks/colored/items.svg',
+                iconAnchor: [0, 0],
+                color: "#08fef8"
+            }),
+            keepMapSize: true,
+        };
+
         let markers = [];
         let richMarkers = [];
         let randomMarkers = [];
@@ -2052,10 +2074,14 @@ export class MapHocComponent {
 
             const richInfo = collectRichLootInfo(richItems);
             const isRich = richInfo.isRich;
+            const hasArtifact = richInfo.tags.includes('artifact');
 
             let icon = null;
 
-            if (isRich) {
+            if (hasArtifact) {
+                icon = artifactStashIcon;
+            }
+            else if (isRich) {
                 icon = richStuffIcon;
             }
             else {
