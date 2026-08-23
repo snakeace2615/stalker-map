@@ -42,6 +42,7 @@ import {
 import { HocRegion } from '../../../models/hoc/region.model';
 import { HOC_LAYER_CONTROL_ICONS } from '../../../models/hoc/layer-control-icons';
 import { refreshCanvasMarkerSize } from '../../../leaflet/canvas-markers';
+import { hocAssetUrl } from '../../../utils/asset-url';
 
 @Component({
     selector: 'app-map-hoc',
@@ -115,12 +116,12 @@ export class MapHocComponent {
             this.loadLocales(i.lang);
         });
 
-        fetch(`/assets/data/${this.game}/map.json`).then((response) => {
+        fetch(hocAssetUrl(`/assets/data/${this.game}/map.json`)).then((response) => {
             if (response.ok) {
                 response.json().then((gamedata: MapHoc) => {
                     Promise.all([
-                        fetch(`/assets/data/${this.game}_config.json`).then((r) => r.json()),
-                        fetch(`/assets/data/${this.game}/regions.json`).then((r) =>
+                        fetch(hocAssetUrl(`/assets/data/${this.game}_config.json`)).then((r) => r.json()),
+                        fetch(hocAssetUrl(`/assets/data/${this.game}/regions.json`)).then((r) =>
                             r.ok ? r.json() : []
                         ),
                     ]).then(([gameConfig, regions]: [MapConfig, HocRegion[]]) => {
@@ -2754,7 +2755,7 @@ export class MapHocComponent {
     }
 
     private async loadItems(): Promise<void> {
-        await fetch(`/assets/data/${this.game}/items.json`).then((response) => {
+        await fetch(hocAssetUrl(`/assets/data/${this.game}/items.json`)).then((response) => {
             if (response.ok) {
                 response.json().then((items: Item[]) => {
                     if (items) {
@@ -2824,7 +2825,7 @@ export class MapHocComponent {
 
     private async loadLocales(language: string): Promise<void> {
         await fetch(
-            `/assets/data/${this.game}/${language}.json`
+            hocAssetUrl(`/assets/data/${this.game}/${language}.json`)
         ).then((response) => {
             if (response.ok) {
                 response.json().then((locales: any) => {
@@ -2835,7 +2836,7 @@ export class MapHocComponent {
             }
         });
 
-        fetch(`/assets/data/${this.game}/locale_import.json`).then((response) => {
+        fetch(hocAssetUrl(`/assets/data/${this.game}/locale_import.json`)).then((response) => {
             if (response.ok) {
                 response.json().then((locales: any) => {
                     let games = Object.keys(locales);
@@ -2845,7 +2846,7 @@ export class MapHocComponent {
 
                             if (!(importLocales == null || importLocales.length == 0)) {
                                 fetch(
-                                    `/assets/data/${game}/${language}.json`
+                                    hocAssetUrl(`/assets/data/${game}/${language}.json`)
                                 ).then((response) => {
                                     if (response.ok) {
                                         response.json().then((locales: any) => {

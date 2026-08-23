@@ -38,6 +38,9 @@
               "src/styles.scss"
             ],
             "scripts": [],
+            "customWebpackConfig": {
+              "path": "./extra-webpack.config.js"
+            },
             "allowedCommonJsDependencies": [
               "leaflet",
               "leaflet-geometryutil",
