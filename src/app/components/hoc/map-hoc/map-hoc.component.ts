@@ -91,16 +91,7 @@ export class MapHocComponent {
     ) { }
     
     showHideAll($event: any = null) {
-        if ($event.target.checked) {
-            for (let o of this.allLayers) {
-                this.map.addLayer(o);
-            }
-        } else {
-            for (let o of this.allLayers) {
-                this.map.removeLayer(o);
-            }
-        }
-        this.mapService.saveLayerVisibility(this.map, this.allLayers);
+        this.layerContoller?.setLayersVisible(this.allLayers, $event.target.checked);
     }
 
     private async ngOnInit(): Promise<void> {

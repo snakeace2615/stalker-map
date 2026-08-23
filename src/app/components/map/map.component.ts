@@ -116,16 +116,7 @@ export class MapComponent {
     }
 
     public showHideAll(n: any = null) {
-        if (n.target.checked) {
-            for (let o of this.layers) {
-                this.map.addLayer(o);
-            }
-        } else {
-            for (let o of this.layers) {
-                this.map.removeLayer(o);
-            }
-        }
-        this.mapService.saveLayerVisibility(this.map, this.layers);
+        this.layerContoller?.setLayersVisible(this.layers, n.target.checked);
     }
 
     public hideMarker(markerToHide: HiddenMarker): void {

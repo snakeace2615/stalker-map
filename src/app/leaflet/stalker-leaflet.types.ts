@@ -58,6 +58,7 @@ export interface StalkerLocationsLayer extends StalkerLayerGroup {
 export type StalkerCustomLayersControl = LeafletControl & {
     searchName?: string;
     isUnderground?: boolean;
+    setLayersVisible(layers: unknown[], visible: boolean): void;
 };
 
 export type StalkerRulerControl = LeafletControl;

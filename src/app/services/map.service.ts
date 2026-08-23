@@ -591,6 +591,8 @@ export class MapService {
 
     public createCustomLayersControl(): void {
         const mapService = this;
+        const layerControlIconCache: Record<string, string> = {};
+        const layerControlIconPending: Record<string, Promise<string>> = {};
 
         L.Control.CustomLayers = L.Control.Layers.extend({
             // @section
@@ -657,8 +659,88 @@ export class MapService {
                 }
             },
 
+            onAdd: function (map: any) {
+                this._map = map;
+                this._applyStoredLayerStates();
+                return (L.Control.Layers.prototype as any).onAdd.call(this, map);
+            },
+
+            setLayersVisible: function (layers: any[], visible: boolean) {
+                this._handlingClick = true;
+
+                for (const layer of layers ?? []) {
+                    if (!layer) {
+                        continue;
+                    }
+
+                    if (visible) {
+                        if (!this._map.hasLayer(layer)) {
+                            this._map.addLayer(layer);
+                        }
+                    } else if (this._map.hasLayer(layer)) {
+                        this._map.removeLayer(layer);
+                    }
+                }
+
+                this._syncCheckboxStates();
+                this._handlingClick = false;
+                mapService.saveLayerVisibility(this._map, layers);
+            },
+
+            _applyStoredLayerStates: function () {
+                if (!this._map) {
+                    return;
+                }
+
+                for (const obj of this._layers) {
+                    if (!obj.overlay) {
+                        continue;
+                    }
+
+                    const stored = this._getStoredLayerState(obj.layer);
+                    if (typeof stored !== 'boolean') {
+                        continue;
+                    }
+
+                    if (stored && !this._map.hasLayer(obj.layer)) {
+                        this._map.addLayer(obj.layer);
+                    } else if (!stored && this._map.hasLayer(obj.layer)) {
+                        this._map.removeLayer(obj.layer);
+                    }
+                }
+            },
+
+            _syncCheckboxStates: function () {
+                for (const input of this._layerControlInputs ?? []) {
+                    const obj = this._getLayer(input.layerId);
+                    if (!obj?.layer) {
+                        continue;
+                    }
+
+                    const checked = this._map.hasLayer(obj.layer);
+                    input.checked = checked;
+                    this._syncSubFiltersDisabled(obj.layer, checked);
+                }
+
+                if (!this._layerControlInputsTop?.length) {
+                    return;
+                }
+
+                for (const obj of this._layers) {
+                    const layer = obj.layer;
+                    if (layer?.addToTop === false || layer?.topId == null) {
+                        continue;
+                    }
+
+                    const topInput = this._layerControlInputsTop[layer.topId];
+                    if (topInput) {
+                        topInput.checked = this._map.hasLayer(layer);
+                    }
+                }
+            },
+
             _update: function () {
-                if (!this._container) { return this; }
+                if (!this._container || this._handlingClick) { return this; }
 
                 this._baseLayersList.replaceChildren();
                 this._overlaysList.replaceChildren();
@@ -703,16 +785,8 @@ export class MapService {
 
             _addItem: function (obj: any) {
                 const label = document.createElement('label'),
-                    checked = this._getStoredLayerState(obj.layer) ?? this._map.hasLayer(obj.layer),
+                    checked = this._map.hasLayer(obj.layer),
                     labelTop = document.createElement('label');
-
-                if (obj.overlay && checked !== this._map.hasLayer(obj.layer)) {
-                    if (checked) {
-                        this._map.addLayer(obj.layer);
-                    } else {
-                        this._map.removeLayer(obj.layer);
-                    }
-                }
 
                 let input;
                 let inputTop;
@@ -865,16 +939,36 @@ export class MapService {
                     return;
                 }
 
-                fetch(iconUrl)
-                    .then((response) => (response.ok ? response.text() : Promise.reject()))
-                    .then((svg: string) => {
-                        const colored = svg.replace(/#FFFFFF/gim, color);
-                        const svgBlob = new Blob([colored], { type: 'image/svg+xml' });
-                        img.src = URL.createObjectURL(svgBlob);
-                    })
-                    .catch(() => {
-                        img.src = iconUrl;
-                    });
+                const cacheKey = `${iconUrl}|${color}`;
+                const cached = layerControlIconCache[cacheKey];
+                if (cached) {
+                    img.src = cached;
+                    return;
+                }
+
+                let pending = layerControlIconPending[cacheKey];
+                if (!pending) {
+                    pending = fetch(iconUrl)
+                        .then((response) => (response.ok ? response.text() : Promise.reject()))
+                        .then((svg: string) => {
+                            const colored = svg.replace(/#FFFFFF/gim, color);
+                            const url = URL.createObjectURL(new Blob([colored], { type: 'image/svg+xml' }));
+                            layerControlIconCache[cacheKey] = url;
+                            delete layerControlIconPending[cacheKey];
+                            return url;
+                        })
+                        .catch(() => {
+                            delete layerControlIconPending[cacheKey];
+                            return iconUrl;
+                        });
+                    layerControlIconPending[cacheKey] = pending;
+                }
+
+                pending.then((src: string) => {
+                    if (img.isConnected) {
+                        img.src = src;
+                    }
+                });
             },
 
             _addSubFilters: function (obj: any, container: HTMLElement, parentChecked: boolean) {
