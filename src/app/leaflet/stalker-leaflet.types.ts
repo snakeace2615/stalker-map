@@ -20,6 +20,7 @@ export {
 
 export interface StalkerMap extends Map {
     scaleFactor: number;
+    filterStorageKey?: string;
 }
 
 export interface MarkerCoordinates {

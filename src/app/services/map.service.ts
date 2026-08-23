@@ -590,6 +590,8 @@ export class MapService {
     }
 
     public createCustomLayersControl(): void {
+        const mapService = this;
+
         L.Control.CustomLayers = L.Control.Layers.extend({
             // @section
             // @aka Control.Layers options
@@ -701,8 +703,16 @@ export class MapService {
 
             _addItem: function (obj: any) {
                 const label = document.createElement('label'),
-                    checked = this._map.hasLayer(obj.layer),
+                    checked = this._getStoredLayerState(obj.layer) ?? this._map.hasLayer(obj.layer),
                     labelTop = document.createElement('label');
+
+                if (obj.overlay && checked !== this._map.hasLayer(obj.layer)) {
+                    if (checked) {
+                        this._map.addLayer(obj.layer);
+                    } else {
+                        this._map.removeLayer(obj.layer);
+                    }
+                }
 
                 let input;
                 let inputTop;
@@ -818,6 +828,31 @@ export class MapService {
 
                 this._checkDisabledLayers();
                 return label;
+            },
+
+            _getStoredLayerState: function (layer: any): boolean | undefined {
+                const key = this._map?.filterStorageKey;
+                if (!key || !layer?.name) {
+                    return undefined;
+                }
+
+                const stored = localStorage.getItem(key);
+                if (!stored) {
+                    return undefined;
+                }
+
+                try {
+                    const states = JSON.parse(stored) as Record<string, boolean>;
+                    return typeof states[layer.name] === 'boolean' ? states[layer.name] : undefined;
+                } catch {
+                    return undefined;
+                }
+            },
+
+            _saveLayerStates: function () {
+                mapService.saveLayerVisibility(this._map, this._layerControlInputs.map((input: any) =>
+                    this._getLayer(input.layerId)?.layer
+                ));
             },
 
             _paintLayerControlIcon: function (
@@ -1012,6 +1047,7 @@ export class MapService {
                 }
 
                 this._handlingClick = false;
+                this._saveLayerStates();
                 this._refocusOnMap();
             },
         } as any);
@@ -1019,6 +1055,22 @@ export class MapService {
         L.control.customLayers = function (baseLayers: any, overlays: any, options: any) {
             return new L.Control.CustomLayers(baseLayers, overlays, options);
         }
+    }
+
+    public saveLayerVisibility(map: any, layers: any[]): void {
+        const key = map?.filterStorageKey;
+        if (!key) {
+            return;
+        }
+
+        const states: Record<string, boolean> = {};
+        for (const layer of layers) {
+            if (layer?.name) {
+                states[layer.name] = map.hasLayer(layer);
+            }
+        }
+
+        localStorage.setItem(key, JSON.stringify(states));
     }
 
     public createCarousel(container: string): void {

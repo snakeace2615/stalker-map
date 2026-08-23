@@ -125,6 +125,7 @@ export class MapComponent {
                 this.map.removeLayer(o);
             }
         }
+        this.mapService.saveLayerVisibility(this.map, this.layers);
     }
 
     public hideMarker(markerToHide: HiddenMarker): void {
@@ -429,6 +430,7 @@ export class MapComponent {
             zoomAnimation: !0,
             zoomControl: !1
         });
+        this.map.filterStorageKey = `layers-${this.game.uniqueName}`;
 
         var transformation = this.map.options.crs!.transformation;
         console.log(transformation._a, transformation._b, transformation._c, transformation._d);

@@ -73,6 +73,7 @@ export class MapHocComponent {
 
     private cellSizeUniqueName: string = 'hoc-cell-size';
     private dlcFilterLocalStorageKey: string = 'hoc-dlc-filter';
+    private richFiltersLocalStorageKey: string = 'hoc-rich-filters';
     private dlcMarkers: any[] = [];
     private dlcTypes: string[] = [];
     private enabledDlcs: Set<string> = new Set();
@@ -98,6 +99,7 @@ export class MapHocComponent {
                 this.map.removeLayer(o);
             }
         }
+        this.mapService.saveLayerVisibility(this.map, this.allLayers);
     }
 
     private async ngOnInit(): Promise<void> {
@@ -226,6 +228,7 @@ export class MapHocComponent {
             zoomAnimation: !0,
             zoomControl: !1,
         });
+        this.map.filterStorageKey = `layers-${this.game}`;
 
         this.mapService.setHiddenMarkerHandlers(
             this.game,
@@ -266,7 +269,7 @@ export class MapHocComponent {
                     noWrap: true
                 })
 
-            /*let inGameMap = L.tileLayer('https://joric.github.io/stalker2_tileset/tiles/{z}/{x}/{y}.jpg',
+            let inGameMap = L.tileLayer('https://joric.github.io/stalker2_tileset/tiles/{z}/{x}/{y}.jpg',
                 {
                     tileSize: tileSize,
                     zoomOffset: zoomOffset,
@@ -274,7 +277,7 @@ export class MapHocComponent {
                     maxZoom: maxZoom,
                     maxNativeZoom: 4,
                     noWrap: true
-                })*/
+                })
 
             let dlc1Map = L.tileLayer('https://joric.github.io/stalker2_tileset/extras/dlc/{z}/{y}/{x}.webp',
                 {
@@ -298,8 +301,8 @@ export class MapHocComponent {
                     noWrap: true
                 })
 
-            //inGameMap.ableToSearch = false;
-            //inGameMap.addToTop = false;
+            inGameMap.ableToSearch = false;
+            inGameMap.addToTop = false;
 
             rawGameMap.ableToSearch = false;
             rawGameMap.addToTop = false;
@@ -311,16 +314,17 @@ export class MapHocComponent {
             dlc1Map.addToTop = false;
 
             rawGameMap.name = 'raw-map-label';
-            //inGameMap.name = 'in-game-map-label';
+            inGameMap.name = 'in-game-base-map-label';
             dlc1Map.name = 'in-game-map-label';
             diegeticMap.name = 'diegetic-map-label';
 
-            dlc1Map.addTo(this.map);
-
-            //baseLayers.push(inGameMap);
+            baseLayers.push(inGameMap);
             baseLayers.push(dlc1Map);
             baseLayers.push(rawGameMap);
             baseLayers.push(diegeticMap);
+
+            const storedBaseLayer = this.readStoredBaseLayer(baseLayers);
+            (storedBaseLayer ?? dlc1Map).addTo(this.map);
         }
 
         this.canvasRenderer = this.mapService.getCanvasRenderer();
@@ -521,6 +525,7 @@ export class MapHocComponent {
                 this.attachRichSubFilters(layer, getRichStuffSubFilters());
             }
         }
+        this.applyDlcFilter();
 
         let baseLayersControl = baseLayers.map((x: any) => [
             this.translate.instant(x.name), x
@@ -817,6 +822,20 @@ export class MapHocComponent {
         localStorage.setItem(this.dlcFilterLocalStorageKey, JSON.stringify(state));
     }
 
+    private readStoredBaseLayer(baseLayers: any[]): any | undefined {
+        const stored = localStorage.getItem(this.map.filterStorageKey ?? '');
+        if (!stored) {
+            return undefined;
+        }
+
+        try {
+            const states = JSON.parse(stored) as Record<string, boolean>;
+            return baseLayers.find((layer) => states[layer.name] === true);
+        } catch {
+            return undefined;
+        }
+    }
+
     private applyDlcFilter(): void {
         this.applyMarkerVisibility();
     }
@@ -912,7 +931,15 @@ export class MapHocComponent {
         layer.subFilters = this.getRichSubFilters(filters);
         layer._richSubFilterDefs = filters;
 
-        if (!layer._activeSubFilters) {
+        const savedFilters = this.readRichFilters()[layer.name];
+
+        if (savedFilters) {
+            layer._activeSubFilters = new Set(
+                filters
+                    .map((filter) => filter.id)
+                    .filter((id) => savedFilters.includes(id))
+            );
+        } else if (!layer._activeSubFilters) {
             layer._activeSubFilters = new Set(filters.map((filter) => filter.id));
         } else {
             // Drop tags that are not present in this dataset / layer.
@@ -923,7 +950,36 @@ export class MapHocComponent {
             }
         }
 
-        layer.onSubFilterChange = () => this.applyMarkerVisibility();
+        layer.onSubFilterChange = () => {
+            this.saveRichFilters();
+            this.applyMarkerVisibility();
+        };
+    }
+
+    private readRichFilters(): Record<string, string[]> {
+        const stored = localStorage.getItem(this.richFiltersLocalStorageKey);
+
+        if (!stored) {
+            return {};
+        }
+
+        try {
+            return JSON.parse(stored) as Record<string, string[]>;
+        } catch {
+            return {};
+        }
+    }
+
+    private saveRichFilters(): void {
+        const filters: Record<string, string[]> = {};
+
+        for (const layer of this.allLayers) {
+            if (layer.name === 'rich-stash' || layer.name === 'rich-stuff') {
+                filters[layer.name] = [...((layer as any)._activeSubFilters ?? [])];
+            }
+        }
+
+        localStorage.setItem(this.richFiltersLocalStorageKey, JSON.stringify(filters));
     }
 
     private getDlcLabel(dlc: string): string {
