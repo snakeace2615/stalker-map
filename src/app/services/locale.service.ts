@@ -1,3 +1,4 @@
+import { Location } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import {
@@ -13,7 +14,10 @@ export class LocaleService {
     public readonly availableLanguages = AVAILABLE_LANGUAGES;
     public readonly defaultLang = DEFAULT_LANG;
 
-    constructor(private readonly translate: TranslateService) {}
+    constructor(
+        private readonly translate: TranslateService,
+        private readonly location: Location
+    ) {}
 
     public get currentLang(): AppLanguage {
         const lang = this.translate.currentLang();
@@ -27,22 +31,23 @@ export class LocaleService {
         localStorage.setItem(LANGUAGE_STORAGE_KEY, lang);
     }
 
-    /** Path with language prefix, e.g. `/ua/map/hoc`. For in-app navigation / SEO URLs. */
+    /** Internal router path with language prefix, e.g. `/ua/map/hoc`. */
     public localizedPath(pagePath: string = ''): string {
         const normalized = pagePath.startsWith('/') ? pagePath : pagePath ? `/${pagePath}` : '';
         return `/${this.currentLang}${normalized}`;
     }
 
+    /** Browser href that respects Angular's configured base href. */
     public mapPath(game: string): string {
-        return this.localizedPath(`/map/${game}`);
+        return this.externalPath(this.localizedPath(`/map/${game}`));
     }
 
     /**
-     * Language-neutral map path for share / deep links.
+     * Language-neutral map href for share / deep links.
      * Opens via legacy redirect that applies the recipient's localStorage language.
      */
     public neutralMapPath(game: string): string {
-        return `/map/${game}`;
+        return this.externalPath(`/map/${game}`);
     }
 
     public absoluteNeutralMapUrl(
@@ -52,7 +57,7 @@ export class LocaleService {
         return this.absoluteUrl(this.neutralMapPath(game), query);
     }
 
-    /** Absolute map URL with language prefix, e.g. `https://…/en/map/shoc?lat=…`. */
+    /** Absolute map URL with language prefix and configured base href. */
     public absoluteLocalizedMapUrl(
         game: string,
         query: Record<string, string | number | boolean | null | undefined> = {}
@@ -61,21 +66,26 @@ export class LocaleService {
     }
 
     public contentPath(game: string): string {
-        return this.localizedPath(`/map/content/${game}`);
+        return this.externalPath(this.localizedPath(`/map/content/${game}`));
+    }
+
+    private externalPath(path: string): string {
+        return this.location.prepareExternalUrl(path);
     }
 
     private absoluteUrl(
         path: string,
         query: Record<string, string | number | boolean | null | undefined> = {}
     ): string {
-        const params = new URLSearchParams();
+        const url = new URL(path, window.location.origin);
+
         for (const [key, value] of Object.entries(query)) {
             if (value === null || value === undefined || value === false) {
                 continue;
             }
-            params.set(key, String(value));
+            url.searchParams.set(key, String(value));
         }
-        const qs = params.toString();
-        return `${window.location.origin}${path}${qs ? `?${qs}` : ''}`;
+
+        return url.toString();
     }
 }
