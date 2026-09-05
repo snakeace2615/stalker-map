@@ -34,6 +34,30 @@ jobs:
       - name: Build for GitHub Pages
         run: npm run build -- --base-href /stalker-map/
 
+      - name: Rewrite root-relative asset URLs for Project Pages
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          root = Path('dist/stalker-map')
+          text_exts = {'.html', '.js', '.css', '.json', '.xml', '.txt', '.svg'}
+          changed = 0
+
+          for path in root.rglob('*'):
+              if not path.is_file() or path.suffix.lower() not in text_exts:
+                  continue
+              try:
+                  text = path.read_text(encoding='utf-8')
+              except UnicodeDecodeError:
+                  continue
+              updated = text.replace('/assets/', '/stalker-map/assets/')
+              if updated != text:
+                  path.write_text(updated, encoding='utf-8')
+                  changed += 1
+
+          print(f'Rewritten asset paths in {changed} files')
+          PY
+
       - name: Add SPA fallback
         run: cp dist/stalker-map/index.html dist/stalker-map/404.html
 
