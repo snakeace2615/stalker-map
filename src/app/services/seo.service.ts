@@ -13,7 +13,6 @@ interface SeoPageConfig {
 
 @Injectable({ providedIn: 'root' })
 export class SeoService {
-    private readonly siteOrigin = 'https://stalker-map.online';
     private current: SeoPageConfig | null = null;
 
     constructor(
@@ -65,7 +64,11 @@ export class SeoService {
     }
 
     private localizedPath(pagePath: string, lang: string): string {
-        return pagePath ? `/${lang}${pagePath}` : `/${lang}`;
+        return pagePath ? `${lang}${pagePath}` : lang;
+    }
+
+    private absoluteLocalizedUrl(pagePath: string, lang: string): string {
+        return new URL(this.localizedPath(pagePath, lang), this.document.baseURI).toString();
     }
 
     private applyTags(config: SeoPageConfig): void {
@@ -79,8 +82,7 @@ export class SeoService {
                 const lang = this.translate.currentLang() || DEFAULT_LANG;
                 const title = translations[config.titleKey];
                 const description = translations[config.descriptionKey];
-                const path = this.localizedPath(config.pagePath, lang);
-                const url = `${this.siteOrigin}${path}`;
+                const url = this.absoluteLocalizedUrl(config.pagePath, lang);
 
                 this.title.setTitle(title);
 
@@ -122,14 +124,14 @@ export class SeoService {
             const link = this.document.createElement('link');
             link.setAttribute('rel', 'alternate');
             link.setAttribute('hreflang', HTML_LANG_MAP[lang] ?? lang);
-            link.setAttribute('href', `${this.siteOrigin}${this.localizedPath(pagePath, lang)}`);
+            link.setAttribute('href', this.absoluteLocalizedUrl(pagePath, lang));
             this.document.head.appendChild(link);
         }
 
         const xDefault = this.document.createElement('link');
         xDefault.setAttribute('rel', 'alternate');
         xDefault.setAttribute('hreflang', 'x-default');
-        xDefault.setAttribute('href', `${this.siteOrigin}${this.localizedPath(pagePath, DEFAULT_LANG)}`);
+        xDefault.setAttribute('href', this.absoluteLocalizedUrl(pagePath, DEFAULT_LANG));
         this.document.head.appendChild(xDefault);
     }
 }
