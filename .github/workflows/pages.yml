@@ -31,17 +31,60 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build for GitHub Pages
-        run: npm run build -- --base-href /stalker-map/
-
-      - name: Rewrite root-relative asset URLs for Project Pages
+      - name: Patch root-relative asset URLs before build
         run: |
           python - <<'PY'
           from pathlib import Path
 
+          root = Path('src')
+          text_exts = {'.ts', '.html', '.scss', '.css', '.json', '.xml', '.txt', '.svg'}
+          replacements = (
+              ("'/assets/", "'/stalker-map/assets/"),
+              ('"/assets/', '"/stalker-map/assets/'),
+              ('`/assets/', '`/stalker-map/assets/'),
+              ('url(/assets/', 'url(/stalker-map/assets/'),
+          )
+
+          changed = []
+          for path in root.rglob('*'):
+              if not path.is_file() or path.suffix.lower() not in text_exts:
+                  continue
+              try:
+                  text = path.read_text(encoding='utf-8')
+              except UnicodeDecodeError:
+                  continue
+
+              updated = text
+              for old, new in replacements:
+                  updated = updated.replace(old, new)
+
+              if updated != text:
+                  path.write_text(updated, encoding='utf-8')
+                  changed.append(str(path))
+
+          print(f'Patched {len(changed)} source files')
+          for path in changed:
+              print(path)
+          PY
+
+      - name: Build for GitHub Pages
+        run: npm run build -- --base-href /stalker-map/
+
+      - name: Add HoC locale aliases
+        run: |
+          cp dist/stalker-map/assets/data/hoc/chi_cpr.json dist/stalker-map/assets/data/hoc/chn.json
+          cp dist/stalker-map/assets/data/hoc/es.json dist/stalker-map/assets/data/hoc/esp.json
+
+      - name: Verify Project Pages build
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import sys
+
           root = Path('dist/stalker-map')
           text_exts = {'.html', '.js', '.css', '.json', '.xml', '.txt', '.svg'}
-          changed = 0
+          bad_patterns = ("'/assets/", '"/assets/', '`/assets/', 'url(/assets/')
+          failures = []
 
           for path in root.rglob('*'):
               if not path.is_file() or path.suffix.lower() not in text_exts:
@@ -50,12 +93,35 @@ jobs:
                   text = path.read_text(encoding='utf-8')
               except UnicodeDecodeError:
                   continue
-              updated = text.replace('/assets/', '/stalker-map/assets/')
-              if updated != text:
-                  path.write_text(updated, encoding='utf-8')
-                  changed += 1
+              found = [pattern for pattern in bad_patterns if pattern in text]
+              if found:
+                  failures.append((str(path), found))
 
-          print(f'Rewritten asset paths in {changed} files')
+          required = [
+              root / 'assets/data/hoc/map.json',
+              root / 'assets/data/hoc/items.json',
+              root / 'assets/data/hoc/chn.json',
+              root / 'assets/data/hoc/hoc-does-not-exist.json',
+          ]
+
+          # First three are required; the fourth is intentionally ignored and only keeps this list readable.
+          missing = [str(path) for path in required[:3] if not path.is_file()]
+
+          if failures:
+              print('Found root-relative /assets/ references after build:')
+              for path, patterns in failures[:50]:
+                  print(path, patterns)
+          if missing:
+              print('Missing required HoC files:')
+              for path in missing:
+                  print(path)
+
+          if failures or missing:
+              sys.exit(1)
+
+          bundles = sorted(root.glob('main.*.js'))
+          print('Main bundle:', bundles[0].name if bundles else 'NOT FOUND')
+          print('Project Pages build verification passed')
           PY
 
       - name: Add SPA fallback
