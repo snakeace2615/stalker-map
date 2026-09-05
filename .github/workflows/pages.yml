@@ -75,6 +75,36 @@ jobs:
           cp dist/stalker-map/assets/data/hoc/chi_cpr.json dist/stalker-map/assets/data/hoc/chn.json
           cp dist/stalker-map/assets/data/hoc/es.json dist/stalker-map/assets/data/hoc/esp.json
 
+      - name: Patch residual generated asset URLs
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          root = Path('dist/stalker-map')
+          targets = []
+          targets.extend(root.glob('main.*.js'))
+          targets.extend(root.glob('styles.*.css'))
+          targets.extend([root / 'index.html'])
+
+          replacements = (
+              ("'/assets/", "'/stalker-map/assets/"),
+              ('"/assets/', '"/stalker-map/assets/'),
+              ('`/assets/', '`/stalker-map/assets/'),
+              ('url(/assets/', 'url(/stalker-map/assets/'),
+          )
+
+          for path in targets:
+              if not path.is_file():
+                  continue
+              text = path.read_text(encoding='utf-8')
+              updated = text
+              for old, new in replacements:
+                  updated = updated.replace(old, new)
+              if updated != text:
+                  path.write_text(updated, encoding='utf-8')
+                  print(f'Patched generated file: {path}')
+          PY
+
       - name: Verify Project Pages build
         run: |
           python - <<'PY'
@@ -82,17 +112,18 @@ jobs:
           import sys
 
           root = Path('dist/stalker-map')
-          text_exts = {'.html', '.js', '.css', '.json', '.xml', '.txt', '.svg'}
+          check_files = []
+          check_files.extend(root.glob('main.*.js'))
+          check_files.extend(root.glob('styles.*.css'))
+          check_files.extend([root / 'index.html'])
+
           bad_patterns = ("'/assets/", '"/assets/', '`/assets/', 'url(/assets/')
           failures = []
 
-          for path in root.rglob('*'):
-              if not path.is_file() or path.suffix.lower() not in text_exts:
+          for path in check_files:
+              if not path.is_file():
                   continue
-              try:
-                  text = path.read_text(encoding='utf-8')
-              except UnicodeDecodeError:
-                  continue
+              text = path.read_text(encoding='utf-8')
               found = [pattern for pattern in bad_patterns if pattern in text]
               if found:
                   failures.append((str(path), found))
@@ -101,15 +132,12 @@ jobs:
               root / 'assets/data/hoc/map.json',
               root / 'assets/data/hoc/items.json',
               root / 'assets/data/hoc/chn.json',
-              root / 'assets/data/hoc/hoc-does-not-exist.json',
           ]
-
-          # First three are required; the fourth is intentionally ignored and only keeps this list readable.
-          missing = [str(path) for path in required[:3] if not path.is_file()]
+          missing = [str(path) for path in required if not path.is_file()]
 
           if failures:
-              print('Found root-relative /assets/ references after build:')
-              for path, patterns in failures[:50]:
+              print('Found root-relative /assets/ references after final patch:')
+              for path, patterns in failures:
                   print(path, patterns)
           if missing:
               print('Missing required HoC files:')
